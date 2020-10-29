@@ -1,6 +1,6 @@
-#include "p6_construction.h"
-#include "p6_linear_material.h"
-#include "p6_nonlinear_material.h"
+#include "../header/p6_construction.h"
+#include "../header/p6_linear_material.h"
+#include "../header/p6_nonlinear_material.h"
 #include <wx/file.h>
 #include <math.h>
 #include <Eigen>

@@ -1,4 +1,4 @@
-#include "p6_nonlinear_material.h"
+#include "../header/p6_nonlinear_material.h"
 #include <stdexcept>
 #include <cmath>
 #include <cstring>

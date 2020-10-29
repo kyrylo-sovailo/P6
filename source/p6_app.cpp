@@ -1,5 +1,5 @@
-#include "p6_app.h"
-#include "p6_frame.h"
+#include "../header/p6_app.h"
+#include "../header/p6_frame.h"
 
 wxIMPLEMENT_APP(p6::App);
 

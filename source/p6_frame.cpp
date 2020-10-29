@@ -1,7 +1,7 @@
-#include "p6_frame.h"
-#include "p6_utils.h"
-#include "p6_linear_material.h"
-#include "p6_nonlinear_material.h"
+#include "../header/p6_frame.h"
+#include "../header/p6_utils.h"
+#include "../header/p6_linear_material.h"
+#include "../header/p6_nonlinear_material.h"
 #include <algorithm>
 
 void p6::Frame::_init_menubar()

@@ -1,4 +1,4 @@
-#include "p6_linear_material.h"
+#include "../header/p6_linear_material.h"
 #include <stdexcept>
 
 p6::LinearMaterial::LinearMaterial(const String &name, real modulus)
