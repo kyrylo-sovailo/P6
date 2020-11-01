@@ -6,35 +6,6 @@
 
 void p6::Frame::_init_menubar()
 {
-	wxMenuBar *menubar = new wxMenuBar();
-	
-	//File
-	wxMenu *filemenu = new wxMenu();
-	wxMenuItem *item = filemenu->Append(wxID_ANY, "Load", "Load construction from file");
-	Bind(wxEVT_MENU, &Frame::OnMenuFileLoad, this, item->GetId());
-	item = filemenu->Append(wxID_ANY, "Import", "Import construction from file");
-	Bind(wxEVT_MENU, &Frame::OnMenuFileImport, this, item->GetId());
-	item = filemenu->Append(wxID_ANY, "Save", "Save construction to file");
-	Bind(wxEVT_MENU, &Frame::OnMenuFileSave, this, item->GetId());
-	item = filemenu->Append(wxID_ANY, "Save as", "Save construction another file");
-	Bind(wxEVT_MENU, &Frame::OnMenuFileSaveAs, this, item->GetId());
-	menubar->Append(filemenu, "File");
-
-	//Export
-	wxMenu *exportmenu = new wxMenu();
-	item = exportmenu->Append(wxID_ANY, "PNG", "Export image as PNG with white background");
-	Bind(wxEVT_MENU, &Frame::OnMenuExportPNG, this, item->GetId());
-	item = exportmenu->Append(wxID_ANY, "JPEG", "Export image as JPEG");
-	Bind(wxEVT_MENU, &Frame::OnMenuExportJPEG, this, item->GetId());
-	menubar->Append(exportmenu, "Export");
-
-	//Help
-	wxMenu *helpmenu = new wxMenu();
-	item = helpmenu->Append(wxID_ANY, "Help", "Get help");
-	Bind(wxEVT_MENU, &Frame::OnMenuHelp, this, item->GetId());
-	menubar->Append(helpmenu, "Help");
-
-	SetMenuBar(menubar);
 };
 
 void p6::Frame::_init_toolbar()
@@ -193,38 +164,7 @@ void p6::Frame::_init_force_bar()
 
 void p6::Frame::_init_material_bar()
 {
-	_material_bar.sizer = new wxBoxSizer(wxVERTICAL);
-	//Material choice
-	_material_bar.sizer->Add(new wxStaticText(_side_panel, wxID_ANY, "Material:"), 0, wxLEFT | wxEXPAND, 10);
-	_material_bar.name_choice = new wxChoice(_side_panel, wxID_ANY);
-	_material_bar.sizer->Add(_material_bar.name_choice, 0, wxALL | wxEXPAND, 10);
-	Bind(wxEVT_CHOICE, &Frame::OnMaterialChoice, this, _material_bar.name_choice->GetId());
-	//Name edit
-	_material_bar.sizer->Add(new wxStaticText(_side_panel, wxID_ANY, "Name:"), 0, wxLEFT | wxEXPAND, 10);
-	_material_bar.name_edit = new wxTextCtrl(_side_panel, wxID_ANY);
-	_material_bar.sizer->Add(_material_bar.name_edit, 0, wxALL | wxEXPAND, 10);
-	Bind(wxEVT_TEXT, &Frame::OnMaterialName, this, _material_bar.name_edit->GetId());
-	//Nonlinear check
-	_material_bar.nonlinear_check = new wxCheckBox(_side_panel, wxID_ANY, "Non-linear");
-	_material_bar.sizer->Add(_material_bar.nonlinear_check, 0, wxALL, 10);
-	Bind(wxEVT_CHECKBOX, &Frame::OnMaterialNonlinear, this, _material_bar.nonlinear_check->GetId());
-	//Formula edit
-	_material_bar.sizer->Add(new wxStaticText(_side_panel, wxID_ANY, "Modulus / formula:"), 0, wxLEFT | wxEXPAND, 10);
-	_material_bar.formula_edit = new wxTextCtrl(_side_panel, wxID_ANY);
-	_material_bar.sizer->Add(_material_bar.formula_edit, 0, wxALL | wxEXPAND, 10);
-	Bind(wxEVT_TEXT, &Frame::OnMaterialFormula, this, _material_bar.formula_edit->GetId());
-	//New-accept-delete buttons
-	wxBoxSizer *hsizer = new wxBoxSizer(wxHORIZONTAL);
-	_material_bar.new_button = new wxButton(_side_panel, wxID_ANY, "New");
-	hsizer->Add(_material_bar.new_button, 1, wxALL, 10);
-	Bind(wxEVT_BUTTON, &Frame::OnMaterialNew, this, _material_bar.new_button->GetId());
-	_material_bar.apply_button = new wxButton(_side_panel, wxID_ANY, "Apply");
-	hsizer->Add(_material_bar.apply_button, 1, wxALL, 10);
-	Bind(wxEVT_BUTTON, &Frame::OnMaterialApply, this, _material_bar.apply_button->GetId());
-	_material_bar.delete_button = new wxButton(_side_panel, wxID_ANY, "Delete");
-	hsizer->Add(_material_bar.delete_button, 1, wxALL, 10);
-	Bind(wxEVT_BUTTON, &Frame::OnMaterialDelete, this, _material_bar.delete_button->GetId());
-	_material_bar.sizer->Add(hsizer, 0, wxALL | wxEXPAND, 10);
+
 };
 
 void p6::Frame::_init_move_bar()
@@ -675,134 +615,7 @@ p6::Frame::~Frame()
 		delete _task.materials[i];
 };
 
-void p6::Frame::OnMenuFileLoad(wxCommandEvent &e)
-{
-	wxFileDialog dialog(this, "Open P6 File", "", "", "P6 File (*.p6)|*.p6", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	if (dialog.ShowModal() != wxID_CANCEL)
-	{
-		try
-		{
-			_task = Construction(dialog.GetPath().ToStdString());
-			_selection.nodes.clear();
-			_selection.sticks.clear();
-			_selection.forces.clear();
-			_refresh_materials();
-			_refresh_side_panel();
-			_refresh_toolbar();
-			Refresh();
-		}
-		catch (std::exception &e)
-		{
-			wxMessageBox(e.what(), "Error", wxICON_ERROR, this);
-		}
-	}
-};
 
-void p6::Frame::OnMenuFileImport(wxCommandEvent &e)
-{
-	wxFileDialog dialog(this, "Import P6 File", "", "", "P6 File (*.p6)|*.p6", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	if (dialog.ShowModal() != wxID_CANCEL)
-	{
-		try
-		{
-			unsigned int oldnodes = _task.nodes.size();
-			unsigned int oldsticks = _task.sticks.size();
-			Construction import = Construction(dialog.GetPath().ToStdString());
-			_task.merge(&import);
-			_selection.nodes.clear();
-			_selection.sticks.clear();
-			_selection.forces.clear();
-			for (unsigned int i = oldnodes; i < _task.nodes.size(); i++)
-			{
-				if (_task.nodes[i].xforce != 0 || _task.nodes[i].yforce != 0) _selection.forces.insert(i);
-				_selection.nodes.insert(i);
-			}
-			for (unsigned int i = oldsticks; i < _task.sticks.size(); i++)
-				_selection.sticks.insert(i);
-
-			_refresh_materials();
-			_refresh_side_panel();
-			_refresh_toolbar();
-			Refresh();
-		}
-		catch (std::exception &e)
-		{
-			wxMessageBox(e.what(), "Error", wxICON_ERROR, this);
-		}
-	}
-};
-
-void p6::Frame::OnMenuFileSave(wxCommandEvent &e)
-{
-	if (_file_path == "")
-	{
-		wxFileDialog dialog(this, "Save P6 File", "", "", "P6 File (*.p6)|*.p6", wxFD_SAVE);
-		if (dialog.ShowModal() == wxID_CANCEL) return;
-		_file_path = dialog.GetPath();
-	}
-
-	try
-	{
-		_task.save(_file_path);
-	}
-	catch (std::exception &e)
-	{
-		wxMessageBox(e.what(), "Error", wxICON_ERROR, this);
-	}
-};
-
-void p6::Frame::OnMenuFileSaveAs(wxCommandEvent &e)
-{
-	wxFileDialog dialog(this, "Save P6 File as...", "", "", "P6 File (*.p6)|*.p6", wxFD_SAVE);
-	if (dialog.ShowModal() != wxID_CANCEL)
-	{
-		try
-		{
-			_task.save(dialog.GetPath().ToStdString());
-		}
-		catch (std::exception &e)
-		{
-			wxMessageBox(e.what(), "Error", wxICON_ERROR, this);
-		}
-	}
-};
-
-void p6::Frame::OnMenuExportPNG(wxCommandEvent &e)
-{
-	wxFileDialog dialog(this, "Export as PNG", "", "", "PNG Image (*.png)|*.png", wxFD_SAVE);
-	if (dialog.ShowModal() != wxID_CANCEL)
-	{
-		wxMemoryDC dc;
-		wxBitmap bitmap(_main_panel->GetSize());
-		dc.SelectObject(bitmap);
-		dc.SetPen(wxPen(wxColour(255, 255, 255), 0));
-		dc.SetBrush(wxBrush(wxColour(255, 255, 255)));
-		dc.DrawRectangle(wxPoint(0, 0), _main_panel->GetSize());
-		_render(&dc, false);
-		bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_PNG);
-	}
-};
-
-void p6::Frame::OnMenuExportJPEG(wxCommandEvent &e)
-{
-	wxFileDialog dialog(this, "Export as JPEG", "", "", "JPEG Image (*.jpg)|*.jpg", wxFD_SAVE);
-	if (dialog.ShowModal() != wxID_CANCEL)
-	{
-		wxMemoryDC dc;
-		wxBitmap bitmap(_main_panel->GetSize());
-		dc.SelectObject(bitmap);
-		dc.SetPen(wxPen(wxColour(255, 255, 255), 0));
-		dc.SetBrush(wxBrush(wxColour(255, 255, 255)));
-		dc.DrawRectangle(wxPoint(0, 0), _main_panel->GetSize());
-		_render(&dc, false);
-		bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_PNG);
-	}
-};
-
-void p6::Frame::OnMenuHelp(wxCommandEvent &e)
-{
-	wxMessageBox("Ask Kyrylo", "Help", wxICON_INFORMATION, this);
-};
 
 void p6::Frame::OnToolSimulate(wxCommandEvent &e)
 {
@@ -1054,93 +867,7 @@ void p6::Frame::OnForceY(wxCommandEvent &e)
 	}
 };
 
-void p6::Frame::OnMaterialChoice(wxCommandEvent &e)
-{
-	int c = _material_bar.name_choice->GetSelection();
-	if (c == wxNOT_FOUND)
-	{
-		_material_bar.name_edit->ChangeValue("");
-		_material_bar.nonlinear_check->SetValue(false);
-		_material_bar.formula_edit->ChangeValue("");
-	}
-	else
-	{
-		Material *material = _task.materials[c];
-		_material_bar.name_edit->ChangeValue(material->name());
-		bool linear = material->type() == Material::Type::linear;
-		_material_bar.nonlinear_check->SetValue(!linear);
-		_material_bar.formula_edit->ChangeValue(linear ?
-			Utils::real_to_string(((LinearMaterial*)material)->modulus()) :
-			((NonlinearMaterial*)material)->formula());
-	}
-};
 
-void p6::Frame::OnMaterialName(wxCommandEvent &e)
-{
-
-};
-
-void p6::Frame::OnMaterialNew(wxCommandEvent &e)
-{
-	_material_bar.name_choice->SetSelection(wxNOT_FOUND);
-	_material_bar.name_edit->ChangeValue("");
-	_material_bar.nonlinear_check->SetValue(false);
-	_material_bar.formula_edit->ChangeValue("");
-};
-
-void p6::Frame::OnMaterialApply(wxCommandEvent &e)
-{
-	try
-	{
-		String name = _material_bar.name_edit->GetValue().ToStdString();
-		String formula = _material_bar.formula_edit->GetValue().ToStdString();
-		Material *material;
-		if (_material_bar.nonlinear_check->GetValue())
-			material = new NonlinearMaterial(name, formula);
-		else
-			material = new LinearMaterial(name, Utils::string_to_real(formula));
-
-		int c = _material_bar.name_choice->FindString(name, true);
-		if (c == wxNOT_FOUND)
-		{
-			_task.materials.push_back(material);
-			_refresh_materials();	
-		}
-		else
-		{
-			delete _task.materials[c];
-			_task.materials[c] = material;
-		}
-	}
-	catch (std::exception &e)
-	{
-		wxMessageBox(e.what(), "Error", wxICON_ERROR, this);
-	}
-};
-
-void p6::Frame::OnMaterialDelete(wxCommandEvent &e)
-{
-	int c = _material_bar.name_choice->GetSelection();
-	if (c != wxNOT_FOUND)
-	{
-		for (unsigned int i = 0; i < _task.sticks.size(); i++)
-		{
-			if (_task.sticks[i].material_index == c)
-				_task.sticks[i].material_index = (unsigned int)-1;
-		}
-		delete _task.materials[c];
-		_task.materials.erase(_task.materials.cbegin() + c);
-		_refresh_materials();
-	}
-};
-
-void p6::Frame::OnMaterialNonlinear(wxCommandEvent &e)
-{
-};
-
-void p6::Frame::OnMaterialFormula(wxCommandEvent &e)
-{
-};
 
 void p6::Frame::OnMoveAnchorX(wxCommandEvent &e)
 {
