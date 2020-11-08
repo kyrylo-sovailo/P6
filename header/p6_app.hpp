@@ -8,14 +8,20 @@
 	Reinventing bicycles since 2020
 */
 
-#include "../header/p6_app.hpp"
-#include "../header/p6_frame.hpp"
+#ifndef P6_APP
+#define P6_APP
 
-wxIMPLEMENT_APP(p6::App);
+#include "p6_frame.hpp"
+#include <wx/wx.h>
 
-bool p6::App::OnInit()
+namespace p6
 {
-	wxImage::AddHandler(new wxPNGHandler);
-	_frame = new Frame;
-	return true;
+	class App : public wxApp
+	{
+	private:
+		Frame *_frame;
+		virtual bool OnInit();
+	};
 }
+
+#endif

@@ -1,5 +1,16 @@
-#include "../header/p6_frame.h"
-#include "../header/p6_utils.h"
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
+#include "../header/p6_force_bar.hpp"
+#include "../header/p6_frame.hpp"
+#include "../header/p6_utils.hpp"
 #include <set>
 
 void p6::ForceBar::_on_force_x(wxCommandEvent &e)
@@ -7,24 +18,24 @@ void p6::ForceBar::_on_force_x(wxCommandEvent &e)
 	real x = Utils::string_to_real(_x_text->GetValue().ToStdString());
 	if (x == x)
 	{
-		std::set<size_t> *selected_forces = &_frame->main_panel.selected_forces;
+		std::set<uint> *selected_forces = &_frame->main_panel.selected_forces;
 		for (auto i = selected_forces->cbegin(); i != selected_forces->cend(); i++)
 			_frame->construction.set_force_x(*i, x);
 		_frame->main_panel.refresh();
 	}
-};
+}
 
 void p6::ForceBar::_on_force_y(wxCommandEvent &e)
 {
 	real y = Utils::string_to_real(_y_text->GetValue().ToStdString());
 	if (y == y)
 	{
-		std::set<size_t> *selected_forces = &_frame->main_panel.selected_forces;
+		std::set<uint> *selected_forces = &_frame->main_panel.selected_forces;
 		for (auto i = selected_forces->cbegin(); i != selected_forces->cend(); i++)
 			_frame->construction.set_force_y(*i, y);
 		_frame->main_panel.refresh();
 	}
-};
+}
 
 p6::ForceBar::ForceBar(Frame *frame)
 {
@@ -44,11 +55,11 @@ p6::ForceBar::ForceBar(Frame *frame)
 	_y_text = new wxTextCtrl(parent, wxID_ANY);
 	parent->Bind(wxEVT_TEXT, &ForceBar::_on_force_y, this, _y_text->GetId());
 	_y_text->Show(false);
-};
+}
 
 void p6::ForceBar::show()
 {
-	std::set<size_t> *selected_forces = &_frame->main_panel.selected_forces;
+	std::set<uint> *selected_forces = &_frame->main_panel.selected_forces;
 
 	//Set x
 	bool x_equal = true;
@@ -76,7 +87,7 @@ void p6::ForceBar::show()
 	sizer->Add(_x_text, 0, wxEXPAND | wxALL, 10);
 	sizer->Add(_y_static, 0, wxEXPAND | wxALL, 10);
 	sizer->Add(_y_text, 0, wxEXPAND | wxALL, 10);
-};
+}
 
 void p6::ForceBar::hide()
-{};
+{}

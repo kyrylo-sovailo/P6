@@ -1,3 +1,13 @@
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
 #ifndef P6_MAIN_PANEL
 #define P6_MAIN_PANEL
 
@@ -28,19 +38,19 @@ namespace p6
 		real meters_in_newton = 1.0;
 		real center_x = 0.0;
 		real center_y = 0.0;
-		std::set<size_t> selected_nodes;
-		std::set<size_t> selected_sticks;
-		std::set<size_t> selected_forces;
+		std::set<uint> selected_nodes;
+		std::set<uint> selected_sticks;
+		std::set<uint> selected_forces;
 
 		MainPanel(Frame *frame);
 		wxSize size()										const;
 		wxPoint offset()									const;
 		void render(wxDC *dc, wxPoint offset)				const;
-		Item get_item(real x, real y, size_t *index)		const;
+		Item get_item(real x, real y, uint *index)		const;
 		void pixel_to_real(wxPoint point, real *x, real *y)	const;
 		void select_area(real ax, real ay, real bx, real by);
 		void refresh();
 	};
-};
+}
 
 #endif

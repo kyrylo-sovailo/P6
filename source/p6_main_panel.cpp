@@ -1,12 +1,22 @@
-#include "../header/p6_frame.h"
-#include "../header/p6_utils.h"
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
+#include "../header/p6_frame.hpp"
+#include "../header/p6_utils.hpp"
 
 wxPoint p6::MainPanel::_real_to_pixel(real x, real y, wxPoint offset) const
 {
 	return offset + wxPoint(
 		panel->GetSize().x / 2 + (x - center_x) * pixels_in_meter,
 		panel->GetSize().y / 2 - (y - center_y) * pixels_in_meter);
-};
+}
 
 p6::MainPanel::MainPanel(Frame *frame)
 {
@@ -14,17 +24,17 @@ p6::MainPanel::MainPanel(Frame *frame)
 	panel = new wxPanel(frame->frame);
 	panel->Show(false);
 	frame->sizer->Add(panel, 4, wxEXPAND | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
-};
+}
 
 wxSize p6::MainPanel::size() const
 {
 	return panel->GetSize();
-};
+}
 
 wxPoint p6::MainPanel::offset() const
 {
 	return panel->GetClientAreaOrigin();
-};
+}
 
 void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 {
@@ -33,15 +43,15 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 
 	//Calculate max strain
 	real max_strain = 0.0;
-	for (size_t i = 0; i < con->get_stick_count(); i++)
+	for (uint i = 0; i < con->get_stick_count(); i++)
 	{
 		if (con->get_stick_strain(i) > max_strain) max_strain = con->get_stick_strain(i);
 	}
 
 	//Draw sticks
-	for (size_t i = 0; i < _frame->construction.get_stick_count(); i++)
+	for (uint i = 0; i < _frame->construction.get_stick_count(); i++)
 	{
-		size_t node_index[2];
+		uint node_index[2];
 		_frame->construction.get_stick_node(i, node_index);
 
 		wxColour colour;
@@ -66,7 +76,7 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 		else colour = wxColour(128, 128, 128);
 
 		wxPoint points[2];
-		for (size_t j = 0; j < 2; j++)
+		for (uint j = 0; j < 2; j++)
 		{
 			real x = con->get_node_x(node_index[j]);
 			real y = con->get_node_y(node_index[j]); 
@@ -82,7 +92,7 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 	}
 
 	//Draw forces
-	for (size_t i = 0; i < con->get_force_count(); i++)
+	for (uint i = 0; i < con->get_force_count(); i++)
 	{
 		const real a = 30.0 * (M_PI / 180.0);
 		const real c = 0.1;
@@ -114,7 +124,7 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 	}
 
 	//Draw points
-	for (size_t i = 0; i < con->get_node_count(); i++)
+	for (uint i = 0; i < con->get_node_count(); i++)
 	{
 		wxPoint point = _real_to_pixel(con->get_node_x(i), con->get_node_y(i), offset);
 		if (selected_nodes.count(i)) dc->SetPen(wxPen(wxColour(255, 255, 0), 1));
@@ -136,14 +146,14 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 		dc->DrawLine(mouse->point_down, wxPoint(mouse->point_down.x, mouse->point_up.y));
 		dc->DrawLine(mouse->point_up, wxPoint(mouse->point_down.x, mouse->point_up.y));
 	}
-};
+}
 
-p6::MainPanel::Item p6::MainPanel::get_item(real x, real y, size_t *index) const
+p6::MainPanel::Item p6::MainPanel::get_item(real x, real y, uint *index) const
 {
 	const Construction *con = &_frame->construction;
 
 	//Checking for clicking node
-	for (size_t i = 0; i < con->get_node_count(); i++)
+	for (uint i = 0; i < con->get_node_count(); i++)
 	{
 		if (pixels_in_meter * sqrt(
 			sqr(con->get_node_x(i) - x) +
@@ -155,12 +165,12 @@ p6::MainPanel::Item p6::MainPanel::get_item(real x, real y, size_t *index) const
 	}
 
 	//Checking for clicking stick
-	for (size_t i = 0; i < con->get_stick_count(); i++)
+	for (uint i = 0; i < con->get_stick_count(); i++)
 	{
-		size_t node[2];
+		uint node[2];
 		con->get_stick_node(i, node);
 		real node_x[2], node_y[2];
-		for (size_t j = 0; j < 2; j++)
+		for (uint j = 0; j < 2; j++)
 		{
 			node_x[j] = con->get_node_x(node[j]);
 			node_y[j] = con->get_node_y(node[j]);
@@ -174,9 +184,9 @@ p6::MainPanel::Item p6::MainPanel::get_item(real x, real y, size_t *index) const
 	}
 
 	//Checking for clicking forces
-	for (size_t i = 0; i < con->get_force_count(); i++)
+	for (uint i = 0; i < con->get_force_count(); i++)
 	{
-		size_t node = con->get_force_node(i);
+		uint node = con->get_force_node(i);
 		real node_x[2], node_y[2];
 		node_x[0] = con->get_node_x(node);
 		node_y[0] = con->get_node_y(node);
@@ -191,7 +201,7 @@ p6::MainPanel::Item p6::MainPanel::get_item(real x, real y, size_t *index) const
 	}
 
 	return Item::no;
-};
+}
 
 void p6::MainPanel::pixel_to_real(wxPoint point, real *x, real *y) const
 {
@@ -199,7 +209,7 @@ void p6::MainPanel::pixel_to_real(wxPoint point, real *x, real *y) const
 	assert(y != nullptr);
 	*x = center_x + (real)(point.x - panel->GetSize().x / 2) / pixels_in_meter;
 	*y = center_y + (real)(panel->GetSize().y / 2 - point.y) / pixels_in_meter;
-};
+}
 
 void p6::MainPanel::select_area(real ax, real ay, real bx, real by)
 {
@@ -210,29 +220,29 @@ void p6::MainPanel::select_area(real ax, real ay, real bx, real by)
 	if (by < ay) { real b = ay; ay = by; by = b; }
 	const Construction *con = &_frame->construction;
 
-	for (size_t i = 0; i < con->get_node_count(); i++)
+	for (uint i = 0; i < con->get_node_count(); i++)
 	{
 		if(ax < con->get_node_x(i) && con->get_node_x(i) < bx
 		&& ay < con->get_node_y(i) && con->get_node_y(i) < by)
 			selected_nodes.insert(i);
 	}
 
-	for (size_t i = 0; i < con->get_stick_count(); i++)
+	for (uint i = 0; i < con->get_stick_count(); i++)
 	{
-		size_t node[2];
+		uint node[2];
 		con->get_stick_node(i, node);
 		if (selected_nodes.count(node[0]) && selected_nodes.count(node[1]))
 			selected_sticks.insert(i);
 	}
 
-	for (size_t i = 0; i < con->get_force_count(); i++)
+	for (uint i = 0; i < con->get_force_count(); i++)
 	{
 		if (selected_nodes.count(con->get_force_node(i)))
 			selected_forces.insert(i);
 	}
-};
+}
 
 void p6::MainPanel::refresh()
 {
 	panel->Refresh();
-};
+}

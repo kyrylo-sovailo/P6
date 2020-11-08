@@ -1,27 +1,37 @@
-#include "../header/p6_frame.h"
-#include "../header/p6_utils.h"
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
+#include "../header/p6_frame.hpp"
+#include "../header/p6_utils.hpp"
 
 void p6::StickBar::_on_area(wxCommandEvent &e)
 {
-	std::set<size_t> *selected_sticks = &_frame->main_panel.selected_sticks;
+	std::set<uint> *selected_sticks = &_frame->main_panel.selected_sticks;
 	real a = Utils::string_to_real(_area_text->GetValue().ToStdString());
 	if (a == a && a > 0.0)
 	{
 		for (auto i = selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
 			_frame->construction.set_stick_area(*i, a);
 	}
-};
+}
 
 void p6::StickBar::_on_material(wxCommandEvent &e)
 {
-	std::set<size_t> *selected_sticks = &_frame->main_panel.selected_sticks;
+	std::set<uint> *selected_sticks = &_frame->main_panel.selected_sticks;
 	int c = _material_choice->GetSelection();
 	if (c != wxNOT_FOUND)
 	{
 		for (auto i = selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
 			_frame->construction.set_stick_material(*i, c);
 	}
-};
+}
 
 p6::StickBar::StickBar(Frame *frame)
 {
@@ -60,7 +70,7 @@ p6::StickBar::StickBar(Frame *frame)
 	//Force text
 	_force_text = new wxTextCtrl(parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	_force_text->Show(false);
-};
+}
 
 void p6::StickBar::show()
 {
@@ -75,17 +85,17 @@ void p6::StickBar::show()
 	sizer->Add(_strain_text, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_force_static, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_force_text, 0, wxALL | wxEXPAND, 10);
-};
+}
 
 void p6::StickBar::refresh()
 {
-	std::set<size_t> *selected_sticks = &_frame->main_panel.selected_sticks;
+	std::set<uint> *selected_sticks = &_frame->main_panel.selected_sticks;
 	Construction *con = &_frame->construction;
 
 	//Setting material
 	{
 		bool material_equal = true;
-		size_t material_value = con->get_stick_material(*selected_sticks->cbegin());
+		uint material_value = con->get_stick_material(*selected_sticks->cbegin());
 		for (auto i = ++selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
 		{
 			if (material_value != con->get_stick_material(*i)) { material_equal = false; break; }
@@ -148,7 +158,7 @@ void p6::StickBar::refresh()
 			else _force_text->ChangeValue("");
 		}
 	}
-};
+}
 
 void p6::StickBar::refresh_material()
 {
@@ -163,12 +173,12 @@ void p6::StickBar::refresh_material()
 	//Create material choice
 	wxArrayString array;
 	array.Alloc(_frame->construction.get_material_count());
-	for (size_t i = 0; i < _frame->construction.get_material_count(); i++)
+	for (uint i = 0; i < _frame->construction.get_material_count(); i++)
 		array.Add(_frame->construction.get_material_name(i));
 	_material_choice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, array);
 	parent->Bind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
 	_material_choice->SetSelection(c);
-};
+}
 
 void p6::StickBar::hide()
-{};
+{}

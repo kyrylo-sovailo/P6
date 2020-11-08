@@ -1,44 +1,54 @@
-#include "../header/p6_frame.h"
-#include "../header/p6_utils.h"
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
+#include "../header/p6_frame.hpp"
+#include "../header/p6_utils.hpp"
 #include <set>
 
 void p6::NodeBar::_on_free(wxCommandEvent &e)
 {
-	std::set<size_t> *selected_nodes = &_frame->main_panel.selected_nodes;
+	std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
 	_fixed_check->SetValue(!_free_check->GetValue());
 	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		_frame->construction.set_node_free(*i, _free_check->GetValue());
-};
+}
 
 void p6::NodeBar::_on_fixed(wxCommandEvent &e)
 {
-	std::set<size_t> *selected_nodes = &_frame->main_panel.selected_nodes;
+	std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
 	_free_check->SetValue(!_fixed_check->GetValue());
 	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		_frame->construction.set_node_free(*i, _free_check->GetValue());
-};
+}
 
 void p6::NodeBar::_on_x(wxCommandEvent &e)
 {
-	std::set<size_t> *selected_nodes = &_frame->main_panel.selected_nodes;
+	std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
 	real x = Utils::string_to_real(_x_text->GetValue().ToStdString());
 	if (x == x)
 	{
 		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 			_frame->construction.set_node_x(*i, x);
 	}
-};
+}
 
 void p6::NodeBar::_on_y(wxCommandEvent &e)
 {
-	std::set<size_t> *selected_nodes = &_frame->main_panel.selected_nodes;
+	std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
 	real y = Utils::string_to_real(_y_text->GetValue().ToStdString());
 	if (y == y)
 	{
 		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 			_frame->construction.set_node_y(*i, y);
 	}
-};
+}
 
 p6::NodeBar::NodeBar(Frame *frame)
 {
@@ -67,7 +77,7 @@ p6::NodeBar::NodeBar(Frame *frame)
 	_y_text = new wxTextCtrl(parent, wxID_ANY);
 	_y_text->Show(false);
 	parent->Bind(wxEVT_TEXT, &NodeBar::_on_y, this, _y_text->GetId());
-};
+}
 
 void p6::NodeBar::show()
 {
@@ -78,12 +88,12 @@ void p6::NodeBar::show()
 	sizer->Add(_x_text, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_y_static, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_y_text, 0, wxALL | wxEXPAND, 10);
-};
+}
 
 void p6::NodeBar::refresh()
 {
 	Construction *con = &_frame->construction;
-	std::set<size_t> *selected_nodes = &_frame->main_panel.selected_nodes;
+	std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
 
 	//Setting free
 	{
@@ -120,7 +130,7 @@ void p6::NodeBar::refresh()
 		if (y_equal) _y_text->ChangeValue(Utils::real_to_string(y_value));
 		else _y_text->ChangeValue("");
 	}
-};
+}
 
 void p6::NodeBar::hide()
-{};
+{}

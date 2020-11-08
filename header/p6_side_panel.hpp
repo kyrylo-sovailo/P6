@@ -1,11 +1,21 @@
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
 #ifndef P6_SIDE_PANEL
 #define P6_SIDE_PANEL
 
-#include "p6_node_bar.h"
-#include "p6_stick_bar.h"
-#include "p6_force_bar.h"
-#include "p6_material_bar.h"
-#include "p6_move_bar.h"
+#include "p6_node_bar.hpp"
+#include "p6_stick_bar.hpp"
+#include "p6_force_bar.hpp"
+#include "p6_material_bar.hpp"
+#include "p6_move_bar.hpp"
 #include <wx/wx.h>
 
 namespace p6
@@ -37,6 +47,6 @@ namespace p6
 		SidePanel(Frame *frame);
 		void refresh();
 	};
-};
+}
 
 #endif

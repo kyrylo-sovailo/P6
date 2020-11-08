@@ -1,4 +1,14 @@
-#include "../header/p6_utils.h"
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
+#include "../header/p6_utils.hpp"
 #include <sstream>
 
 p6::real p6::Utils::string_to_real(const String s)
@@ -8,7 +18,7 @@ p6::real p6::Utils::string_to_real(const String s)
 	ss << s;
 	if (ss >> r) return r;
 	else return nan("");
-};
+}
 
 std::string p6::Utils::real_to_string(real r)
 {
@@ -17,7 +27,7 @@ std::string p6::Utils::real_to_string(real r)
 	ss << r;
 	ss >> s;
 	return s;
-};
+}
 
 wxBitmap p6::Utils::load_png(const String path)
 {
@@ -34,7 +44,7 @@ wxBitmap p6::Utils::load_png(const String path)
 		bitmap = wxBitmap::NewFromPNGData(memory.data(), memory.size());
 	}
 	return bitmap;
-};
+}
 
 p6::real p6::Utils::distance_to_line(real px, real py, const real x[2], const real y[2])
 {
@@ -45,4 +55,4 @@ p6::real p6::Utils::distance_to_line(real px, real py, const real x[2], const re
 	else return sqrt(
 		sqr(k * x[0] + (1.0 - k) * x[1] - px) +
 		sqr(k * y[0] + (1.0 - k) * y[1] - py));
-};
+}

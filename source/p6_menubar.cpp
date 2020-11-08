@@ -1,4 +1,14 @@
-#include "../header/p6_frame.h"
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
+#include "../header/p6_frame.hpp"
 
 void p6::MenuBar::_on_menu_file_load(wxCommandEvent &e)
 {
@@ -18,7 +28,7 @@ void p6::MenuBar::_on_menu_file_load(wxCommandEvent &e)
 			wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame);
 		}
 	}
-};
+}
 
 void p6::MenuBar::_on_menu_file_import(wxCommandEvent &e)
 {
@@ -27,22 +37,22 @@ void p6::MenuBar::_on_menu_file_import(wxCommandEvent &e)
 	{
 		try
 		{
-			size_t old_node_count = _frame->construction.get_node_count();
-			size_t old_stick_count = _frame->construction.get_stick_count();
-			size_t old_force_count = _frame->construction.get_force_count();
+			uint old_node_count = _frame->construction.get_node_count();
+			uint old_stick_count = _frame->construction.get_stick_count();
+			uint old_force_count = _frame->construction.get_force_count();
 			_frame->construction.import(dialog.GetPath().ToStdString());
 			_frame->main_panel.selected_nodes.clear();
-			for (size_t i = old_node_count; i < _frame->construction.get_node_count(); i++)
+			for (uint i = old_node_count; i < _frame->construction.get_node_count(); i++)
 			{
 				_frame->main_panel.selected_nodes.insert(i);
 			}
 			_frame->main_panel.selected_sticks.clear();
-			for (size_t i = old_stick_count; i < _frame->construction.get_stick_count(); i++)
+			for (uint i = old_stick_count; i < _frame->construction.get_stick_count(); i++)
 			{
 				_frame->main_panel.selected_sticks.insert(i);
 			}
 			_frame->main_panel.selected_forces.clear();
-			for (size_t i = old_force_count; i < _frame->construction.get_force_count(); i++)
+			for (uint i = old_force_count; i < _frame->construction.get_force_count(); i++)
 			{
 				_frame->main_panel.selected_forces.insert(i);
 			}
@@ -52,7 +62,7 @@ void p6::MenuBar::_on_menu_file_import(wxCommandEvent &e)
 			wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame);
 		}
 	}
-};
+}
 
 void p6::MenuBar::_on_menu_file_save(wxCommandEvent &e)
 {
@@ -71,7 +81,7 @@ void p6::MenuBar::_on_menu_file_save(wxCommandEvent &e)
 	{
 		wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame);
 	}
-};
+}
 
 void p6::MenuBar::_on_menu_file_save_as(wxCommandEvent &e)
 {
@@ -87,7 +97,7 @@ void p6::MenuBar::_on_menu_file_save_as(wxCommandEvent &e)
 			wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame);
 		}
 	}
-};
+}
 
 void p6::MenuBar::_on_menu_export_png(wxCommandEvent &e)
 {
@@ -104,7 +114,7 @@ void p6::MenuBar::_on_menu_export_png(wxCommandEvent &e)
 		_frame->main_panel.render(&dc, wxPoint(0, 0));
 		bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_PNG);
 	}
-};
+}
 
 void p6::MenuBar::_on_menu_export_jpeg(wxCommandEvent &e)
 {
@@ -121,12 +131,12 @@ void p6::MenuBar::_on_menu_export_jpeg(wxCommandEvent &e)
 		_frame->main_panel.render(&dc, wxPoint(0, 0));
 		bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_JPEG);
 	}
-};
+}
 
 void p6::MenuBar::_on_menu_help(wxCommandEvent &e)
 {
 	wxMessageBox("Pray to Pinkie Pie to make it work", "Help", wxICON_INFORMATION, _frame->frame);
-};
+}
 
 p6::MenuBar::MenuBar(Frame *frame)
 {
@@ -160,4 +170,4 @@ p6::MenuBar::MenuBar(Frame *frame)
 	menubar->Append(helpmenu, "Help");
 
 	frame->frame->SetMenuBar(menubar);
-};
+}

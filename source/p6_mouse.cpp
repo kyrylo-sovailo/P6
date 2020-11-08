@@ -1,11 +1,21 @@
-#include "../header/p6_frame.h"
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
+#include "../header/p6_frame.hpp"
 
 void p6::Mouse::_on_left_down(wxMouseEvent &e)
 {
 	real x, y;
 	_frame->main_panel.pixel_to_real(e.GetPosition(), &x, &y);
 	selected_item = _frame->main_panel.get_item(x, y, &selected_index);
-};
+}
 
 void p6::Mouse::_on_left_up(wxMouseEvent &e)
 {
@@ -57,18 +67,18 @@ void p6::Mouse::_on_left_up(wxMouseEvent &e)
 				_frame->main_panel.selected_forces.insert(selected_index);
 		}
 	}
-};
+}
 
 void p6::Mouse::_on_right_down(wxMouseEvent &e)
-{};
+{}
 
 void p6::Mouse::_on_right_up(wxMouseEvent &e)
-{};
+{}
 
 void p6::Mouse::_on_move(wxMouseEvent &e)
 {
 
-};
+}
 
 void p6::Mouse::_on_wheel(wxMouseEvent &e)
 {
@@ -84,7 +94,7 @@ void p6::Mouse::_on_wheel(wxMouseEvent &e)
 		else if (e.GetWheelRotation() < 0) _wheel--;
 		_frame->main_panel.pixels_in_meter = 30.0 * exp2(_wheel);
 	}
-};
+}
 
 p6::Mouse::Mouse(Frame *frame)
 {
@@ -96,4 +106,4 @@ p6::Mouse::Mouse(Frame *frame)
 	parent->Bind(wxEVT_RIGHT_UP, &Mouse::_on_right_up, this, parent->GetId());
 	parent->Bind(wxEVT_MOTION, &Mouse::_on_move, this, parent->GetId());
 	parent->Bind(wxEVT_MOUSEWHEEL, &Mouse::_on_wheel, this, wxID_ANY);
-};
+}

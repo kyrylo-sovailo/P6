@@ -1,7 +1,17 @@
-#include "../header/p6_frame.h"
-#include "../header/p6_utils.h"
-#include "../header/p6_linear_material.h"
-#include "../header/p6_nonlinear_material.h"
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
+#include "../header/p6_frame.hpp"
+#include "../header/p6_utils.hpp"
+#include "../header/p6_linear_material.hpp"
+#include "../header/p6_nonlinear_material.hpp"
 
 void p6::MaterialBar::_on_material_choice(wxCommandEvent &e)
 {
@@ -22,10 +32,10 @@ void p6::MaterialBar::_on_material_choice(wxCommandEvent &e)
 			Utils::real_to_string(con->get_material_modulus(c)) :
 			con->get_material_formula(c));
 	}
-};
+}
 
 void p6::MaterialBar::_on_material_name(wxCommandEvent &e)
-{};
+{}
 
 void p6::MaterialBar::_on_material_new(wxCommandEvent &e)
 {
@@ -33,7 +43,7 @@ void p6::MaterialBar::_on_material_new(wxCommandEvent &e)
 	_name_text->ChangeValue("");
 	_nonlinear_check->SetValue(false);
 	_formula_text->ChangeValue("");
-};
+}
 
 void p6::MaterialBar::_on_material_apply(wxCommandEvent &e)
 {
@@ -49,7 +59,7 @@ void p6::MaterialBar::_on_material_apply(wxCommandEvent &e)
 	{
 		wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame);
 	}
-};
+}
 
 void p6::MaterialBar::_on_material_delete(wxCommandEvent &e)
 {
@@ -57,19 +67,19 @@ void p6::MaterialBar::_on_material_delete(wxCommandEvent &e)
 	if (c != wxNOT_FOUND)
 	{
 		Construction *con = &_frame->construction;
-		for (size_t i = 0; i < con->get_stick_count(); i++)
+		for (uint i = 0; i < con->get_stick_count(); i++)
 		{
 			if (con->get_stick_material(i) == c) con->set_stick_material(i, c);
 		}
 		con->delete_material(c);
 	}
-};
+}
 
 void p6::MaterialBar::_on_material_nonlinear(wxCommandEvent &e)
-{};
+{}
 
 void p6::MaterialBar::_on_material_formula(wxCommandEvent &e)
-{};
+{}
 
 p6::MaterialBar::MaterialBar(Frame *frame)
 {
@@ -98,7 +108,7 @@ p6::MaterialBar::MaterialBar(Frame *frame)
 	button = new wxButton(parent, wxID_ANY, "Delete");
 	_buttons_sizer->Add(button, 1, wxALL, 10);
 	parent->Bind(wxEVT_BUTTON, &MaterialBar::_on_material_delete, this, button->GetId());
-};
+}
 
 void p6::MaterialBar::show()
 {
@@ -110,7 +120,7 @@ void p6::MaterialBar::show()
 	sizer->Add(_formula_static, 0, wxLEFT | wxEXPAND, 10);
 	sizer->Add(_formula_text, 0, wxLEFT | wxEXPAND, 10);
 	sizer->Add(_buttons_sizer, 0, wxALL | wxEXPAND, 10);
-};
+}
 
 void p6::MaterialBar::refresh()
 {
@@ -118,15 +128,15 @@ void p6::MaterialBar::refresh()
 
 	wxArrayString array;
 	array.Alloc(_frame->construction.get_material_count());
-	for (size_t i = 0; i < _frame->construction.get_material_count(); i++)
+	for (uint i = 0; i < _frame->construction.get_material_count(); i++)
 		array.Add(_frame->construction.get_material_name(i));
 	_material_choice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, array);
 	parent->Bind(wxEVT_CHOICE, &MaterialBar::_on_material_choice, this, _material_choice->GetId());
-};
+}
 
 void p6::MaterialBar::hide()
 {
 	wxWindow *parent = _frame->side_panel.panel;
 	parent->Unbind(wxEVT_CHOICE, &MaterialBar::_on_material_choice, this, _material_choice->GetId());
 	delete _material_choice;
-};
+}

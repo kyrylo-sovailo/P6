@@ -1,4 +1,14 @@
-#include "../header/p6_frame.h"
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
+#include "../header/p6_frame.hpp"
 
 void p6::SidePanel::_switch(Mode mode)
 {
@@ -52,7 +62,7 @@ void p6::SidePanel::_switch(Mode mode)
 		break;
 	}
 	_mode = mode;
-};
+}
 
 p6::SidePanel::SidePanel(Frame *frame) :
 	_frame(frame),
@@ -67,13 +77,13 @@ p6::SidePanel::SidePanel(Frame *frame) :
 	panel->Show(false);
 	sizer->Add(panel, 4, wxEXPAND | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
 	_material_bar.show();
-};
+}
 
 void p6::SidePanel::refresh()
 {
-	const std::set<size_t> *selected_nodes = &_frame->main_panel.selected_nodes;
-	const std::set<size_t> *selected_sticks = &_frame->main_panel.selected_sticks;
-	const std::set<size_t> *selected_forces = &_frame->main_panel.selected_forces;
+	const std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
+	const std::set<uint> *selected_sticks = &_frame->main_panel.selected_sticks;
+	const std::set<uint> *selected_forces = &_frame->main_panel.selected_forces;
 	if (_frame->toolbar.tool == ToolBar::Tool::move)
 	{
 		_switch(Mode::move);
@@ -94,4 +104,4 @@ void p6::SidePanel::refresh()
 	{
 		_switch(Mode::material);
 	}
-};
+}

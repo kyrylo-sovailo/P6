@@ -1,5 +1,15 @@
-#include "../header/p6_frame.h"
-#include "../header/p6_utils.h"
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
+
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
+#include "../header/p6_frame.hpp"
+#include "../header/p6_utils.hpp"
 
 void p6::ToolBar::_on_simulate(wxCommandEvent &e)
 {
@@ -20,7 +30,7 @@ void p6::ToolBar::_on_simulate(wxCommandEvent &e)
 			wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame);
 		}
 	}
-};
+}
 
 void p6::ToolBar::_on_select(wxCommandEvent &e)
 {
@@ -29,7 +39,7 @@ void p6::ToolBar::_on_select(wxCommandEvent &e)
 	_frame->main_panel.selected_nodes.clear();
 	_frame->main_panel.selected_sticks.clear();
 	_frame->main_panel.selected_forces.clear();
-};
+}
 
 void p6::ToolBar::_on_area(wxCommandEvent &e)
 {
@@ -38,13 +48,13 @@ void p6::ToolBar::_on_area(wxCommandEvent &e)
 	_frame->main_panel.selected_nodes.clear();
 	_frame->main_panel.selected_sticks.clear();
 	_frame->main_panel.selected_forces.clear();
-};
+}
 
 void p6::ToolBar::_on_move(wxCommandEvent &e)
 {
 	if (tool == Tool::move) tool = Tool::no;
 	else tool = Tool::move;
-};
+}
 
 void p6::ToolBar::_on_node(wxCommandEvent &e)
 {
@@ -65,7 +75,7 @@ void p6::ToolBar::_on_node(wxCommandEvent &e)
 		main->selected_sticks.clear();
 		main->selected_forces.clear();
 	}
-};
+}
 
 void p6::ToolBar::_on_stick(wxCommandEvent &e)
 {
@@ -74,11 +84,11 @@ void p6::ToolBar::_on_stick(wxCommandEvent &e)
 	else if (main->selected_nodes.size() == 2 && main->selected_sticks.empty() && main->selected_forces.empty())
 	{
 		//Connect two sticks
-		size_t node[2];
+		uint node[2];
 		node[0] = *main->selected_nodes.cbegin();
 		node[1] = *++main->selected_nodes.cbegin();
 		main->selected_nodes.clear();
-		_frame->construction.create_stick(node, (size_t)-1, 0.0);
+		_frame->construction.create_stick(node, (uint)-1, 0.0);
 	}
 	else if (!main->selected_sticks.empty() && (!main->selected_nodes.empty() || !main->selected_forces.empty()))
 	{
@@ -94,7 +104,7 @@ void p6::ToolBar::_on_stick(wxCommandEvent &e)
 		main->selected_sticks.clear();
 		main->selected_forces.clear();
 	}
-};
+}
 
 void p6::ToolBar::_on_force(wxCommandEvent &e)
 {
@@ -114,7 +124,7 @@ void p6::ToolBar::_on_force(wxCommandEvent &e)
 		main->selected_sticks.clear();
 		main->selected_forces.clear();
 	}
-};
+}
 
 void p6::ToolBar::_on_delete(wxCommandEvent &e)
 {
@@ -138,7 +148,7 @@ void p6::ToolBar::_on_delete(wxCommandEvent &e)
 		main->selected_sticks.clear();
 		main->selected_forces.clear();
 	}
-};
+}
 
 
 p6::ToolBar::ToolBar(Frame *frame)
@@ -225,4 +235,4 @@ p6::ToolBar::ToolBar(Frame *frame)
 		"Delete selected items");
 	frame->frame->Bind(wxEVT_TOOL, &ToolBar::_on_delete, this, _delete->GetId());
 	toolbar->Realize();
-};
+}

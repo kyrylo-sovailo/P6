@@ -8,9 +8,24 @@
 	Reinventing bicycles since 2020
 */
 
-#include "../header/p6_common.hpp"
+#ifndef P6_COMMON
+#define P6_COMMON
 
-p6::real p6::sqr(real x)
+#include <string>
+
+namespace p6
 {
-	return x * x;
+	///String used in P6
+	typedef std::string String;
+
+	///Real number used in P6
+	typedef double real;
+
+	///uinteger number used in P6
+	typedef size_t uint;
+
+	///Square of real number
+	real sqr(real x);
 }
+
+#endif

@@ -1,13 +1,23 @@
-#include "../header/p6_construction.h"
-#include "../header/p6_linear_material.h"
-#include "../header/p6_nonlinear_material.h"
-#include "../header/p6_indexer.h"
-#include <wx/file.h>
-#include <assert.h>
-#include <math.h>
-#include <Eigen>
+/*
+	This software is distributed under MIT License, which means:
+		- Do whatever you want
+		- Please keep this notice and include the license file to your project
+		- I provide no warranty
 
-size_t p6::Construction::create_node(real x, real y, bool free)
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Reinventing bicycles since 2020
+*/
+
+#include "../header/p6_construction.hpp"
+#include "../header/p6_linear_material.hpp"
+#include "../header/p6_nonlinear_material.hpp"
+#include "../header/p6_indexer.hpp"
+#include <wx/file.h>
+#include <Eigen>
+#include <cassert>
+#include <cmath>
+
+p6::uint p6::Construction::create_node(real x, real y, bool free)
 {
 	assert(!_simulation);
 	assert(x == x);
@@ -18,12 +28,12 @@ size_t p6::Construction::create_node(real x, real y, bool free)
 	node.y = y;
 	_node.push_back(node);
 	return _node.size() - 1;
-};
+}
 
-void p6::Construction::delete_node(size_t node)
+void p6::Construction::delete_node(uint node)
 {
 	assert(!_simulation);
-	for (size_t i = _stick.size() - 1; i != (size_t)-1; i--)
+	for (uint i = _stick.size() - 1; i != (uint)-1; i--)
 	{
 		if (_stick[i].node[0] == node || _stick[i].node[1] == node)
 		{
@@ -36,56 +46,56 @@ void p6::Construction::delete_node(size_t node)
 		}
 	}
 	_node.erase(_node.cbegin() + node);
-};
+}
 
-void p6::Construction::set_node_x(size_t node, real x)
+void p6::Construction::set_node_x(uint node, real x)
 {
 	assert(!_simulation);
 	assert(x == x);
 	_node[node].x = x;
-};
+}
 
-void p6::Construction::set_node_y(size_t node, real y)
+void p6::Construction::set_node_y(uint node, real y)
 {
 	assert(!_simulation);
 	assert(y == y);
 	_node[node].y = y;
-};
+}
 
-void p6::Construction::set_node_free(size_t node, bool free)
+void p6::Construction::set_node_free(uint node, bool free)
 {
 	assert(!_simulation);
 	_node[node].free = free;
-};
+}
 
-size_t p6::Construction::get_node_count() const
+p6::uint p6::Construction::get_node_count() const
 {
 	return _node.size();
-};
+}
 
-p6::real p6::Construction::get_node_x(size_t node) const
+p6::real p6::Construction::get_node_x(uint node) const
 {
 	return _simulation ? _node[node].x_simulated : _node[node].x;
-};
+}
 
-p6::real p6::Construction::get_node_y(size_t node) const
+p6::real p6::Construction::get_node_y(uint node) const
 {
 	return _simulation ? _node[node].y_simulated : _node[node].y;
-};
+}
 
-bool p6::Construction::get_node_free(size_t node) const
+bool p6::Construction::get_node_free(uint node) const
 {
 	return _node[node].free;
-};
+}
 
-size_t p6::Construction::create_stick(const size_t node[2], size_t material, real area)
+p6::uint p6::Construction::create_stick(const uint node[2], uint material, real area)
 {
 	assert(!_simulation);
 	assert(area >= 0);
 	assert(node[0] != node[1]);
 	assert(node[0] < _node.size());
 	assert(node[1] < _node.size());
-	for (size_t i = 0; i < _stick.size(); i++)
+	for (uint i = 0; i < _stick.size(); i++)
 	{
 		assert(!((_stick[i].node[0] == node[0] && _stick[i].node[0] == node[1])
 			&& (_stick[i].node[1] == node[1] && _stick[i].node[1] == node[1])));
@@ -98,57 +108,57 @@ size_t p6::Construction::create_stick(const size_t node[2], size_t material, rea
 	stick.area = area;
 	_stick.push_back(stick);
 	return _stick.size() - 1;
-};
+}
 
-void p6::Construction::delete_stick(size_t stick)
+void p6::Construction::delete_stick(uint stick)
 {
 	assert(!_simulation);
 	_stick.erase(_stick.cbegin() + stick);
-};
+}
 
-void p6::Construction::set_stick_material(size_t stick, size_t material)
+void p6::Construction::set_stick_material(uint stick, uint material)
 {
 	assert(!_simulation);
 	_stick[stick].material = material;
-};
+}
 
-void p6::Construction::set_stick_area(size_t stick, real area)
+void p6::Construction::set_stick_area(uint stick, real area)
 {
 	assert(!_simulation);
 	assert(area == area);
 	_stick[stick].area = area;
-};
+}
 
-size_t p6::Construction::get_stick_count() const
+p6::uint p6::Construction::get_stick_count() const
 {
 	return _stick.size();
-};
+}
 
-size_t p6::Construction::get_stick_material(size_t stick) const
+p6::uint p6::Construction::get_stick_material(uint stick) const
 {
 	return _stick[stick].material;
-};
+}
 
-p6::real p6::Construction::get_stick_area(size_t stick) const
+p6::real p6::Construction::get_stick_area(uint stick) const
 {
 	return _stick[stick].area;
-};
+}
 
-void p6::Construction::get_stick_node(size_t stick, size_t node[2]) const
+void p6::Construction::get_stick_node(uint stick, uint node[2]) const
 {
 	node[0] = _stick[stick].node[0];
 	node[1] = _stick[stick].node[1];
-};
+}
 
-p6::real p6::Construction::get_stick_length(size_t stick) const
+p6::real p6::Construction::get_stick_length(uint stick) const
 {
 	const Node *node[2] = { &_node[_stick[stick].node[0]], &_node[_stick[stick].node[1]] };
 	return _simulation ?
 		sqrt(sqr(node[0]->x_simulated - node[1]->x_simulated) + sqr(node[0]->y_simulated - node[1]->y_simulated)) : 
 		sqrt(sqr(node[0]->x - node[1]->x) + sqr(node[0]->y - node[1]->y));
-};
+}
 
-p6::real p6::Construction::get_stick_strain(size_t stick) const
+p6::real p6::Construction::get_stick_strain(uint stick) const
 {
 	assert(_simulation);
 	const Node *node[2] = { &_node[_stick[stick].node[0]], &_node[_stick[stick].node[1]] };
@@ -156,15 +166,15 @@ p6::real p6::Construction::get_stick_strain(size_t stick) const
 		sqrt(sqr(node[0]->x_simulated - node[1]->x_simulated) + sqr(node[0]->y_simulated - node[1]->y_simulated)) /
 		sqrt(sqr(node[0]->x - node[1]->x) + sqr(node[0]->y - node[1]->y))
 		) - 1.0;
-};
+}
 
-p6::real p6::Construction::get_stick_force(size_t stick) const
+p6::real p6::Construction::get_stick_force(uint stick) const
 {
 	assert(_simulation);
 	return _stick[stick].area * _material[_stick[stick].material]->stress(get_stick_strain(stick));
-};
+}
 
-size_t p6::Construction::create_force(size_t node, real x, real y)
+p6::uint p6::Construction::create_force(uint node, real x, real y)
 {
 	assert(!_simulation);
 	assert(x == x);
@@ -176,99 +186,99 @@ size_t p6::Construction::create_force(size_t node, real x, real y)
 	force.y = y;
 	_force.push_back(force);
 	return _force.size() - 1;
-};
+}
 
-void p6::Construction::delete_force(size_t force)
+void p6::Construction::delete_force(uint force)
 {
 	assert(!_simulation);
 	_force.erase(_force.cbegin() + force);
-};
+}
 
-void p6::Construction::set_force_x(size_t force, real x)
+void p6::Construction::set_force_x(uint force, real x)
 {
 	assert(!_simulation);
 	assert(x == x);
 	_force[force].x = x;
-};
+}
 
-void p6::Construction::set_force_y(size_t force, real y)
+void p6::Construction::set_force_y(uint force, real y)
 {
 	assert(!_simulation);
 	assert(y == y);
 	_force[force].y = y;
-};
+}
 
-size_t p6::Construction::get_force_count() const
+p6::uint p6::Construction::get_force_count() const
 {
 	return _force.size();
-};
+}
 
-p6::real p6::Construction::get_force_x(size_t force) const
+p6::real p6::Construction::get_force_x(uint force) const
 {
 	return _force[force].x;
-};
+}
 
-p6::real p6::Construction::get_force_y(size_t force) const
+p6::real p6::Construction::get_force_y(uint force) const
 {
 	return _force[force].y;
-};
+}
 
-size_t p6::Construction::get_force_node(size_t force) const
+p6::uint p6::Construction::get_force_node(uint force) const
 {
 	return _force[force].node;
-};
+}
 
-size_t p6::Construction::create_linear_material(const String &name, real modulus)
+p6::uint p6::Construction::create_linear_material(const String &name, real modulus)
 {
 	assert(!_simulation);
 	_material.push_back(new LinearMaterial(name, modulus));
 	return _material.size() - 1;
-};
+}
 
-size_t p6::Construction::create_nonlinear_material(const String &name, const String &formula)
+p6::uint p6::Construction::create_nonlinear_material(const String &name, const String &formula)
 {
 	assert(!_simulation);
 	_material.push_back(new NonlinearMaterial(name, formula));
 	return _material.size() - 1;
-};
+}
 
-void p6::Construction::delete_material(size_t material)
+void p6::Construction::delete_material(uint material)
 {
 	assert(!_simulation);
-	for (size_t i = 0; i < _stick.size(); i++)
+	for (uint i = 0; i < _stick.size(); i++)
 	{
-		if (_stick[i].material == material) _stick[i].material = (size_t)-1;
+		if (_stick[i].material == material) _stick[i].material = (uint)-1;
 	}
 	delete _material[material];
 	_material.erase(_material.cbegin() + material);
-};
+}
 
-size_t p6::Construction::get_material_count() const
+p6::uint p6::Construction::get_material_count() const
 {
 	return _material.size();
-};
+}
 
-p6::String p6::Construction::get_material_name(size_t material) const
+p6::String p6::Construction::get_material_name(uint material) const
 {
 	return _material[material]->name();
-};
+}
 
-p6::Material::Type p6::Construction::get_material_type(size_t material) const
+p6::Material::Type p6::Construction::get_material_type(uint material) const
 {
 	return _material[material]->type();
-};
+}
 
-p6::real p6::Construction::get_material_modulus(size_t material) const
+p6::real p6::Construction::get_material_modulus(uint material) const
 {
 	assert(_material[material]->type() == Material::Type::linear);
 	return ((LinearMaterial*)_material[material])->modulus();
-};
+}
 
-p6::String p6::Construction::get_material_formula(size_t material) const
+p6::String p6::Construction::get_material_formula(uint material) const
 {
 	assert(_material[material]->type() == Material::Type::nonlinear);
 	return ((NonlinearMaterial*)_material[material])->formula();
-};
+}
 
 void p6::Construction::save(const String &filepath) const
 {
@@ -283,30 +293,30 @@ void p6::Construction::save(const String &filepath) const
 	file.Write(&header, sizeof(Header));
 
 	//Nodes
-	for (size_t i = 0; i < _node.size(); i++)
+	for (uint i = 0; i < _node.size(); i++)
 	{
 		file.Write(&_node[i], sizeof(StaticNode));
 	}
 
 	//Sticks
-	for (size_t i = 0; i < _stick.size(); i++)
+	for (uint i = 0; i < _stick.size(); i++)
 	{
 		file.Write(&_stick[i], sizeof(Stick));
 	}
 
 	//Forces
-	for (size_t i = 0; i < _force.size(); i++)
+	for (uint i = 0; i < _force.size(); i++)
 	{
 		file.Write(&_force[i], sizeof(Force));
 	}
 
 	//Materials
-	for (unsigned int i = 0; i < _material.size(); i++)
+	for (uint i = 0; i < _material.size(); i++)
 	{
 		//Name
 		String name = _material[i]->name();
-		unsigned int len = name.size();
-		file.Write(&len, sizeof(unsigned int));
+		uint len = name.size();
+		file.Write(&len, sizeof(uint));
 		file.Write(name.data(), len);
 
 		//Type
@@ -324,11 +334,11 @@ void p6::Construction::save(const String &filepath) const
 			//Formula
 			String formula = ((NonlinearMaterial*)_material[i])->formula();
 			len = formula.size();
-			file.Write(&len, sizeof(unsigned int));
+			file.Write(&len, sizeof(uint));
 			file.Write(formula.data(), len);
 		}
 	}
-};
+}
 
 void p6::Construction::load(const String &filepath)
 {
@@ -341,33 +351,33 @@ void p6::Construction::load(const String &filepath)
 	
 	//Nodes
 	_node.resize(header.node);
-	for (size_t i = 0; i < _node.size(); i++)
+	for (uint i = 0; i < _node.size(); i++)
 	{
 		file.Read(&_node[i], sizeof(StaticNode));
 	}
 
 	//Sticks
 	_stick.resize(header.stick);
-	for (size_t i = 0; i < _stick.size(); i++)
+	for (uint i = 0; i < _stick.size(); i++)
 	{
 		file.Read(&_stick[i], sizeof(Stick));
 	}
 
 	//Forces
 	_force.resize(header.force);
-	for (size_t i = 0; i < _force.size(); i++)
+	for (uint i = 0; i < _force.size(); i++)
 	{
 		file.Read(&_force[i], sizeof(Force));
 	}
 
 	//Materials
-	for (size_t i = 0; i < _material.size(); i++) delete _material[i];
+	for (uint i = 0; i < _material.size(); i++) delete _material[i];
 	_material.resize(header.material);
-	for (size_t i = 0; i < _material.size(); i++)
+	for (uint i = 0; i < _material.size(); i++)
 	{
 		//Name
-		unsigned int len;
-		file.Read(&len, sizeof(unsigned int));
+		uint len;
+		file.Read(&len, sizeof(uint));
 		String name(len, '\0');
 		file.Read(&name[0], len);
 
@@ -385,13 +395,13 @@ void p6::Construction::load(const String &filepath)
 		else
 		{
 			//Formula
-			file.Read(&len, sizeof(unsigned int));
+			file.Read(&len, sizeof(uint));
 			String formula(len, '\0');
 			file.Read(&formula[0], len);
 			_material[i] = new NonlinearMaterial(name, formula);
 		}
 	}
-};
+}
 
 void p6::Construction::import(const String &filepath)
 {
@@ -402,21 +412,21 @@ void p6::Construction::import(const String &filepath)
 	file.Read(&header, sizeof(Header));
 	if (memcmp(header.signature, sample.signature, 8) != 0) throw ("Invalid file format");
 
-	size_t old_node_size = _node.size();
-	size_t old_stick_size = _stick.size();
-	size_t old_force_size = _force.size();
-	size_t old_material_size = _material.size();
+	uint old_node_size = _node.size();
+	uint old_stick_size = _stick.size();
+	uint old_force_size = _force.size();
+	uint old_material_size = _material.size();
 
 	//Nodes
 	_node.resize(old_node_size + header.node);
-	for (size_t i = old_node_size; i < _node.size(); i++)
+	for (uint i = old_node_size; i < _node.size(); i++)
 	{
 		file.Read(&_node[i], sizeof(StaticNode));
 	}
 
 	//Sticks
 	_stick.resize(old_stick_size + header.stick);
-	for (size_t i = old_stick_size; i < _stick.size(); i++)
+	for (uint i = old_stick_size; i < _stick.size(); i++)
 	{
 		file.Read(&_stick[i], sizeof(Stick));
 		_stick[i].node[0] += old_node_size;
@@ -426,24 +436,24 @@ void p6::Construction::import(const String &filepath)
 
 	//Forces
 	_force.resize(old_force_size + header.force);
-	for (size_t i = old_force_size; i < _force.size(); i++)
+	for (uint i = old_force_size; i < _force.size(); i++)
 	{
 		file.Read(&_force[i], sizeof(Force));
 		_force[i].node += old_node_size;
 	}
 
 	//Materials
-	for (size_t i = 0; i < header.material; i++)
+	for (uint i = 0; i < header.material; i++)
 	{
 		//Name
-		unsigned int len;
-		file.Read(&len, sizeof(unsigned int));
+		uint len;
+		file.Read(&len, sizeof(uint));
 		String name(len, '\0');
 		file.Read(&name[0], len);
 
 		//Find existing material
-		size_t existing_material = (size_t)-1;
-		for (size_t j = 0; j < old_material_size; j++)
+		uint existing_material = (uint)-1;
+		for (uint j = 0; j < old_material_size; j++)
 		{
 			if (_material[j]->name() == name)
 			{
@@ -463,31 +473,31 @@ void p6::Construction::import(const String &filepath)
 			//Modulus
 			real modulus;
 			file.Read(&modulus, sizeof(real));
-			if (existing_material != (size_t)-1) new_material = new LinearMaterial(name, modulus);
+			if (existing_material != (uint)-1) new_material = new LinearMaterial(name, modulus);
 		}
 		else
 		{
 			//Formula
-			file.Read(&len, sizeof(unsigned int));
+			file.Read(&len, sizeof(uint));
 			String formula(len, '\0');
 			file.Read(&formula[0], len);
-			if (existing_material != (size_t)-1) new_material = new NonlinearMaterial(name, formula);
+			if (existing_material != (uint)-1) new_material = new NonlinearMaterial(name, formula);
 		}
 
 		//Adding material to materials
-		if (existing_material == (size_t)-1)
+		if (existing_material == (uint)-1)
 		{
 			_material.push_back(new_material);
 			existing_material = _material.size() - 1;
 		}
 
 		//Correcting sticks
-		for (size_t i = old_stick_size; i < _stick.size(); i++)
+		for (uint i = old_stick_size; i < _stick.size(); i++)
 		{
 			if (_stick[i].material == old_material_size + i) _stick[i].material = existing_material;
 		}
 	}
-};
+}
 
 void p6::Construction::simulate(bool sim)
 {
@@ -496,15 +506,15 @@ void p6::Construction::simulate(bool sim)
 
 	//Initial lengths of sticks
 	std::vector<real> lengths(_stick.size());
-	for (size_t i = 0; i < _stick.size(); i++) lengths[i] = get_stick_length(i);
+	for (uint i = 0; i < _stick.size(); i++) lengths[i] = get_stick_length(i);
 
 	//Creating general-to-free and free-to general maps
-	std::vector<size_t> free_to_node;
-	std::vector<size_t> node_to_free;
+	std::vector<uint> free_to_node;
+	std::vector<uint> node_to_free;
 	{
-		size_t nfree = 0;
-		node_to_free.resize(_node.size(), (size_t)-1);
-		for (size_t i = 0; i < _node.size(); i++)
+		uint nfree = 0;
+		node_to_free.resize(_node.size(), (uint)-1);
+		for (uint i = 0; i < _node.size(); i++)
 		{
 			if (_node[i].free)
 			{
@@ -514,7 +524,7 @@ void p6::Construction::simulate(bool sim)
 		}
 
 		free_to_node.reserve(nfree);
-		for (size_t i = 0; i < _node.size(); i++)
+		for (uint i = 0; i < _node.size(); i++)
 		{
 			if (_node[i].free)
 			{
@@ -528,7 +538,7 @@ void p6::Construction::simulate(bool sim)
 
 	//Creating state vector
 	Eigen::Vector<real, Eigen::Dynamic> s(r.variable_number());
-	for (size_t i = 0; i < free_to_node.size(); i++)
+	for (uint i = 0; i < free_to_node.size(); i++)
 	{
 		s(r.node_variable_x(i)) = _node[free_to_node[i]].x;
 		s(r.node_variable_y(i)) = _node[free_to_node[i]].y;
@@ -546,7 +556,7 @@ void p6::Construction::simulate(bool sim)
 	real tolerance;
 	{
 		real minforce = std::numeric_limits<real>::infinity();
-		for (size_t i = 0; i < _force.size(); i++)
+		for (uint i = 0; i < _force.size(); i++)
 		{
 			real newforce = sqrt(sqr(_force[i].x) + sqr(_force[i].y));
 			if (newforce < minforce) minforce = newforce;
@@ -556,37 +566,37 @@ void p6::Construction::simulate(bool sim)
 
 	//Iterating
 	real last_error = 0.0;
-	size_t not_converge_count = 0;
+	uint not_converge_count = 0;
 	while (true)
 	{
 		//Calculating should-be-zero and derivative value
 		//Setting external forces for free nodes (zeroing should-be-zero)
-		for (size_t i = 0; i < _force.size(); i++)
+		for (uint i = 0; i < _force.size(); i++)
 		{
-			size_t node = _force[i].node;
+			uint node = _force[i].node;
 			if (_node[node].free)
 			{
-				size_t free = node_to_free[node];
+				uint free = node_to_free[node];
 				z(r.node_variable_x(free)) = _force[i].x;
 				z(r.node_variable_y(free)) = _force[i].y;
 			}
 		}
 		//Setting that forces of free _node do not depend from coordinates of free _node (zeroing derivative)
-		for (size_t i = 0; i < _stick.size(); i++)
+		for (uint i = 0; i < _stick.size(); i++)
 		{
-			const size_t *node = _stick[i].node;
-			for (size_t j = 0; j < 2; j++)
+			const uint *node = _stick[i].node;
+			for (uint j = 0; j < 2; j++)
 			{
 				if (_node[node[j]].free)
 				{
-					size_t free_j = node_to_free[node[j]];
+					uint free_j = node_to_free[node[j]];
 					d(r.node_equation_fx(free_j), r.node_variable_x(free_j)) = 0.0;
 					d(r.node_equation_fx(free_j), r.node_variable_y(free_j)) = 0.0;
 					d(r.node_equation_fy(free_j), r.node_variable_x(free_j)) = 0.0;
 					d(r.node_equation_fy(free_j), r.node_variable_y(free_j)) = 0.0;
 					if (_node[node[j ^ 1]].free)
 					{
-						size_t free_j1 = node_to_free[node[j ^ 1]];
+						uint free_j1 = node_to_free[node[j ^ 1]];
 						d(r.node_equation_fx(free_j), r.node_variable_x(free_j1)) = 0.0;
 						d(r.node_equation_fx(free_j), r.node_variable_y(free_j1)) = 0.0;
 						d(r.node_equation_fy(free_j), r.node_variable_x(free_j1)) = 0.0;
@@ -597,16 +607,16 @@ void p6::Construction::simulate(bool sim)
 		}
 
 		//Setting forces and derivatives for pairs of _node
-		for (size_t i = 0; i < _stick.size(); i++)
+		for (uint i = 0; i < _stick.size(); i++)
 		{
 			//Getting coordinates of _node
-			const size_t *node = _stick[i].node;
+			const uint *node = _stick[i].node;
 			real x[2], y[2];
-			for (size_t j = 0; j < 2; j++)
+			for (uint j = 0; j < 2; j++)
 			{
 				if (_node[node[j]].free)
 				{
-					size_t free = node_to_free[node[j]];
+					uint free = node_to_free[node[j]];
 					x[j] = s(r.node_variable_x(free));
 					y[j] = s(r.node_variable_y(free));
 				}
@@ -623,11 +633,11 @@ void p6::Construction::simulate(bool sim)
 			real length = sqrt(sqr(dx) + sqr(dy));
 			real strain = length / lengths[i] - 1.0;
 			real force = _stick[i].area * material->stress(strain);
-			for (size_t j = 0; j < 2; j++)
+			for (uint j = 0; j < 2; j++)
 			{
 				if (_node[node[j]].free)
 				{
-					size_t free = node_to_free[node[j]];
+					uint free = node_to_free[node[j]];
 					real sign = j == 0 ? 1.0 : -1.0;
 					z(r.node_variable_x(free)) += sign * force * dx / length;
 					z(r.node_variable_y(free)) += sign * force * dy / length;
@@ -652,11 +662,11 @@ void p6::Construction::simulate(bool sim)
 				material->stress(strain) * (-length - dldy0 * dy) / sqr(length) +
 				material->derivative(strain) * dldy0 * dy / (lengths[i] * length)
 				);
-			for (size_t j = 0; j < 2; j++)
+			for (uint j = 0; j < 2; j++)
 			{
 				if (_node[node[j]].free)
 				{
-					size_t free_j = node_to_free[node[j]];
+					uint free_j = node_to_free[node[j]];
 					real sign = j == 0 ? -1.0 : 1.0;
 					d(r.node_equation_fx(free_j), r.node_variable_x(free_j)) += sign * dfx0dx0;
 					d(r.node_equation_fx(free_j), r.node_variable_y(free_j)) += sign * dfx0dy0;
@@ -664,7 +674,7 @@ void p6::Construction::simulate(bool sim)
 					d(r.node_equation_fy(free_j), r.node_variable_y(free_j)) += sign * dfy0dy0;
 					if (_node[node[j ^ 1]].free)
 					{
-						size_t free_j1 = node_to_free[node[j ^ 1]];
+						uint free_j1 = node_to_free[node[j ^ 1]];
 						d(r.node_equation_fx(free_j), r.node_variable_x(free_j1)) -= sign * dfx0dx0;
 						d(r.node_equation_fx(free_j), r.node_variable_y(free_j1)) -= sign * dfx0dy0;
 						d(r.node_equation_fy(free_j), r.node_variable_x(free_j1)) -= sign * dfy0dx0;
@@ -702,15 +712,15 @@ void p6::Construction::simulate(bool sim)
 		{
 			//Determining of flow coefficient
 			real flow_coef = std::numeric_limits<real>::infinity();
-			for (size_t i = 0; i < _stick.size(); i++)
+			for (uint i = 0; i < _stick.size(); i++)
 			{
-				const size_t *node = _stick[i].node;
+				const uint *node = _stick[i].node;
 				real x[2], y[2];
-				for (size_t j = 0; j < 2; j++)
+				for (uint j = 0; j < 2; j++)
 				{
 					if (_node[node[j]].free)
 					{
-						size_t free = node_to_free[node[j]];
+						uint free = node_to_free[node[j]];
 						x[j] = s(r.node_variable_x(free));
 						y[j] = s(r.node_variable_y(free));
 					}
@@ -720,11 +730,11 @@ void p6::Construction::simulate(bool sim)
 						y[j] = _node[node[j]].y;
 					}
 				}
-				for (size_t j = 0; j < 2; j++)
+				for (uint j = 0; j < 2; j++)
 				{
 					if (_node[node[j]].free)
 					{
-						size_t free = node_to_free[node[j]];
+						uint free = node_to_free[node[j]];
 						real newcoef = sqrt(sqr(x[1] - x[0]) + sqr(y[1] - y[0])) /
 							sqrt(sqr(z(r.node_equation_fx(free))) + sqr(z(r.node_equation_fy(free))));
 						if (newcoef < flow_coef) flow_coef = newcoef;
@@ -736,19 +746,19 @@ void p6::Construction::simulate(bool sim)
 	}
 
 	//Setting node coordinates from state vector
-	for (size_t i = 0; i < free_to_node.size(); i++)
+	for (uint i = 0; i < free_to_node.size(); i++)
 	{
 		_node[free_to_node[i]].x = s(r.node_variable_x(i));
 		_node[free_to_node[i]].y = s(r.node_variable_y(i));
 	}
-};
+}
 
 bool p6::Construction::simulation() const
 {
 	return _simulation;
-};
+}
 
 p6::Construction::~Construction()
 {
-	for (size_t i = 0; i < _material.size(); i++) delete _material[i];
-};
+	for (uint i = 0; i < _material.size(); i++) delete _material[i];
+}
