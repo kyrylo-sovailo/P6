@@ -1,8 +1,8 @@
 #ifndef P6_APP
 #define P6_APP
 
-#include <wx/wx.h>
 #include "p6_frame.h"
+#include <wx/wx.h>
 
 namespace p6
 {

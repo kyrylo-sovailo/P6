@@ -1,39 +1,35 @@
-#ifndef P6_MOVE_BAR
-#define P6_MOVE_BAR
+#ifndef P6_MOUSE_BAR
+#define P6_MOUSE_BAR
 
-#include <wx/wx.h>
 #include "p6_common.h"
+#include <wx/wx.h>
 
 namespace p6
 {
+	class Frame;
+
 	struct Mouse
 	{
-		enum class State
-		{
-			unpressed,
-			pressed_on_panel,
-			pressed_on_node,
-			pressed_on_stick,
-			pressed_on_force,
-			move_on_panel,
-			move_on_node
-		};
+	private:
+		Frame *_frame;
+		int _wheel;						//Used by scaling nodes
+		int _wheel_force;				//Used by scaling forces
+		real _old_x;					//Used by moving view
+		real _old_y;					//Used by moving view
+		void _on_left_down(wxMouseEvent &e);
+		void _on_left_up(wxMouseEvent &e);
+		void _on_right_down(wxMouseEvent &e);
+		void _on_right_up(wxMouseEvent &e);
+		void _on_move(wxMouseEvent &e);
+		void _on_wheel(wxMouseEvent &e);
 
-		State _state;		//Mouse state
-		size_t _index;		//Index of selected element
-		real _old_x;		//Old _x, used for dragging
-		real _old_y;		//Old _y, used for dragging
-		wxPoint _down;		//Point on main panel where mouse were pressed
-		wxPoint _up;		//Point on main panel where mouse were unpressed
-		int wheel;			//State of scaling wheel
-		int wheel_force;	//State of force scaling wheel
-
-		void OnLeftDown(wxMouseEvent &e);
-		void OnLeftUp(wxMouseEvent &e);
-		void OnRightDown(wxMouseEvent &e);
-		void OnRightUp(wxMouseEvent &e);
-		void OnMove(wxMouseEvent &e);
-		void OnWheel(wxMouseEvent &e);
+	public:
+		bool moving;					//Used to decide if moving ot clicking
+		MainPanel::Item selected_item;	//Used by clicking
+		size_t selected_index;			//Used by clicking
+		wxPoint point_down;				//Used by dragging and area
+		wxPoint point_up;				//Used by dragging and area
+		Mouse(Frame *frame);
 	};
 };
 

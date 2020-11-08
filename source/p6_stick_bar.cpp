@@ -1,2 +1,174 @@
-#include "../header/p6_stick_bar.h"
+#include "../header/p6_frame.h"
+#include "../header/p6_utils.h"
 
+void p6::StickBar::_on_area(wxCommandEvent &e)
+{
+	std::set<size_t> *selected_sticks = &_frame->main_panel.selected_sticks;
+	real a = Utils::string_to_real(_area_text->GetValue().ToStdString());
+	if (a == a && a > 0.0)
+	{
+		for (auto i = selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
+			_frame->construction.set_stick_area(*i, a);
+	}
+};
+
+void p6::StickBar::_on_material(wxCommandEvent &e)
+{
+	std::set<size_t> *selected_sticks = &_frame->main_panel.selected_sticks;
+	int c = _material_choice->GetSelection();
+	if (c != wxNOT_FOUND)
+	{
+		for (auto i = selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
+			_frame->construction.set_stick_material(*i, c);
+	}
+};
+
+p6::StickBar::StickBar(Frame *frame)
+{
+	_frame = frame;
+	wxWindow *parent = frame->side_panel.panel;
+
+	//Material static text
+	_material_static = new wxStaticText(parent, wxID_ANY, "Material:");
+	_material_static->Show(false);
+	//Material choice
+	_material_choice = new wxChoice(parent, wxID_ANY);
+	_material_choice->Show(false);
+	parent->Bind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
+	//Area static text
+	_area_static = new wxStaticText(parent, wxID_ANY, "Area:");
+	_area_static->Show(false);
+	//Area text
+	_area_text = new wxTextCtrl(parent, wxID_ANY);
+	_area_text->Show(false);
+	parent->Bind(wxEVT_TEXT, &StickBar::_on_area, this, _area_text->GetId());
+	//Length static text
+	_length_static = new wxStaticText(parent, wxID_ANY, "Length:");
+	_length_static->Show(false);
+	//Length text
+	_length_text = new wxTextCtrl(parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	_length_text->Show(false);
+	//Strain static text
+	_strain_static = new wxStaticText(parent, wxID_ANY, "Strain:");
+	_strain_static->Show(false);
+	//Strain text
+	_strain_text = new wxTextCtrl(parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	_strain_text->Show(false);
+	//Force static text
+	_force_static = new wxStaticText(parent, wxID_ANY, "Force:");
+	_force_static->Show(false);
+	//Force text
+	_force_text = new wxTextCtrl(parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	_force_text->Show(false);
+};
+
+void p6::StickBar::show()
+{
+	wxBoxSizer *sizer = _frame->side_panel.sizer;
+	sizer->Add(_material_static, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_material_choice, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_area_static, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_area_text, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_length_static, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_length_text, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_strain_static, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_strain_text, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_force_static, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_force_text, 0, wxALL | wxEXPAND, 10);
+};
+
+void p6::StickBar::refresh()
+{
+	std::set<size_t> *selected_sticks = &_frame->main_panel.selected_sticks;
+	Construction *con = &_frame->construction;
+
+	//Setting material
+	{
+		bool material_equal = true;
+		size_t material_value = con->get_stick_material(*selected_sticks->cbegin());
+		for (auto i = ++selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
+		{
+			if (material_value != con->get_stick_material(*i)) { material_equal = false; break; }
+		}
+		if (!material_equal) _material_choice->SetSelection(wxNOT_FOUND);
+		else _material_choice->SetSelection(material_value);
+	}
+
+	//Setting area
+	{
+		bool area_equal = true;
+		real area_value = con->get_stick_area(*selected_sticks->cbegin());
+		for (auto i = ++selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
+		{
+			if (area_value != con->get_stick_area(*i)) { area_equal = false; break; }
+		}
+		if (area_equal) _area_text->ChangeValue(Utils::real_to_string(area_value));
+		else _area_text->ChangeValue("");
+	}
+
+	//Setting length
+	{
+		bool length_equal = true;
+		real length_value = con->get_stick_length(*selected_sticks->cbegin());
+		for (auto i = ++selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
+		{
+			if (length_value != con->get_stick_length(*i)) { length_equal = false; break; }
+		}
+		if (!length_equal) _length_text->ChangeValue(Utils::real_to_string(length_value));
+		else _length_text->ChangeValue("");
+	}
+
+	_strain_static->Show(con->simulation());
+	_strain_text->Show(con->simulation());
+	_force_static->Show(con->simulation());
+	_force_text->Show(con->simulation());
+	if (con->simulation())
+	{
+		//Setting strain
+		{
+			bool strain_equal = true;
+			real strain_value = con->get_stick_strain(*selected_sticks->cbegin());
+			for (auto i = ++selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
+			{
+				if (strain_value != con->get_stick_strain(*i)) { strain_equal = false; break; }
+			}
+			if (!strain_equal) _strain_text->ChangeValue(Utils::real_to_string(strain_value));
+			else _strain_text->ChangeValue("");
+		}
+		
+		//Setting force
+		{
+			bool force_equal = true;
+			real force_value = con->get_stick_force(*selected_sticks->cbegin());
+			for (auto i = ++selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
+			{
+				if (force_value != con->get_stick_force(*i)) { force_equal = false; break; }
+			}
+			if (!force_equal) _force_text->ChangeValue(Utils::real_to_string(force_value));
+			else _force_text->ChangeValue("");
+		}
+	}
+};
+
+void p6::StickBar::refresh_material()
+{
+	wxWindow *parent = _frame->side_panel.panel;
+	wxBoxSizer *sizer = _frame->side_panel.sizer;
+
+	//Destroy material choice
+	int c = _material_choice->GetSelection();
+	parent->Unbind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
+	_material_choice->Destroy();
+
+	//Create material choice
+	wxArrayString array;
+	array.Alloc(_frame->construction.get_material_count());
+	for (size_t i = 0; i < _frame->construction.get_material_count(); i++)
+		array.Add(_frame->construction.get_material_name(i));
+	_material_choice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, array);
+	parent->Bind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
+	_material_choice->SetSelection(c);
+};
+
+void p6::StickBar::hide()
+{};

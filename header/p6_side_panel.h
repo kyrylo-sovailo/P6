@@ -1,7 +1,11 @@
 #ifndef P6_SIDE_PANEL
 #define P6_SIDE_PANEL
 
-#include "../header/p6_material_bar.h"
+#include "p6_node_bar.h"
+#include "p6_stick_bar.h"
+#include "p6_force_bar.h"
+#include "p6_material_bar.h"
+#include "p6_move_bar.h"
 #include <wx/wx.h>
 
 namespace p6
@@ -18,11 +22,20 @@ namespace p6
 			material
 		};
 
-		wxPanel *_panel;
-		wxBoxSizer *_sizer;
+		Frame *_frame;
 		Mode _mode = Mode::material;
+		NodeBar _node_bar;
+		StickBar _stick_bar;
+		ForceBar _force_bar;
+		MaterialBar _material_bar;
+		MoveBar _move_bar;
+		void _switch(Mode mode);
 
-		friend MaterialBar;
+	public:
+		wxPanel *panel;
+		wxBoxSizer *sizer;
+		SidePanel(Frame *frame);
+		void refresh();
 	};
 };
 

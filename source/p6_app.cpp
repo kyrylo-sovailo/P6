@@ -7,6 +7,5 @@ bool p6::App::OnInit()
 {
 	wxImage::AddHandler(new wxPNGHandler);
 	_frame = new Frame;
-	_frame->Show(true);
 	return true;
 }

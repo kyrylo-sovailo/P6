@@ -4,7 +4,6 @@
 #include "p6_common.h"
 #include "p6_construction.h"
 #include <string>
-
 #include <wx/wx.h>
 #include <wx/file.h>
 

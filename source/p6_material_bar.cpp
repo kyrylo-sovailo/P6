@@ -1,158 +1,132 @@
-#include "../header/p6_material_bar.h"
+#include "../header/p6_frame.h"
+#include "../header/p6_utils.h"
+#include "../header/p6_linear_material.h"
+#include "../header/p6_nonlinear_material.h"
 
-p6::MaterialBar::MaterialBar()
+void p6::MaterialBar::_on_material_choice(wxCommandEvent &e)
 {
-	//Material choice
-	_name_choice = new wxChoice(_side_panel, wxID_ANY);
-	Bind(wxEVT_CHOICE, &Frame::OnMaterialChoice, this, _name_choice->GetId());
+	int c = _material_choice->GetSelection();
+	if (c == wxNOT_FOUND)
+	{
+		_name_text->ChangeValue("");
+		_nonlinear_check->SetValue(false);
+		_formula_text->ChangeValue("");
+	}
+	else
+	{
+		Construction *con = &_frame->construction;
+		_name_text->ChangeValue(con->get_material_name(c));
+		bool linear = (con->get_material_type(c) == Material::Type::linear);
+		_nonlinear_check->SetValue(!linear);
+		_formula_text->ChangeValue(linear ?
+			Utils::real_to_string(con->get_material_modulus(c)) :
+			con->get_material_formula(c));
+	}
+};
+
+void p6::MaterialBar::_on_material_name(wxCommandEvent &e)
+{};
+
+void p6::MaterialBar::_on_material_new(wxCommandEvent &e)
+{
+	_material_choice->SetSelection(wxNOT_FOUND);
+	_name_text->ChangeValue("");
+	_nonlinear_check->SetValue(false);
+	_formula_text->ChangeValue("");
+};
+
+void p6::MaterialBar::_on_material_apply(wxCommandEvent &e)
+{
+	try
+	{
+		Construction *con = &_frame->construction;
+		String name = _name_text->GetValue().ToStdString();
+		String formula = _formula_text->GetValue().ToStdString();
+		if (_nonlinear_check->GetValue()) con->create_nonlinear_material(name, formula);
+		else con->create_linear_material(name, Utils::string_to_real(formula));
+	}
+	catch (std::exception &e)
+	{
+		wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame);
+	}
+};
+
+void p6::MaterialBar::_on_material_delete(wxCommandEvent &e)
+{
+	int c = _material_choice->GetSelection();
+	if (c != wxNOT_FOUND)
+	{
+		Construction *con = &_frame->construction;
+		for (size_t i = 0; i < con->get_stick_count(); i++)
+		{
+			if (con->get_stick_material(i) == c) con->set_stick_material(i, c);
+		}
+		con->delete_material(c);
+	}
+};
+
+void p6::MaterialBar::_on_material_nonlinear(wxCommandEvent &e)
+{};
+
+void p6::MaterialBar::_on_material_formula(wxCommandEvent &e)
+{};
+
+p6::MaterialBar::MaterialBar(Frame *frame)
+{
+	_frame = frame;
+	wxWindow *parent = frame->side_panel.panel;
+
+	//Name static text
+	_name_static = new wxStaticText(parent, wxID_ANY, "Name:");
 	//Name edit
-	_sizer->Add(new wxStaticText(_side_panel, wxID_ANY, "Name:"), 0, wxLEFT | wxEXPAND, 10);
-	_name_edit = new wxTextCtrl(_side_panel, wxID_ANY);
-	_sizer->Add(_name_edit, 0, wxALL | wxEXPAND, 10);
-	Bind(wxEVT_TEXT, &Frame::OnMaterialName, this, _name_edit->GetId());
+	_name_text = new wxTextCtrl(parent, wxID_ANY);
+	parent->Bind(wxEVT_TEXT, &MaterialBar::_on_material_name, this, _name_text->GetId());
 	//Nonlinear check
-	_nonlinear_check = new wxCheckBox(_side_panel, wxID_ANY, "Non-linear");
-	_sizer->Add(_nonlinear_check, 0, wxALL, 10);
-	Bind(wxEVT_CHECKBOX, &Frame::OnMaterialNonlinear, this, _nonlinear_check->GetId());
+	_nonlinear_check = new wxCheckBox(parent, wxID_ANY, "Non-linear");
+	parent->Bind(wxEVT_CHECKBOX, &MaterialBar::_on_material_nonlinear, this, _nonlinear_check->GetId());
 	//Formula edit
-	_sizer->Add(new wxStaticText(_side_panel, wxID_ANY, "Modulus / formula:"), 0, wxLEFT | wxEXPAND, 10);
-	_formula_edit = new wxTextCtrl(_side_panel, wxID_ANY);
-	_sizer->Add(_formula_edit, 0, wxALL | wxEXPAND, 10);
-	Bind(wxEVT_TEXT, &Frame::OnMaterialFormula, this, _formula_edit->GetId());
+	_formula_text = new wxTextCtrl(parent, wxID_ANY);
+	parent->Bind(wxEVT_TEXT, &MaterialBar::_on_material_formula, this, _formula_text->GetId());
 	//New-accept-delete buttons
-	wxBoxSizer *hsizer = new wxBoxSizer(wxHORIZONTAL);
-	_new_button = new wxButton(_side_panel, wxID_ANY, "New");
-	hsizer->Add(_new_button, 1, wxALL, 10);
-	Bind(wxEVT_BUTTON, &Frame::OnMaterialNew, this, _new_button->GetId());
-	_apply_button = new wxButton(_side_panel, wxID_ANY, "Apply");
-	hsizer->Add(_apply_button, 1, wxALL, 10);
-	Bind(wxEVT_BUTTON, &Frame::OnMaterialApply, this, _apply_button->GetId());
-	_delete_button = new wxButton(_side_panel, wxID_ANY, "Delete");
-	hsizer->Add(_delete_button, 1, wxALL, 10);
-	Bind(wxEVT_BUTTON, &Frame::OnMaterialDelete, this, _delete_button->GetId());
-	_sizer->Add(hsizer, 0, wxALL | wxEXPAND, 10);
+	_buttons_sizer = new wxBoxSizer(wxHORIZONTAL);
+	wxButton *button = new wxButton(parent, wxID_ANY, "New");
+	_buttons_sizer->Add(button, 1, wxALL, 10);
+	parent->Bind(wxEVT_BUTTON, &MaterialBar::_on_material_new, this, button->GetId());
+	button = new wxButton(parent, wxID_ANY, "Apply");
+	_buttons_sizer->Add(button, 1, wxALL, 10);
+	parent->Bind(wxEVT_BUTTON, &MaterialBar::_on_material_apply, this, button->GetId());
+	button = new wxButton(parent, wxID_ANY, "Delete");
+	_buttons_sizer->Add(button, 1, wxALL, 10);
+	parent->Bind(wxEVT_BUTTON, &MaterialBar::_on_material_delete, this, button->GetId());
 };
 
 void p6::MaterialBar::show()
 {
-	_sizer = new wxBoxSizer(wxVERTICAL);
-	//Material choice
-	_sizer->Add(new wxStaticText(_side_panel, wxID_ANY, "Material:"), 0, wxLEFT | wxEXPAND, 10);
-	_name_choice = new wxChoice(_side_panel, wxID_ANY);
-	_sizer->Add(_name_choice, 0, wxALL | wxEXPAND, 10);
-	Bind(wxEVT_CHOICE, &Frame::OnMaterialChoice, this, _name_choice->GetId());
-	//Name edit
-	_sizer->Add(new wxStaticText(_side_panel, wxID_ANY, "Name:"), 0, wxLEFT | wxEXPAND, 10);
-	_name_edit = new wxTextCtrl(_side_panel, wxID_ANY);
-	_sizer->Add(_name_edit, 0, wxALL | wxEXPAND, 10);
-	Bind(wxEVT_TEXT, &Frame::OnMaterialName, this, _name_edit->GetId());
-	//Nonlinear check
-	_nonlinear_check = new wxCheckBox(_side_panel, wxID_ANY, "Non-linear");
-	_sizer->Add(_nonlinear_check, 0, wxALL, 10);
-	Bind(wxEVT_CHECKBOX, &Frame::OnMaterialNonlinear, this, _nonlinear_check->GetId());
-	//Formula edit
-	_sizer->Add(new wxStaticText(_side_panel, wxID_ANY, "Modulus / formula:"), 0, wxLEFT | wxEXPAND, 10);
-	_formula_edit = new wxTextCtrl(_side_panel, wxID_ANY);
-	_sizer->Add(_formula_edit, 0, wxALL | wxEXPAND, 10);
-	Bind(wxEVT_TEXT, &Frame::OnMaterialFormula, this, _formula_edit->GetId());
-	//New-accept-delete buttons
-	wxBoxSizer *hsizer = new wxBoxSizer(wxHORIZONTAL);
-	_new_button = new wxButton(_side_panel, wxID_ANY, "New");
-	hsizer->Add(_new_button, 1, wxALL, 10);
-	Bind(wxEVT_BUTTON, &Frame::OnMaterialNew, this, _new_button->GetId());
-	_apply_button = new wxButton(_side_panel, wxID_ANY, "Apply");
-	hsizer->Add(_apply_button, 1, wxALL, 10);
-	Bind(wxEVT_BUTTON, &Frame::OnMaterialApply, this, _apply_button->GetId());
-	_delete_button = new wxButton(_side_panel, wxID_ANY, "Delete");
-	hsizer->Add(_delete_button, 1, wxALL, 10);
-	Bind(wxEVT_BUTTON, &Frame::OnMaterialDelete, this, _delete_button->GetId());
-	_sizer->Add(hsizer, 0, wxALL | wxEXPAND, 10);
+	wxBoxSizer *sizer = _frame->side_panel.sizer;
+	sizer->Add(_material_choice, 0, wxLEFT | wxEXPAND, 10);
+	sizer->Add(_name_static, 0, wxLEFT | wxEXPAND, 10);
+	sizer->Add(_name_text, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_nonlinear_check, 0, wxALL, 10);
+	sizer->Add(_formula_static, 0, wxLEFT | wxEXPAND, 10);
+	sizer->Add(_formula_text, 0, wxLEFT | wxEXPAND, 10);
+	sizer->Add(_buttons_sizer, 0, wxALL | wxEXPAND, 10);
 };
 
-void p6::MaterialBar::OnMaterialChoice(wxCommandEvent &e)
+void p6::MaterialBar::refresh()
 {
-	int c = _name_choice->GetSelection();
-	if (c == wxNOT_FOUND)
-	{
-		_name_edit->ChangeValue("");
-		_nonlinear_check->SetValue(false);
-		_formula_edit->ChangeValue("");
-	}
-	else
-	{
-		Material *material = _task.materials[c];
-		_name_edit->ChangeValue(material->name());
-		bool linear = material->type() == Material::Type::linear;
-		_nonlinear_check->SetValue(!linear);
-		_formula_edit->ChangeValue(linear ?
-			Utils::real_to_string(((LinearMaterial*)material)->modulus()) :
-			((NonlinearMaterial*)material)->formula());
-	}
+	wxWindow *parent = _frame->side_panel.panel;
+
+	wxArrayString array;
+	array.Alloc(_frame->construction.get_material_count());
+	for (size_t i = 0; i < _frame->construction.get_material_count(); i++)
+		array.Add(_frame->construction.get_material_name(i));
+	_material_choice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, array);
+	parent->Bind(wxEVT_CHOICE, &MaterialBar::_on_material_choice, this, _material_choice->GetId());
 };
 
-void p6::MaterialBar::OnMaterialName(wxCommandEvent &e)
+void p6::MaterialBar::hide()
 {
-
-};
-
-void p6::MaterialBar::OnMaterialNew(wxCommandEvent &e)
-{
-	_name_choice->SetSelection(wxNOT_FOUND);
-	_name_edit->ChangeValue("");
-	_nonlinear_check->SetValue(false);
-	_formula_edit->ChangeValue("");
-};
-
-void p6::MaterialBar::OnMaterialApply(wxCommandEvent &e)
-{
-	try
-	{
-		String name = _name_edit->GetValue().ToStdString();
-		String formula = _formula_edit->GetValue().ToStdString();
-		Material *material;
-		if (_nonlinear_check->GetValue())
-			material = new NonlinearMaterial(name, formula);
-		else
-			material = new LinearMaterial(name, Utils::string_to_real(formula));
-
-		int c = _name_choice->FindString(name, true);
-		if (c == wxNOT_FOUND)
-		{
-			_task.materials.push_back(material);
-			_refresh_materials();
-		}
-		else
-		{
-			delete _task.materials[c];
-			_task.materials[c] = material;
-		}
-	}
-	catch (std::exception &e)
-	{
-		wxMessageBox(e.what(), "Error", wxICON_ERROR, this);
-	}
-};
-
-void p6::MaterialBar::OnMaterialDelete(wxCommandEvent &e)
-{
-	int c = _name_choice->GetSelection();
-	if (c != wxNOT_FOUND)
-	{
-		for (unsigned int i = 0; i < _task.sticks.size(); i++)
-		{
-			if (_task.sticks[i].material_index == c)
-				_task.sticks[i].material_index = (unsigned int)-1;
-		}
-		delete _task.materials[c];
-		_task.materials.erase(_task.materials.cbegin() + c);
-		_refresh_materials();
-	}
-};
-
-void p6::MaterialBar::OnMaterialNonlinear(wxCommandEvent &e)
-{
-};
-
-void p6::MaterialBar::OnMaterialFormula(wxCommandEvent &e)
-{
+	wxWindow *parent = _frame->side_panel.panel;
+	parent->Unbind(wxEVT_CHOICE, &MaterialBar::_on_material_choice, this, _material_choice->GetId());
+	delete _material_choice;
 };

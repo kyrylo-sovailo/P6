@@ -13,9 +13,6 @@ namespace p6
 
 	///Square of real number
 	real sqr(real x);
-
-	///Square of signed integer number
-	int sqr(int x);
 };
 
 #endif

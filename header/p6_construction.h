@@ -45,12 +45,6 @@ namespace p6
 			real y;
 		};
 
-		static const char * const _simulation_message;
-		static const char * const _no_simulation_message;
-		static const char * const _nan_message;
-		static const char * const _node_message;
-		static const char * const _material_message;
-
 		std::vector<Node> _node;
 		std::vector<Stick> _stick;
 		std::vector<Force> _force;
@@ -64,7 +58,7 @@ namespace p6
 		void set_node_x(size_t node, real x);
 		void set_node_y(size_t node, real y);
 		void set_node_free(size_t node, bool free);
-		size_t get_node_count();							const;
+		size_t get_node_count()								const;
 		real get_node_x(size_t node)						const;
 		real get_node_y(size_t node)						const;
 		bool get_node_free(size_t node)						const;
@@ -90,6 +84,7 @@ namespace p6
 		size_t get_force_count()							const;
 		real get_force_x(size_t force)						const;
 		real get_force_y(size_t force)						const;
+		size_t get_force_node(size_t force)					const;
 
 		//Material
 		size_t create_linear_material(const String &name, real modulus);

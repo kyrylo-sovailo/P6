@@ -58,6 +58,11 @@ void p6::Construction::set_node_free(size_t node, bool free)
 	_node[node].free = free;
 };
 
+size_t p6::Construction::get_node_count() const
+{
+	return _node.size();
+};
+
 p6::real p6::Construction::get_node_x(size_t node) const
 {
 	return _simulation ? _node[node].x_simulated : _node[node].x;
@@ -114,6 +119,11 @@ void p6::Construction::set_stick_area(size_t stick, real area)
 	_stick[stick].area = area;
 };
 
+size_t p6::Construction::get_stick_count() const
+{
+	return _stick.size();
+};
+
 size_t p6::Construction::get_stick_material(size_t stick) const
 {
 	return _stick[stick].material;
@@ -124,7 +134,7 @@ p6::real p6::Construction::get_stick_area(size_t stick) const
 	return _stick[stick].area;
 };
 
-void p6::Construction::get_stick_node(size_t stick, size_t node[2])
+void p6::Construction::get_stick_node(size_t stick, size_t node[2]) const
 {
 	node[0] = _stick[stick].node[0];
 	node[1] = _stick[stick].node[1];
@@ -150,18 +160,22 @@ p6::real p6::Construction::get_stick_strain(size_t stick) const
 
 p6::real p6::Construction::get_stick_force(size_t stick) const
 {
+	assert(_simulation);
 	return _stick[stick].area * _material[_stick[stick].material]->stress(get_stick_strain(stick));
 };
 
 size_t p6::Construction::create_force(size_t node, real x, real y)
 {
 	assert(!_simulation);
-	if (x != x || y != y) throw std::runtime_error(_nan_message); 
-	if (node >= _node.size()) throw std::runtime_error(_node_message);
+	assert(x == x);
+	assert(y == y);
+	assert(node < _node.size());
 	Force force;
 	force.node = node;
 	force.x = x;
 	force.y = y;
+	_force.push_back(force);
+	return _force.size() - 1;
 };
 
 void p6::Construction::delete_force(size_t force)
@@ -184,6 +198,11 @@ void p6::Construction::set_force_y(size_t force, real y)
 	_force[force].y = y;
 };
 
+size_t p6::Construction::get_force_count() const
+{
+	return _force.size();
+};
+
 p6::real p6::Construction::get_force_x(size_t force) const
 {
 	return _force[force].x;
@@ -192,6 +211,11 @@ p6::real p6::Construction::get_force_x(size_t force) const
 p6::real p6::Construction::get_force_y(size_t force) const
 {
 	return _force[force].y;
+};
+
+size_t p6::Construction::get_force_node(size_t force) const
+{
+	return _force[force].node;
 };
 
 size_t p6::Construction::create_linear_material(const String &name, real modulus)
@@ -217,6 +241,11 @@ void p6::Construction::delete_material(size_t material)
 	}
 	delete _material[material];
 	_material.erase(_material.cbegin() + material);
+};
+
+size_t p6::Construction::get_material_count() const
+{
+	return _material.size();
 };
 
 p6::String p6::Construction::get_material_name(size_t material) const
