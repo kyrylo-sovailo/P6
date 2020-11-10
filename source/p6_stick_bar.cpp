@@ -85,6 +85,7 @@ void p6::StickBar::show()
 	sizer->Add(_strain_text, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_force_static, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_force_text, 0, wxALL | wxEXPAND, 10);
+	sizer->ShowItems(true);
 }
 
 void p6::StickBar::refresh()
@@ -163,22 +164,29 @@ void p6::StickBar::refresh()
 void p6::StickBar::refresh_materials()
 {
 	wxWindow *parent = _frame->side_panel()->panel();
-	wxBoxSizer *sizer = _frame->side_panel()->sizer();
 
-	//Destroy material choice
+	//Unbind old
 	int c = _material_choice->GetSelection();
 	parent->Unbind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
-	_material_choice->Destroy();
 
-	//Create material choice
+	//Create new
 	wxArrayString array;
 	array.Alloc(_frame->construction()->get_material_count());
 	for (uint i = 0; i < _frame->construction()->get_material_count(); i++)
 		array.Add(_frame->construction()->get_material_name(i));
-	_material_choice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, array);
-	parent->Bind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
+	wxChoice *newchoice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, array);
+
+	//Replace
+	_frame->side_panel()->sizer()->Replace(_material_choice, newchoice);
+	_material_choice->Destroy();
+	_material_choice = newchoice;
+
+	//Bind new
 	_material_choice->SetSelection(c);
+	parent->Bind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
 }
 
 void p6::StickBar::hide()
-{}
+{
+	_frame->side_panel()->sizer()->ShowItems(false);
+}

@@ -23,6 +23,9 @@ void p6::MenuBar::_on_menu_file_load(wxCommandEvent &e)
 			_frame->main_panel()->selected_nodes.clear();
 			_frame->main_panel()->selected_sticks.clear();
 			_frame->main_panel()->selected_forces.clear();
+			_frame->main_panel()->need_refresh();
+			_frame->side_panel()->refresh();
+			_frame->side_panel()->refresh_materials();
 		}
 		catch (std::exception &e)
 		{
@@ -57,6 +60,9 @@ void p6::MenuBar::_on_menu_file_import(wxCommandEvent &e)
 			{
 				_frame->main_panel()->selected_forces.insert(i);
 			}
+			_frame->main_panel()->need_refresh();
+			_frame->side_panel()->refresh();
+			_frame->side_panel()->refresh_materials();
 		}
 		catch (std::exception &e)
 		{
@@ -136,7 +142,7 @@ void p6::MenuBar::_on_menu_export_jpeg(wxCommandEvent &e)
 
 void p6::MenuBar::_on_menu_help(wxCommandEvent &e)
 {
-	wxMessageBox("Pray to Pinkie Pie to make it work", "Help", wxICON_INFORMATION, _frame->frame());
+	wxMessageBox("The developer highly recommends praying to Pinkie Pie to make it work", "Help", wxICON_INFORMATION, _frame->frame());
 }
 
 p6::MenuBar::MenuBar(Frame *frame)

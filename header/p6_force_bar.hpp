@@ -25,7 +25,6 @@ namespace p6
 		wxTextCtrl *_x_text;
 		wxStaticText *_y_static;
 		wxTextCtrl *_y_text;
-		bool _shown;
 		
 		void _on_force_x(wxCommandEvent &e);
 		void _on_force_y(wxCommandEvent &e);

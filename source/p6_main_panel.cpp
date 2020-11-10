@@ -241,6 +241,8 @@ void p6::MainPanel::select_items()
 		if (selected_nodes.count(con->get_force_node(i)))
 			selected_forces.insert(i);
 	}
+
+	need_refresh();
 }
 
 void p6::MainPanel::need_refresh()

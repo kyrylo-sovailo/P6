@@ -18,6 +18,7 @@ void p6::NodeBar::_on_free(wxCommandEvent &e)
 	_fixed_check->SetValue(!_free_check->GetValue());
 	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		_frame->construction()->set_node_free(*i, _free_check->GetValue());
+	_frame->main_panel()->need_refresh();
 }
 
 void p6::NodeBar::_on_fixed(wxCommandEvent &e)
@@ -26,6 +27,7 @@ void p6::NodeBar::_on_fixed(wxCommandEvent &e)
 	_free_check->SetValue(!_fixed_check->GetValue());
 	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		_frame->construction()->set_node_free(*i, _free_check->GetValue());
+	_frame->main_panel()->need_refresh();
 }
 
 void p6::NodeBar::_on_x(wxCommandEvent &e)
@@ -40,6 +42,7 @@ void p6::NodeBar::_on_x(wxCommandEvent &e)
 			coord.x = x;
 			_frame->construction()->set_node_coord(*i, coord);
 		}
+		_frame->main_panel()->need_refresh();
 	}
 }
 
@@ -55,6 +58,7 @@ void p6::NodeBar::_on_y(wxCommandEvent &e)
 			coord.y = y;
 			_frame->construction()->set_node_coord(*i, coord);
 		}
+		_frame->main_panel()->need_refresh();
 	}
 }
 
@@ -96,6 +100,7 @@ void p6::NodeBar::show()
 	sizer->Add(_x_text, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_y_static, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_y_text, 0, wxALL | wxEXPAND, 10);
+	sizer->ShowItems(true);
 }
 
 void p6::NodeBar::refresh()
@@ -141,4 +146,6 @@ void p6::NodeBar::refresh()
 }
 
 void p6::NodeBar::hide()
-{}
+{
+	_frame->side_panel()->sizer()->ShowItems(false);
+}

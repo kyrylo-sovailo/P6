@@ -29,13 +29,13 @@ namespace p6
 		wxTextCtrl *_formula_text;
 		wxBoxSizer *_buttons_sizer;
 
-		void _on_material_choice(wxCommandEvent &e);
-		void _on_material_name(wxCommandEvent &e);
-		void _on_material_new(wxCommandEvent &e);
-		void _on_material_apply(wxCommandEvent &e);
-		void _on_material_delete(wxCommandEvent &e);
-		void _on_material_nonlinear(wxCommandEvent &e);
-		void _on_material_formula(wxCommandEvent &e);
+		void _on_choice(wxCommandEvent &e);
+		void _on_name(wxCommandEvent &e);
+		void _on_new(wxCommandEvent &e);
+		void _on_apply(wxCommandEvent &e);
+		void _on_delete(wxCommandEvent &e);
+		void _on_nonlinear(wxCommandEvent &e);
+		void _on_formula(wxCommandEvent &e);
 
 	public:
 		MaterialBar(Frame *frame);

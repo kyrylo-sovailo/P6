@@ -20,7 +20,6 @@ void p6::Frame::_on_paint(wxPaintEvent &e)
 void p6::Frame::_on_size(wxSizeEvent &e)
 {
 	_main_panel.need_refresh();
-	_frame->Layout();
 }
 
 p6::Frame::Frame() :

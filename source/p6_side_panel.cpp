@@ -43,18 +43,22 @@ void p6::SidePanel::_switch(Mode mode)
 	switch (mode)
 	{
 	case Mode::node:
+		_node_bar.refresh();
 		_node_bar.show();
 		break;
 
 	case Mode::stick:
+		_stick_bar.refresh();
 		_stick_bar.show();
 		break;
 
 	case Mode::force:
+		_force_bar.refresh();
 		_force_bar.show();
 		break;
 
 	case Mode::move:
+		_move_bar.refresh();
 		_move_bar.show();
 		break;
 
@@ -115,4 +119,11 @@ void p6::SidePanel::refresh()
 	{
 		_switch(Mode::material);
 	}
+}
+
+void p6::SidePanel::refresh_materials()
+{
+	_stick_bar.refresh_materials();
+	_material_bar.refresh_materials();
+	_panel->Layout();
 }

@@ -23,6 +23,7 @@ void p6::ForceBar::_on_force_x(wxCommandEvent &e)
 			Coord direction = _frame->construction()->get_force_direction(*i);
 			direction.x = x;
 			_frame->construction()->set_force_direction(*i, direction);
+			_frame->main_panel()->need_refresh();
 		}
 	}
 }
@@ -37,6 +38,7 @@ void p6::ForceBar::_on_force_y(wxCommandEvent &e)
 			Coord direction = _frame->construction()->get_force_direction(*i);
 			direction.y = y;
 			_frame->construction()->set_force_direction(*i, direction);
+			_frame->main_panel()->need_refresh();
 		}
 	}
 }
@@ -44,7 +46,6 @@ void p6::ForceBar::_on_force_y(wxCommandEvent &e)
 p6::ForceBar::ForceBar(Frame *frame)
 {
 	_frame = frame;
-	_shown = false;
 	wxWindow *parent = frame->side_panel()->panel();
 	
 	//Static x
@@ -68,8 +69,6 @@ p6::ForceBar::ForceBar(Frame *frame)
 
 void p6::ForceBar::show()
 {
-	assert(!_shown);
-	_shown = true;
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
 	sizer->Add(_x_static, 0, wxEXPAND | wxALL, 10);
 	sizer->Add(_x_text, 0, wxEXPAND | wxALL, 10);
@@ -80,7 +79,6 @@ void p6::ForceBar::show()
 
 void p6::ForceBar::refresh()
 {
-	assert(_shown);
 	std::set<uint> *selected_forces = &_frame->main_panel()->selected_forces;
 
 	//Set x
@@ -110,7 +108,5 @@ void p6::ForceBar::refresh()
 
 void p6::ForceBar::hide()
 {
-	assert(_shown);
-	_shown = false;
 	_frame->side_panel()->sizer()->ShowItems(false);
 }
