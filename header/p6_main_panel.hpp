@@ -22,34 +22,44 @@ namespace p6
 	{
 	private:
 		Frame *_frame;
-		wxPoint _real_to_pixel(real x, real y, wxPoint offset) const;
+		wxPanel *_panel;
+		
+		wxPoint _real_to_pixel(Coord coord, wxPoint offset)	const;
 
 	public:
-		enum class Item
+		///Structure representing item type and it's inddex
+		struct Item
 		{
-			no,
-			node,
-			stick,
-			force
+			enum class Type
+			{
+				no,
+				node,
+				stick,
+				force
+			};
+
+			Type type;
+			uint index;
 		};
 
-		wxPanel *panel;
 		real pixels_in_meter = 30.0;
 		real meters_in_newton = 1.0;
-		real center_x = 0.0;
-		real center_y = 0.0;
+		Coord center;
 		std::set<uint> selected_nodes;
 		std::set<uint> selected_sticks;
 		std::set<uint> selected_forces;
+		wxPoint selected_area_points[2];
+		bool selected_area_draw;
 
 		MainPanel(Frame *frame);
-		wxSize size()										const;
-		wxPoint offset()									const;
-		void render(wxDC *dc, wxPoint offset)				const;
-		Item get_item(real x, real y, uint *index)		const;
-		void pixel_to_real(wxPoint point, real *x, real *y)	const;
-		void select_area(real ax, real ay, real bx, real by);
-		void refresh();
+		wxPanel *panel();
+		wxSize size()							const;
+		wxPoint offset()						const;
+		void render(wxDC *dc, wxPoint offset)	const;
+		Item get_item(wxPoint a)				const;
+		Coord pixel_to_real(wxPoint point)		const;
+		void select_items();
+		void need_refresh();
 	};
 }
 

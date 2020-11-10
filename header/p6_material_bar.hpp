@@ -28,6 +28,7 @@ namespace p6
 		wxStaticText *_formula_static;
 		wxTextCtrl *_formula_text;
 		wxBoxSizer *_buttons_sizer;
+
 		void _on_material_choice(wxCommandEvent &e);
 		void _on_material_name(wxCommandEvent &e);
 		void _on_material_new(wxCommandEvent &e);
@@ -39,7 +40,7 @@ namespace p6
 	public:
 		MaterialBar(Frame *frame);
 		void show();
-		void refresh();
+		void refresh_materials();
 		void hide();
 	};
 }

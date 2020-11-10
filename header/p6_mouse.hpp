@@ -12,6 +12,7 @@
 #define P6_MOUSE_BAR
 
 #include "p6_common.hpp"
+#include "p6_main_panel.hpp"
 #include <wx/wx.h>
 
 namespace p6
@@ -22,23 +23,20 @@ namespace p6
 	{
 	private:
 		Frame *_frame;
-		int _wheel;						//Used by scaling nodes
-		int _wheel_force;				//Used by scaling forces
-		real _old_x;					//Used by moving view
-		real _old_y;					//Used by moving view
+		bool _pressed;
+		MainPanel::Item _pressed_item;
+		wxPoint _pressed_point;
+		bool _moving;
+		int _wheel;
+		int _wheel_force;
+		Coord _old_center;
+
 		void _on_left_down(wxMouseEvent &e);
 		void _on_left_up(wxMouseEvent &e);
-		void _on_right_down(wxMouseEvent &e);
-		void _on_right_up(wxMouseEvent &e);
 		void _on_move(wxMouseEvent &e);
 		void _on_wheel(wxMouseEvent &e);
 
 	public:
-		bool moving;					//Used to decide if moving ot clicking
-		MainPanel::Item selected_item;	//Used by clicking
-		uint selected_index;			//Used by clicking
-		wxPoint point_down;				//Used by dragging and area
-		wxPoint point_up;				//Used by dragging and area
 		Mouse(Frame *frame);
 	};
 }

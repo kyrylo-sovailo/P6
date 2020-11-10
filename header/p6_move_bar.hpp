@@ -40,7 +40,6 @@ namespace p6
 		void show();
 		void refresh();
 		void hide();
-
 	};
 }
 

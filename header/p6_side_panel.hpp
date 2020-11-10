@@ -20,6 +20,8 @@
 
 namespace p6
 {
+	class Frame;
+
 	class SidePanel
 	{
 	private:
@@ -33,19 +35,23 @@ namespace p6
 		};
 
 		Frame *_frame;
-		Mode _mode = Mode::material;
+		wxPanel *_panel;
+		wxBoxSizer *_sizer;
 		NodeBar _node_bar;
 		StickBar _stick_bar;
 		ForceBar _force_bar;
 		MaterialBar _material_bar;
 		MoveBar _move_bar;
+		Mode _mode = Mode::material;
+
 		void _switch(Mode mode);
 
 	public:
-		wxPanel *panel;
-		wxBoxSizer *sizer;
 		SidePanel(Frame *frame);
+		wxPanel *panel();
+		wxBoxSizer *sizer();
 		void refresh();
+		void refresh_materials();
 	};
 }
 

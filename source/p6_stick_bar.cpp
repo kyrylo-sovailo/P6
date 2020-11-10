@@ -8,35 +8,35 @@
 	Reinventing bicycles since 2020
 */
 
+#include "../header/p6_side_panel.hpp"
 #include "../header/p6_frame.hpp"
-#include "../header/p6_utils.hpp"
 
 void p6::StickBar::_on_area(wxCommandEvent &e)
 {
-	std::set<uint> *selected_sticks = &_frame->main_panel.selected_sticks;
-	real a = Utils::string_to_real(_area_text->GetValue().ToStdString());
+	std::set<uint> *selected_sticks = &_frame->main_panel()->selected_sticks;
+	real a = string_to_real(_area_text->GetValue().ToStdString());
 	if (a == a && a > 0.0)
 	{
 		for (auto i = selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
-			_frame->construction.set_stick_area(*i, a);
+			_frame->construction()->set_stick_area(*i, a);
 	}
 }
 
 void p6::StickBar::_on_material(wxCommandEvent &e)
 {
-	std::set<uint> *selected_sticks = &_frame->main_panel.selected_sticks;
+	std::set<uint> *selected_sticks = &_frame->main_panel()->selected_sticks;
 	int c = _material_choice->GetSelection();
 	if (c != wxNOT_FOUND)
 	{
 		for (auto i = selected_sticks->cbegin(); i != selected_sticks->cend(); i++)
-			_frame->construction.set_stick_material(*i, c);
+			_frame->construction()->set_stick_material(*i, c);
 	}
 }
 
 p6::StickBar::StickBar(Frame *frame)
 {
 	_frame = frame;
-	wxWindow *parent = frame->side_panel.panel;
+	wxWindow *parent = frame->side_panel()->panel();
 
 	//Material static text
 	_material_static = new wxStaticText(parent, wxID_ANY, "Material:");
@@ -74,7 +74,7 @@ p6::StickBar::StickBar(Frame *frame)
 
 void p6::StickBar::show()
 {
-	wxBoxSizer *sizer = _frame->side_panel.sizer;
+	wxBoxSizer *sizer = _frame->side_panel()->sizer();
 	sizer->Add(_material_static, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_material_choice, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_area_static, 0, wxALL | wxEXPAND, 10);
@@ -89,8 +89,8 @@ void p6::StickBar::show()
 
 void p6::StickBar::refresh()
 {
-	std::set<uint> *selected_sticks = &_frame->main_panel.selected_sticks;
-	Construction *con = &_frame->construction;
+	std::set<uint> *selected_sticks = &_frame->main_panel()->selected_sticks;
+	Construction *con = _frame->construction();
 
 	//Setting material
 	{
@@ -112,7 +112,7 @@ void p6::StickBar::refresh()
 		{
 			if (area_value != con->get_stick_area(*i)) { area_equal = false; break; }
 		}
-		if (area_equal) _area_text->ChangeValue(Utils::real_to_string(area_value));
+		if (area_equal) _area_text->ChangeValue(real_to_string(area_value));
 		else _area_text->ChangeValue("");
 	}
 
@@ -124,7 +124,7 @@ void p6::StickBar::refresh()
 		{
 			if (length_value != con->get_stick_length(*i)) { length_equal = false; break; }
 		}
-		if (!length_equal) _length_text->ChangeValue(Utils::real_to_string(length_value));
+		if (!length_equal) _length_text->ChangeValue(real_to_string(length_value));
 		else _length_text->ChangeValue("");
 	}
 
@@ -142,7 +142,7 @@ void p6::StickBar::refresh()
 			{
 				if (strain_value != con->get_stick_strain(*i)) { strain_equal = false; break; }
 			}
-			if (!strain_equal) _strain_text->ChangeValue(Utils::real_to_string(strain_value));
+			if (!strain_equal) _strain_text->ChangeValue(real_to_string(strain_value));
 			else _strain_text->ChangeValue("");
 		}
 		
@@ -154,16 +154,16 @@ void p6::StickBar::refresh()
 			{
 				if (force_value != con->get_stick_force(*i)) { force_equal = false; break; }
 			}
-			if (!force_equal) _force_text->ChangeValue(Utils::real_to_string(force_value));
+			if (!force_equal) _force_text->ChangeValue(real_to_string(force_value));
 			else _force_text->ChangeValue("");
 		}
 	}
 }
 
-void p6::StickBar::refresh_material()
+void p6::StickBar::refresh_materials()
 {
-	wxWindow *parent = _frame->side_panel.panel;
-	wxBoxSizer *sizer = _frame->side_panel.sizer;
+	wxWindow *parent = _frame->side_panel()->panel();
+	wxBoxSizer *sizer = _frame->side_panel()->sizer();
 
 	//Destroy material choice
 	int c = _material_choice->GetSelection();
@@ -172,9 +172,9 @@ void p6::StickBar::refresh_material()
 
 	//Create material choice
 	wxArrayString array;
-	array.Alloc(_frame->construction.get_material_count());
-	for (uint i = 0; i < _frame->construction.get_material_count(); i++)
-		array.Add(_frame->construction.get_material_name(i));
+	array.Alloc(_frame->construction()->get_material_count());
+	for (uint i = 0; i < _frame->construction()->get_material_count(); i++)
+		array.Add(_frame->construction()->get_material_name(i));
 	_material_choice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, array);
 	parent->Bind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
 	_material_choice->SetSelection(c);

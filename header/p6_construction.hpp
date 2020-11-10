@@ -31,14 +31,12 @@ namespace p6
 		struct StaticNode
 		{
 			bool free;
-			real x;
-			real y;
+			Coord coord;
 		};
 
 		struct Node : StaticNode
 		{
-			real x_simulated;
-			real y_simulated;
+			Coord coord_simulated;
 		};
 
 		struct Stick
@@ -51,8 +49,7 @@ namespace p6
 		struct Force
 		{
 			uint node;
-			real x;
-			real y;
+			Coord direction;
 		};
 
 		std::vector<Node> _node;
@@ -63,14 +60,12 @@ namespace p6
 
 	public:
 		//Node
-		uint create_node(real x, real y, bool free);
+		uint create_node(Coord coord, bool free);
 		void delete_node(uint node);
-		void set_node_x(uint node, real x);
-		void set_node_y(uint node, real y);
+		void set_node_coord(uint node, Coord coord);
 		void set_node_free(uint node, bool free);
 		uint get_node_count()							const;
-		real get_node_x(uint node)						const;
-		real get_node_y(uint node)						const;
+		Coord get_node_coord(uint node)					const;
 		bool get_node_free(uint node)					const;
 		
 		//Stick
@@ -87,18 +82,16 @@ namespace p6
 		real get_stick_force(uint stick)				const;
 
 		//Force
-		uint create_force(uint node, real x, real y);
+		uint create_force(uint node, Coord direction);
 		void delete_force(uint force);
-		void set_force_x(uint force, real x);
-		void set_force_y(uint force, real y);
+		void set_force_direction(uint force, Coord coord);
 		uint get_force_count()							const;
-		real get_force_x(uint force)					const;
-		real get_force_y(uint force)					const;
+		Coord get_force_direction(uint force)			const;
 		uint get_force_node(uint force)					const;
 
 		//Material
-		uint create_linear_material(const String &name, real modulus);
-		uint create_nonlinear_material(const String &name, const String &formula);
+		uint create_linear_material(const String name, real modulus);
+		uint create_nonlinear_material(const String name, const String formula);
 		void delete_material(uint material);
 		uint get_material_count()						const;
 		String get_material_name(uint material)			const;
@@ -107,9 +100,9 @@ namespace p6
 		String get_material_formula(uint material)		const;
 		
 		//Maintanance
-		void save(const String &filepath)				const;
-		void load(const String &filepath);
-		void import(const String &filepath);
+		void save(const String filepath)				const;
+		void load(const String filepath);
+		void import(const String filepath);
 		void simulate(bool sim);
 		bool simulation()								const;
 		~Construction();

@@ -8,8 +8,8 @@
 	Reinventing bicycles since 2020
 */
 
+#include "../header/p6_material_bar.hpp"
 #include "../header/p6_frame.hpp"
-#include "../header/p6_utils.hpp"
 #include "../header/p6_linear_material.hpp"
 #include "../header/p6_nonlinear_material.hpp"
 
@@ -24,12 +24,12 @@ void p6::MaterialBar::_on_material_choice(wxCommandEvent &e)
 	}
 	else
 	{
-		Construction *con = &_frame->construction;
+		Construction *con = _frame->construction();
 		_name_text->ChangeValue(con->get_material_name(c));
 		bool linear = (con->get_material_type(c) == Material::Type::linear);
 		_nonlinear_check->SetValue(!linear);
 		_formula_text->ChangeValue(linear ?
-			Utils::real_to_string(con->get_material_modulus(c)) :
+			real_to_string(con->get_material_modulus(c)) :
 			con->get_material_formula(c));
 	}
 }
@@ -49,15 +49,15 @@ void p6::MaterialBar::_on_material_apply(wxCommandEvent &e)
 {
 	try
 	{
-		Construction *con = &_frame->construction;
+		Construction *con = _frame->construction();
 		String name = _name_text->GetValue().ToStdString();
 		String formula = _formula_text->GetValue().ToStdString();
 		if (_nonlinear_check->GetValue()) con->create_nonlinear_material(name, formula);
-		else con->create_linear_material(name, Utils::string_to_real(formula));
+		else con->create_linear_material(name, string_to_real(formula));
 	}
 	catch (std::exception &e)
 	{
-		wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame);
+		wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame());
 	}
 }
 
@@ -66,7 +66,7 @@ void p6::MaterialBar::_on_material_delete(wxCommandEvent &e)
 	int c = _material_choice->GetSelection();
 	if (c != wxNOT_FOUND)
 	{
-		Construction *con = &_frame->construction;
+		Construction *con = _frame->construction();
 		for (uint i = 0; i < con->get_stick_count(); i++)
 		{
 			if (con->get_stick_material(i) == c) con->set_stick_material(i, c);
@@ -84,7 +84,7 @@ void p6::MaterialBar::_on_material_formula(wxCommandEvent &e)
 p6::MaterialBar::MaterialBar(Frame *frame)
 {
 	_frame = frame;
-	wxWindow *parent = frame->side_panel.panel;
+	wxWindow *parent = frame->side_panel()->panel();
 
 	//Name static text
 	_name_static = new wxStaticText(parent, wxID_ANY, "Name:");
@@ -112,7 +112,7 @@ p6::MaterialBar::MaterialBar(Frame *frame)
 
 void p6::MaterialBar::show()
 {
-	wxBoxSizer *sizer = _frame->side_panel.sizer;
+	wxBoxSizer *sizer = _frame->side_panel()->sizer();
 	sizer->Add(_material_choice, 0, wxLEFT | wxEXPAND, 10);
 	sizer->Add(_name_static, 0, wxLEFT | wxEXPAND, 10);
 	sizer->Add(_name_text, 0, wxALL | wxEXPAND, 10);
@@ -122,21 +122,21 @@ void p6::MaterialBar::show()
 	sizer->Add(_buttons_sizer, 0, wxALL | wxEXPAND, 10);
 }
 
-void p6::MaterialBar::refresh()
+void p6::MaterialBar::refresh_materials()
 {
-	wxWindow *parent = _frame->side_panel.panel;
+	wxWindow *parent = _frame->side_panel()->panel();
 
 	wxArrayString array;
-	array.Alloc(_frame->construction.get_material_count());
-	for (uint i = 0; i < _frame->construction.get_material_count(); i++)
-		array.Add(_frame->construction.get_material_name(i));
+	array.Alloc(_frame->construction()->get_material_count());
+	for (uint i = 0; i < _frame->construction()->get_material_count(); i++)
+		array.Add(_frame->construction()->get_material_name(i));
 	_material_choice = new wxChoice(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, array);
 	parent->Bind(wxEVT_CHOICE, &MaterialBar::_on_material_choice, this, _material_choice->GetId());
 }
 
 void p6::MaterialBar::hide()
 {
-	wxWindow *parent = _frame->side_panel.panel;
+	wxWindow *parent = _frame->side_panel()->panel();
 	parent->Unbind(wxEVT_CHOICE, &MaterialBar::_on_material_choice, this, _material_choice->GetId());
 	delete _material_choice;
 }

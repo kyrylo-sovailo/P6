@@ -29,7 +29,7 @@ namespace p6
 			nonlinear
 		};
 
-		const String &name() const;						///< returns name of material
+		String name() const;							///< returns name of material
 		virtual Type type() const noexcept = 0;			///< Returns type of material
 		virtual real stress(real strain) const = 0;		///< Returns stress in dependence of strain
 		virtual real derivative(real strain) const = 0;	///< Returns derivative of stress by strain

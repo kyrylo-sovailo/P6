@@ -9,37 +9,41 @@
 */
 
 #include "../header/p6_frame.hpp"
-#include "../header/p6_utils.hpp"
 
-wxPoint p6::MainPanel::_real_to_pixel(real x, real y, wxPoint offset) const
+wxPoint p6::MainPanel::_real_to_pixel(Coord coord, wxPoint offset) const
 {
 	return offset + wxPoint(
-		panel->GetSize().x / 2 + (x - center_x) * pixels_in_meter,
-		panel->GetSize().y / 2 - (y - center_y) * pixels_in_meter);
+		_panel->GetSize().x / 2 + (coord.x - center.x) * pixels_in_meter,
+		_panel->GetSize().y / 2 - (coord.y - center.y) * pixels_in_meter);
 }
 
 p6::MainPanel::MainPanel(Frame *frame)
 {
 	_frame = frame;
-	panel = new wxPanel(frame->frame);
-	panel->Show(false);
-	frame->sizer->Add(panel, 4, wxEXPAND | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
+	_panel = new wxPanel(frame->frame());
+	_panel->Show(false);
+	frame->sizer()->Add(_panel, 4, wxEXPAND | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
+}
+
+wxPanel *p6::MainPanel::panel()
+{
+	return _panel;
 }
 
 wxSize p6::MainPanel::size() const
 {
-	return panel->GetSize();
+	return _panel->GetSize();
 }
 
 wxPoint p6::MainPanel::offset() const
 {
-	return panel->GetClientAreaOrigin();
+	return _panel->GetClientAreaOrigin();
 }
 
 void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 {
-	bool sim = _frame->construction.simulation();
-	Construction *con = &_frame->construction;
+	bool sim = _frame->construction()->simulation();
+	Construction *con = _frame->construction();
 
 	//Calculate max strain
 	real max_strain = 0.0;
@@ -49,10 +53,10 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 	}
 
 	//Draw sticks
-	for (uint i = 0; i < _frame->construction.get_stick_count(); i++)
+	for (uint i = 0; i < _frame->construction()->get_stick_count(); i++)
 	{
-		uint node_index[2];
-		_frame->construction.get_stick_node(i, node_index);
+		uint node[2];
+		_frame->construction()->get_stick_node(i, node);
 
 		wxColour colour;
 		if (sim)
@@ -78,9 +82,7 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 		wxPoint points[2];
 		for (uint j = 0; j < 2; j++)
 		{
-			real x = con->get_node_x(node_index[j]);
-			real y = con->get_node_y(node_index[j]); 
-			points[j] = _real_to_pixel(x, y, offset);
+			points[j] = _real_to_pixel(con->get_node_coord(node[j]), offset);
 		}
 		if (selected_sticks.count(i))
 		{
@@ -94,22 +96,22 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 	//Draw forces
 	for (uint i = 0; i < con->get_force_count(); i++)
 	{
-		const real a = 30.0 * (M_PI / 180.0);
-		const real c = 0.1;
+		const real angle = 30.0 * (M_PI / 180.0);
+		const real coef = 0.1;
 
-		real ax = con->get_node_x(con->get_force_node(i));
-		real ay = con->get_node_y(con->get_force_node(i));
-		real bax = con->get_force_x(i) * meters_in_newton;
-		real bay = con->get_force_y(i) * meters_in_newton;
-		real bcx = c * (cos(a) * bax - sin(a) * bay);
-		real bcy = c * (sin(a) * bax + cos(a) * bay);
-		real bdx = c * (cos(a) * bax + sin(a) * bay);
-		real bdy = c * (-sin(a) * bax + cos(a) * bay);
+		Coord a = con->get_node_coord(con->get_force_node(i));
+		Coord ba = con->get_force_direction(i) * meters_in_newton;
+		Coord bc = Coord(
+			cos(angle) * ba.x - sin(angle) * ba.y,
+			sin(angle) * ba.x + cos(angle) * ba.y) * coef;
+		Coord bd = Coord(
+			cos(angle) * ba.x + sin(angle) * ba.y,
+			-sin(angle) * ba.x + cos(angle) * ba.y) * coef;
 
-		wxPoint pa = _real_to_pixel(ax, ay, offset);
-		wxPoint pb = _real_to_pixel(ax - bax, ay - bay, offset);
-		wxPoint pc = _real_to_pixel(ax - bax + bcx, ay - bay + bcy, offset);
-		wxPoint pd = _real_to_pixel(ax - bax + bdx, ay - bay + bdy, offset);
+		wxPoint pa = _real_to_pixel(a, offset);
+		wxPoint pb = _real_to_pixel(a - ba, offset);
+		wxPoint pc = _real_to_pixel(a - ba + bc, offset);
+		wxPoint pd = _real_to_pixel(a - ba + bd, offset);
 		if (selected_forces.count(i))
 		{
 			dc->SetPen(wxPen(wxColour(255, 255, 0), 2));
@@ -126,7 +128,7 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 	//Draw points
 	for (uint i = 0; i < con->get_node_count(); i++)
 	{
-		wxPoint point = _real_to_pixel(con->get_node_x(i), con->get_node_y(i), offset);
+		wxPoint point = _real_to_pixel(con->get_node_coord(i), offset);
 		if (selected_nodes.count(i)) dc->SetPen(wxPen(wxColour(255, 255, 0), 1));
 		else dc->SetPen(wxPen(wxColour(0, 0, 0), 1));
 		if (con->get_node_free(i)) dc->SetBrush(wxBrush(wxColour(128, 128, 128)));
@@ -135,32 +137,30 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 	}
 
 	//Draw selection rect
-	Mouse *mouse = &_frame->mouse;
-	if (_frame->toolbar.tool == ToolBar::Tool::area
-		&& mouse->moving
-		&& mouse->selected_item != Item::node)
+	if (selected_area_draw)
 	{
 		dc->SetPen(wxPen(wxColour(0, 0, 0), 1, wxPENSTYLE_SHORT_DASH));
-		dc->DrawLine(mouse->point_down, wxPoint(mouse->point_up.x, mouse->point_down.y));
-		dc->DrawLine(mouse->point_up, wxPoint(mouse->point_up.x, mouse->point_down.y));
-		dc->DrawLine(mouse->point_down, wxPoint(mouse->point_down.x, mouse->point_up.y));
-		dc->DrawLine(mouse->point_up, wxPoint(mouse->point_down.x, mouse->point_up.y));
+		dc->DrawLine(selected_area_points[1], wxPoint(selected_area_points[0].x, selected_area_points[1].y));
+		dc->DrawLine(wxPoint(selected_area_points[0].x, selected_area_points[1].y), selected_area_points[0]);
+		dc->DrawLine(selected_area_points[0], wxPoint(selected_area_points[1].x, selected_area_points[0].y));
+		dc->DrawLine(wxPoint(selected_area_points[1].x, selected_area_points[0].y), selected_area_points[1]);
 	}
 }
 
-p6::MainPanel::Item p6::MainPanel::get_item(real x, real y, uint *index) const
+p6::MainPanel::Item p6::MainPanel::get_item(wxPoint point) const
 {
-	const Construction *con = &_frame->construction;
+	const Construction *con = _frame->construction();
+	Coord coord = pixel_to_real(point);
 
 	//Checking for clicking node
 	for (uint i = 0; i < con->get_node_count(); i++)
 	{
-		if (pixels_in_meter * sqrt(
-			sqr(con->get_node_x(i) - x) +
-			sqr(con->get_force_y(i) - y)) < 5.0)
+		if (coord.distance(con->get_node_coord(i)) * pixels_in_meter < 5.0)
 		{
-			*index = i;
-			return Item::node;
+			Item item;
+			item.type = Item::Type::node;
+			item.index = i;
+			return item;
 		}
 	}
 
@@ -169,17 +169,15 @@ p6::MainPanel::Item p6::MainPanel::get_item(real x, real y, uint *index) const
 	{
 		uint node[2];
 		con->get_stick_node(i, node);
-		real node_x[2], node_y[2];
-		for (uint j = 0; j < 2; j++)
+		Coord coords[2];
+		coords[0] = con->get_node_coord(node[0]);
+		coords[1] = con->get_node_coord(node[1]);
+		if (coord.distance(coords) *pixels_in_meter < 5.0)
 		{
-			node_x[j] = con->get_node_x(node[j]);
-			node_y[j] = con->get_node_y(node[j]);
-		}
-		
-		if (Utils::distance_to_line(x, y, node_x, node_y) *pixels_in_meter < 5.0)
-		{
-			*index = i;
-			return Item::stick;
+			Item item;
+			item.type = Item::Type::stick;
+			item.index = i;
+			return item;
 		}
 	}
 
@@ -187,43 +185,46 @@ p6::MainPanel::Item p6::MainPanel::get_item(real x, real y, uint *index) const
 	for (uint i = 0; i < con->get_force_count(); i++)
 	{
 		uint node = con->get_force_node(i);
-		real node_x[2], node_y[2];
-		node_x[0] = con->get_node_x(node);
-		node_y[0] = con->get_node_y(node);
-		node_x[1] = node_x[0] + con->get_force_x(i) * meters_in_newton;
-		node_y[1] = node_y[0] + con->get_force_y(i) * meters_in_newton;
-
-		if (Utils::distance_to_line(x, y, node_x, node_y) *pixels_in_meter < 5.0)
+		Coord coords[2];
+		coords[0] = con->get_node_coord(node);
+		coords[1] = coords[0] + con->get_force_direction(i) * meters_in_newton;
+		if (coord.distance(coords) * pixels_in_meter < 5.0)
 		{
-			*index = i;
-			return Item::force;
+			Item item;
+			item.type = Item::Type::force;
+			item.index = i;
+			return item;
 		}
 	}
 
-	return Item::no;
+	Item item;
+	item.type = Item::Type::no;
+	return item;
 }
 
-void p6::MainPanel::pixel_to_real(wxPoint point, real *x, real *y) const
+p6::Coord p6::MainPanel::pixel_to_real(wxPoint point) const
 {
-	assert(x != nullptr);
-	assert(y != nullptr);
-	*x = center_x + (real)(point.x - panel->GetSize().x / 2) / pixels_in_meter;
-	*y = center_y + (real)(panel->GetSize().y / 2 - point.y) / pixels_in_meter;
+	return Coord(
+		center.x + (real)(point.x - _panel->GetSize().x / 2) / pixels_in_meter,
+		center.y + (real)(_panel->GetSize().y / 2 - point.y) / pixels_in_meter);
 }
 
-void p6::MainPanel::select_area(real ax, real ay, real bx, real by)
+void p6::MainPanel::select_items()
 {
 	selected_nodes.clear();
 	selected_sticks.clear();
-	selected_forces.clear();	
-	if (bx < ax) { real b = ax; ax = bx; bx = b; }
-	if (by < ay) { real b = ay; ay = by; by = b; }
-	const Construction *con = &_frame->construction;
+	selected_forces.clear();
+	Coord coords[2];
+	coords[0] = pixel_to_real(selected_area_points[0]);
+	coords[1] = pixel_to_real(selected_area_points[1]);
+	if (coords[0].x > coords[1].x) { wxCoord b = coords[1].x; coords[1].x = coords[0].x; coords[0].x = b; }
+	if (coords[0].y > coords[1].y) { wxCoord b = coords[1].y; coords[1].y = coords[0].y; coords[0].y = b; }
+	const Construction *con = _frame->construction();
 
 	for (uint i = 0; i < con->get_node_count(); i++)
 	{
-		if(ax < con->get_node_x(i) && con->get_node_x(i) < bx
-		&& ay < con->get_node_y(i) && con->get_node_y(i) < by)
+		if(coords[0].x < con->get_node_coord(i).x && con->get_node_coord(i).x < coords[1].x
+		&& coords[0].y < con->get_node_coord(i).y && con->get_node_coord(i).y < coords[1].y)
 			selected_nodes.insert(i);
 	}
 
@@ -242,7 +243,7 @@ void p6::MainPanel::select_area(real ax, real ay, real bx, real by)
 	}
 }
 
-void p6::MainPanel::refresh()
+void p6::MainPanel::need_refresh()
 {
-	panel->Refresh();
+	_panel->Refresh();
 }

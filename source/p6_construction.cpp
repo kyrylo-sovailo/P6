@@ -9,23 +9,22 @@
 */
 
 #include "../header/p6_construction.hpp"
+#include "../header/p6_indexer.hpp"
 #include "../header/p6_linear_material.hpp"
 #include "../header/p6_nonlinear_material.hpp"
-#include "../header/p6_indexer.hpp"
 #include <wx/file.h>
 #include <Eigen>
 #include <cassert>
 #include <cmath>
 
-p6::uint p6::Construction::create_node(real x, real y, bool free)
+p6::uint p6::Construction::create_node(Coord coord, bool free)
 {
 	assert(!_simulation);
-	assert(x == x);
-	assert(y == y);
+	assert(coord.x == coord.x);
+	assert(coord.y == coord.y);
 	Node node;
 	node.free = free;
-	node.x = x;
-	node.y = y;
+	node.coord = coord;
 	_node.push_back(node);
 	return _node.size() - 1;
 }
@@ -48,18 +47,12 @@ void p6::Construction::delete_node(uint node)
 	_node.erase(_node.cbegin() + node);
 }
 
-void p6::Construction::set_node_x(uint node, real x)
+void p6::Construction::set_node_coord(uint node, Coord coord)
 {
 	assert(!_simulation);
-	assert(x == x);
-	_node[node].x = x;
-}
-
-void p6::Construction::set_node_y(uint node, real y)
-{
-	assert(!_simulation);
-	assert(y == y);
-	_node[node].y = y;
+	assert(coord.x == coord.x);
+	assert(coord.y == coord.y);
+	_node[node].coord = coord;
 }
 
 void p6::Construction::set_node_free(uint node, bool free)
@@ -73,14 +66,9 @@ p6::uint p6::Construction::get_node_count() const
 	return _node.size();
 }
 
-p6::real p6::Construction::get_node_x(uint node) const
+p6::Coord p6::Construction::get_node_coord(uint node) const
 {
-	return _simulation ? _node[node].x_simulated : _node[node].x;
-}
-
-p6::real p6::Construction::get_node_y(uint node) const
-{
-	return _simulation ? _node[node].y_simulated : _node[node].y;
+	return _simulation ? _node[node].coord_simulated : _node[node].coord;
 }
 
 bool p6::Construction::get_node_free(uint node) const
@@ -154,8 +142,8 @@ p6::real p6::Construction::get_stick_length(uint stick) const
 {
 	const Node *node[2] = { &_node[_stick[stick].node[0]], &_node[_stick[stick].node[1]] };
 	return _simulation ?
-		sqrt(sqr(node[0]->x_simulated - node[1]->x_simulated) + sqr(node[0]->y_simulated - node[1]->y_simulated)) : 
-		sqrt(sqr(node[0]->x - node[1]->x) + sqr(node[0]->y - node[1]->y));
+		node[0]->coord_simulated.distance(node[1]->coord_simulated) :
+		node[0]->coord.distance(node[1]->coord);
 }
 
 p6::real p6::Construction::get_stick_strain(uint stick) const
@@ -163,8 +151,8 @@ p6::real p6::Construction::get_stick_strain(uint stick) const
 	assert(_simulation);
 	const Node *node[2] = { &_node[_stick[stick].node[0]], &_node[_stick[stick].node[1]] };
 	return (
-		sqrt(sqr(node[0]->x_simulated - node[1]->x_simulated) + sqr(node[0]->y_simulated - node[1]->y_simulated)) /
-		sqrt(sqr(node[0]->x - node[1]->x) + sqr(node[0]->y - node[1]->y))
+		node[0]->coord_simulated.distance(node[1]->coord_simulated) /
+		node[0]->coord.distance(node[1]->coord)
 		) - 1.0;
 }
 
@@ -174,16 +162,15 @@ p6::real p6::Construction::get_stick_force(uint stick) const
 	return _stick[stick].area * _material[_stick[stick].material]->stress(get_stick_strain(stick));
 }
 
-p6::uint p6::Construction::create_force(uint node, real x, real y)
+p6::uint p6::Construction::create_force(uint node, Coord direction)
 {
 	assert(!_simulation);
-	assert(x == x);
-	assert(y == y);
+	assert(direction.x == direction.x);
+	assert(direction.y == direction.y);
 	assert(node < _node.size());
 	Force force;
 	force.node = node;
-	force.x = x;
-	force.y = y;
+	force.direction = direction;
 	_force.push_back(force);
 	return _force.size() - 1;
 }
@@ -194,18 +181,12 @@ void p6::Construction::delete_force(uint force)
 	_force.erase(_force.cbegin() + force);
 }
 
-void p6::Construction::set_force_x(uint force, real x)
+void p6::Construction::set_force_direction(uint force, Coord direction)
 {
 	assert(!_simulation);
-	assert(x == x);
-	_force[force].x = x;
-}
-
-void p6::Construction::set_force_y(uint force, real y)
-{
-	assert(!_simulation);
-	assert(y == y);
-	_force[force].y = y;
+	assert(direction.x == direction.x);
+	assert(direction.y == direction.y);
+	_force[force].direction = direction;
 }
 
 p6::uint p6::Construction::get_force_count() const
@@ -213,14 +194,9 @@ p6::uint p6::Construction::get_force_count() const
 	return _force.size();
 }
 
-p6::real p6::Construction::get_force_x(uint force) const
+p6::Coord p6::Construction::get_force_direction(uint force) const
 {
-	return _force[force].x;
-}
-
-p6::real p6::Construction::get_force_y(uint force) const
-{
-	return _force[force].y;
+	return _force[force].direction;
 }
 
 p6::uint p6::Construction::get_force_node(uint force) const
@@ -228,16 +204,37 @@ p6::uint p6::Construction::get_force_node(uint force) const
 	return _force[force].node;
 }
 
-p6::uint p6::Construction::create_linear_material(const String &name, real modulus)
+p6::uint p6::Construction::create_linear_material(const String name, real modulus)
 {
 	assert(!_simulation);
+	for (uint i = 0; i < _material.size(); i++)
+	{
+		if (name == _material[i]->name())
+		{
+			Material *material = new LinearMaterial(name, modulus);
+			delete _material[i];
+			_material[i] = material;
+			return i;
+		}
+	}
 	_material.push_back(new LinearMaterial(name, modulus));
 	return _material.size() - 1;
 }
 
-p6::uint p6::Construction::create_nonlinear_material(const String &name, const String &formula)
+p6::uint p6::Construction::create_nonlinear_material(const String name, const String formula)
 {
 	assert(!_simulation);
+	for (uint i = 0; i < _material.size(); i++)
+	{
+		if (name == _material[i]->name())
+		{
+			Material *material = new NonlinearMaterial(name, formula);
+			delete _material[i];
+			_material[i] = material;
+			return i;
+		}
+	}
+
 	_material.push_back(new NonlinearMaterial(name, formula));
 	return _material.size() - 1;
 }
@@ -280,7 +277,7 @@ p6::String p6::Construction::get_material_formula(uint material) const
 	return ((NonlinearMaterial*)_material[material])->formula();
 }
 
-void p6::Construction::save(const String &filepath) const
+void p6::Construction::save(const String filepath) const
 {
 	//Open file
 	wxFile file(filepath, wxFile::OpenMode::write);
@@ -340,7 +337,7 @@ void p6::Construction::save(const String &filepath) const
 	}
 }
 
-void p6::Construction::load(const String &filepath)
+void p6::Construction::load(const String filepath)
 {
 	//Open file
 	wxFile file(filepath, wxFile::OpenMode::read);
@@ -403,7 +400,7 @@ void p6::Construction::load(const String &filepath)
 	}
 }
 
-void p6::Construction::import(const String &filepath)
+void p6::Construction::import(const String filepath)
 {
 	//Open file
 	wxFile file(filepath, wxFile::OpenMode::read);
@@ -540,8 +537,8 @@ void p6::Construction::simulate(bool sim)
 	Eigen::Vector<real, Eigen::Dynamic> s(r.variable_number());
 	for (uint i = 0; i < free_to_node.size(); i++)
 	{
-		s(r.node_variable_x(i)) = _node[free_to_node[i]].x;
-		s(r.node_variable_y(i)) = _node[free_to_node[i]].y;
+		s(r.node_variable_x(i)) = _node[free_to_node[i]].coord.x;
+		s(r.node_variable_y(i)) = _node[free_to_node[i]].coord.y;
 	}
 
 	//Preallocating
@@ -558,7 +555,7 @@ void p6::Construction::simulate(bool sim)
 		real minforce = std::numeric_limits<real>::infinity();
 		for (uint i = 0; i < _force.size(); i++)
 		{
-			real newforce = sqrt(sqr(_force[i].x) + sqr(_force[i].y));
+			real newforce = sqrt(sqr(_force[i].direction.x) + sqr(_force[i].direction.y));
 			if (newforce < minforce) minforce = newforce;
 		}
 		tolerance = minforce / 1000.0;
@@ -577,8 +574,8 @@ void p6::Construction::simulate(bool sim)
 			if (_node[node].free)
 			{
 				uint free = node_to_free[node];
-				z(r.node_variable_x(free)) = _force[i].x;
-				z(r.node_variable_y(free)) = _force[i].y;
+				z(r.node_variable_x(free)) = _force[i].direction.x;
+				z(r.node_variable_y(free)) = _force[i].direction.y;
 			}
 		}
 		//Setting that forces of free _node do not depend from coordinates of free _node (zeroing derivative)
@@ -609,28 +606,29 @@ void p6::Construction::simulate(bool sim)
 		//Setting forces and derivatives for pairs of _node
 		for (uint i = 0; i < _stick.size(); i++)
 		{
-			//Getting coordinates of _node
+			//Getting delta between nodes
+			Coord delta;
 			const uint *node = _stick[i].node;
-			real x[2], y[2];
-			for (uint j = 0; j < 2; j++)
 			{
-				if (_node[node[j]].free)
+				Coord coord[2];
+				for (uint j = 0; j < 2; j++)
 				{
-					uint free = node_to_free[node[j]];
-					x[j] = s(r.node_variable_x(free));
-					y[j] = s(r.node_variable_y(free));
+					if (_node[node[j]].free)
+					{
+						uint free = node_to_free[node[j]];
+						coord[j].x = s(r.node_variable_x(free));
+						coord[j].y = s(r.node_variable_y(free));
+					}
+					else
+					{
+						coord[j] = _node[node[j]].coord;
+					}
 				}
-				else
-				{
-					x[j] = _node[node[j]].x;
-					y[j] = _node[node[j]].y;
-				}
+				delta = coord[1] - coord[0];
 			}
 			//Setting should-be-zero
 			const Material *material = _material[_stick[i].material];
-			real dx = x[1] - x[0];
-			real dy = y[1] - y[0];
-			real length = sqrt(sqr(dx) + sqr(dy));
+			real length = sqrt(sqr(delta.x) + sqr(delta.y));
 			real strain = length / lengths[i] - 1.0;
 			real force = _stick[i].area * material->stress(strain);
 			for (uint j = 0; j < 2; j++)
@@ -639,28 +637,28 @@ void p6::Construction::simulate(bool sim)
 				{
 					uint free = node_to_free[node[j]];
 					real sign = j == 0 ? 1.0 : -1.0;
-					z(r.node_variable_x(free)) += sign * force * dx / length;
-					z(r.node_variable_y(free)) += sign * force * dy / length;
+					z(r.node_variable_x(free)) += sign * force * delta.x / length;
+					z(r.node_variable_y(free)) += sign * force * delta.y / length;
 				}
 			}
 			//Setting derivative
-			real dldx0 = -dx / length;
+			real dldx0 = -delta.x / length;
 			real dfx0dx0 = _stick[i].area * (
-				material->stress(strain) * (-length - dldx0 * dx) / sqr(length) +
-				material->derivative(strain) * dldx0 * dx / (lengths[i] * length)
+				material->stress(strain) * (-length - dldx0 * delta.x) / sqr(length) +
+				material->derivative(strain) * dldx0 * delta.x / (lengths[i] * length)
 				);
 			real dfy0dx0 = _stick[i].area * (
-				material->stress(strain) * (-dldx0 * dy) / sqr(length) +
-				material->derivative(strain) * dldx0 * dy / (lengths[i] * length)
+				material->stress(strain) * (-dldx0 * delta.y) / sqr(length) +
+				material->derivative(strain) * dldx0 * delta.y / (lengths[i] * length)
 				);
-			real dldy0 = -dy / length;
+			real dldy0 = -delta.y / length;
 			real dfx0dy0 = _stick[i].area * (
-				material->stress(strain) * (-dldy0 * dx) / sqr(length) +
-				material->derivative(strain) * dldy0 * dx / (lengths[i] * length)
+				material->stress(strain) * (-dldy0 * delta.x) / sqr(length) +
+				material->derivative(strain) * dldy0 * delta.x / (lengths[i] * length)
 				);
 			real dfy0dy0 = _stick[i].area * (
-				material->stress(strain) * (-length - dldy0 * dy) / sqr(length) +
-				material->derivative(strain) * dldy0 * dy / (lengths[i] * length)
+				material->stress(strain) * (-length - dldy0 * delta.y) / sqr(length) +
+				material->derivative(strain) * dldy0 * delta.y / (lengths[i] * length)
 				);
 			for (uint j = 0; j < 2; j++)
 			{
@@ -715,19 +713,18 @@ void p6::Construction::simulate(bool sim)
 			for (uint i = 0; i < _stick.size(); i++)
 			{
 				const uint *node = _stick[i].node;
-				real x[2], y[2];
+				Coord coord[2];
 				for (uint j = 0; j < 2; j++)
 				{
 					if (_node[node[j]].free)
 					{
 						uint free = node_to_free[node[j]];
-						x[j] = s(r.node_variable_x(free));
-						y[j] = s(r.node_variable_y(free));
+						coord[j].x = s(r.node_variable_x(free));
+						coord[j].y = s(r.node_variable_y(free));
 					}
 					else
 					{
-						x[j] = _node[node[j]].x;
-						y[j] = _node[node[j]].y;
+						coord[j] = _node[node[j]].coord;
 					}
 				}
 				for (uint j = 0; j < 2; j++)
@@ -735,7 +732,7 @@ void p6::Construction::simulate(bool sim)
 					if (_node[node[j]].free)
 					{
 						uint free = node_to_free[node[j]];
-						real newcoef = sqrt(sqr(x[1] - x[0]) + sqr(y[1] - y[0])) /
+						real newcoef = coord[0].distance(coord[1]) /
 							sqrt(sqr(z(r.node_equation_fx(free))) + sqr(z(r.node_equation_fy(free))));
 						if (newcoef < flow_coef) flow_coef = newcoef;
 					}
@@ -748,8 +745,8 @@ void p6::Construction::simulate(bool sim)
 	//Setting node coordinates from state vector
 	for (uint i = 0; i < free_to_node.size(); i++)
 	{
-		_node[free_to_node[i]].x = s(r.node_variable_x(i));
-		_node[free_to_node[i]].y = s(r.node_variable_y(i));
+		_node[free_to_node[i]].coord_simulated.x = s(r.node_variable_x(i));
+		_node[free_to_node[i]].coord_simulated.y = s(r.node_variable_y(i));
 	}
 }
 

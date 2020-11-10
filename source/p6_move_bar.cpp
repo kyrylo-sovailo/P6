@@ -8,6 +8,7 @@
 	Reinventing bicycles since 2020
 */
 
+#include "../header/p6_move_bar.hpp"
 #include "../header/p6_frame.hpp"
 
 void p6::MoveBar::_on_anchor_x(wxCommandEvent &e)

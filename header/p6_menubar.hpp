@@ -24,6 +24,7 @@ namespace p6
 		Frame *_frame;
 		wxMenuBar *_menu;
 		String _file;
+
 		void _on_menu_file_load(wxCommandEvent &e);
 		void _on_menu_file_import(wxCommandEvent &e);
 		void _on_menu_file_save(wxCommandEvent &e);

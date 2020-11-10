@@ -8,52 +8,60 @@
 	Reinventing bicycles since 2020
 */
 
+#include "../header/p6_node_bar.hpp"
 #include "../header/p6_frame.hpp"
-#include "../header/p6_utils.hpp"
 #include <set>
 
 void p6::NodeBar::_on_free(wxCommandEvent &e)
 {
-	std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
+	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
 	_fixed_check->SetValue(!_free_check->GetValue());
 	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
-		_frame->construction.set_node_free(*i, _free_check->GetValue());
+		_frame->construction()->set_node_free(*i, _free_check->GetValue());
 }
 
 void p6::NodeBar::_on_fixed(wxCommandEvent &e)
 {
-	std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
+	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
 	_free_check->SetValue(!_fixed_check->GetValue());
 	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
-		_frame->construction.set_node_free(*i, _free_check->GetValue());
+		_frame->construction()->set_node_free(*i, _free_check->GetValue());
 }
 
 void p6::NodeBar::_on_x(wxCommandEvent &e)
 {
-	std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
-	real x = Utils::string_to_real(_x_text->GetValue().ToStdString());
+	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
+	real x = string_to_real(_x_text->GetValue().ToStdString());
 	if (x == x)
 	{
 		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
-			_frame->construction.set_node_x(*i, x);
+		{
+			Coord coord = _frame->construction()->get_node_coord(*i);
+			coord.x = x;
+			_frame->construction()->set_node_coord(*i, coord);
+		}
 	}
 }
 
 void p6::NodeBar::_on_y(wxCommandEvent &e)
 {
-	std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
-	real y = Utils::string_to_real(_y_text->GetValue().ToStdString());
+	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
+	real y = string_to_real(_y_text->GetValue().ToStdString());
 	if (y == y)
 	{
 		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
-			_frame->construction.set_node_y(*i, y);
+		{
+			Coord coord = _frame->construction()->get_node_coord(*i);
+			coord.y = y;
+			_frame->construction()->set_node_coord(*i, coord);
+		}
 	}
 }
 
 p6::NodeBar::NodeBar(Frame *frame)
 {
 	_frame = frame;
-	wxWindow *parent = _frame->side_panel.panel;
+	wxWindow *parent = _frame->side_panel()->panel();
 
 	//Free check
 	_free_check = new wxCheckBox(parent, wxID_ANY, "Free");
@@ -81,7 +89,7 @@ p6::NodeBar::NodeBar(Frame *frame)
 
 void p6::NodeBar::show()
 {
-	wxBoxSizer *sizer = _frame->side_panel.sizer;
+	wxBoxSizer *sizer = _frame->side_panel()->sizer();
 	sizer->Add(_free_check, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_fixed_check, 0, wxALL | wxEXPAND, 10);
 	sizer->Add(_x_static, 0, wxALL | wxEXPAND, 10);
@@ -92,8 +100,8 @@ void p6::NodeBar::show()
 
 void p6::NodeBar::refresh()
 {
-	Construction *con = &_frame->construction;
-	std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
+	Construction *con = _frame->construction();
+	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
 
 	//Setting free
 	{
@@ -110,24 +118,24 @@ void p6::NodeBar::refresh()
 	//Setting x
 	{
 		bool x_equal = true;
-		real x_value = con->get_node_x(*selected_nodes->cbegin());
+		real x_value = con->get_node_coord(*selected_nodes->cbegin()).x;
 		for (auto i = ++selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		{
-			if (x_value != con->get_node_x(*i)) { x_equal = false; break; }
+			if (x_value != con->get_node_coord(*i).x) { x_equal = false; break; }
 		}
-		if (x_equal) _x_text->ChangeValue(Utils::real_to_string(x_value));
+		if (x_equal) _x_text->ChangeValue(real_to_string(x_value));
 		else _x_text->ChangeValue("");
 	}
 
 	//Setting y
 	{
 		bool y_equal = true;
-		real y_value = con->get_node_y(*selected_nodes->cbegin());
+		real y_value = con->get_node_coord(*selected_nodes->cbegin()).y;
 		for (auto i = ++selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		{
-			if (y_value != con->get_node_y(*i)) { y_equal = false; break; }
+			if (y_value != con->get_node_coord(*i).y) { y_equal = false; break; }
 		}
-		if (y_equal) _y_text->ChangeValue(Utils::real_to_string(y_value));
+		if (y_equal) _y_text->ChangeValue(real_to_string(y_value));
 		else _y_text->ChangeValue("");
 	}
 }

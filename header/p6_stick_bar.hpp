@@ -11,11 +11,12 @@
 #ifndef P6_STICK_BAR
 #define P6_STICK_BAR
 
-#include "p6_frame.hpp"
 #include <wx/wx.h>
 
 namespace p6
 {
+	class Frame;
+
 	class StickBar
 	{
 	private:
@@ -30,6 +31,7 @@ namespace p6
 		wxTextCtrl *_strain_text;
 		wxStaticText *_force_static;
 		wxTextCtrl *_force_text;
+
 		void _on_area(wxCommandEvent &e);
 		void _on_material(wxCommandEvent &e);
 
@@ -37,7 +39,7 @@ namespace p6
 		StickBar(Frame *frame);
 		void show();
 		void refresh();
-		void refresh_material();
+		void refresh_materials();
 		void hide();
 	};
 }

@@ -24,19 +24,28 @@ namespace p6
 	class Frame
 	{
 	private:
+		wxFrame *_frame;
+		wxBoxSizer *_sizer;
+		ToolBar _toolbar;
+		MenuBar _menubar;
+		MainPanel _main_panel;
+		SidePanel _side_panel;
+		Mouse _mouse;
+		Construction _construction;
+
 		void _on_paint(wxPaintEvent &e);
 		void _on_size(wxSizeEvent &e);
 
 	public:
-		wxFrame *frame;
-		wxBoxSizer *sizer;
-		ToolBar toolbar;
-		MenuBar menubar;
-		MainPanel main_panel;
-		SidePanel side_panel;
-		Mouse mouse;
-		Construction construction;
 		Frame();
+		wxFrame *frame();
+		wxBoxSizer *sizer();
+		ToolBar *toolbar();
+		MenuBar *menubar();
+		MainPanel *main_panel();
+		SidePanel *side_panel();
+		Mouse *mouse();
+		Construction *construction();
 	};
 }
 

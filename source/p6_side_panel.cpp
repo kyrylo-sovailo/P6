@@ -8,6 +8,7 @@
 	Reinventing bicycles since 2020
 */
 
+#include "../header/p6_side_panel.hpp"
 #include "../header/p6_frame.hpp"
 
 void p6::SidePanel::_switch(Mode mode)
@@ -66,25 +67,35 @@ void p6::SidePanel::_switch(Mode mode)
 
 p6::SidePanel::SidePanel(Frame *frame) :
 	_frame(frame),
-	panel(new wxPanel(frame->frame, wxID_ANY)),
-	sizer(new wxBoxSizer(wxHORIZONTAL)),
+	_panel(new wxPanel(frame->frame(), wxID_ANY)),
+	_sizer(new wxBoxSizer(wxHORIZONTAL)),
 	_node_bar(frame),
 	_stick_bar(frame),
 	_force_bar(frame),
 	_material_bar(frame),
 	_move_bar(frame)
 {
-	panel->Show(false);
-	sizer->Add(panel, 4, wxEXPAND | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
+	_panel->Show(false);
+	_sizer->Add(_panel, 4, wxEXPAND | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
 	_material_bar.show();
+}
+
+wxPanel *p6::SidePanel::panel()
+{
+	return _panel;
+}
+
+wxBoxSizer *p6::SidePanel::sizer()
+{
+	return _sizer;
 }
 
 void p6::SidePanel::refresh()
 {
-	const std::set<uint> *selected_nodes = &_frame->main_panel.selected_nodes;
-	const std::set<uint> *selected_sticks = &_frame->main_panel.selected_sticks;
-	const std::set<uint> *selected_forces = &_frame->main_panel.selected_forces;
-	if (_frame->toolbar.tool == ToolBar::Tool::move)
+	const std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
+	const std::set<uint> *selected_sticks = &_frame->main_panel()->selected_sticks;
+	const std::set<uint> *selected_forces = &_frame->main_panel()->selected_forces;
+	if (_frame->toolbar()->tool() == ToolBar::Tool::move)
 	{
 		_switch(Mode::move);
 	}

@@ -10,7 +10,7 @@
 
 #include "../header/p6_material.hpp"
 
-const p6::String &p6::Material::name() const
+p6::String p6::Material::name() const
 {
 	return _name;
 }
