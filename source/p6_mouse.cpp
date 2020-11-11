@@ -21,6 +21,7 @@ void p6::Mouse::_on_left_down(wxMouseEvent &e)
 
 void p6::Mouse::_on_left_up(wxMouseEvent &e)
 {
+	_pressed = false;
 	if (!_moving && _pressed_item.type == MainPanel::Item::Type::node)
 	{
 		//Select node
@@ -59,6 +60,12 @@ void p6::Mouse::_on_left_up(wxMouseEvent &e)
 		else selected_forces->insert(_pressed_item.index);
 		_frame->main_panel()->need_refresh();
 		_frame->side_panel()->refresh();
+	}
+	else if (!_moving && _frame->toolbar()->tool() == ToolBar::Tool::node)
+	{
+		//Create node
+		_frame->construction()->create_node(_frame->main_panel()->pixel_to_real(e.GetPosition()), true);
+		_frame->main_panel()->need_refresh();
 	}
 	else if (_moving && _frame->toolbar()->tool() == ToolBar::Tool::area)
 	{
@@ -160,10 +167,9 @@ void p6::Mouse::_on_wheel(wxMouseEvent &e)
 	_frame->main_panel()->need_refresh();
 }
 
-p6::Mouse::Mouse(Frame *frame)
+p6::Mouse::Mouse(Frame *frame) : _frame(frame)
 {
-	_frame = frame;
-	wxWindow *parent = frame->main_panel()->panel();
+	wxWindow *parent = frame->frame();
 	parent->Bind(wxEVT_LEFT_DOWN, &Mouse::_on_left_down, this, parent->GetId());
 	parent->Bind(wxEVT_LEFT_UP, &Mouse::_on_left_up, this, parent->GetId());
 	parent->Bind(wxEVT_MOTION, &Mouse::_on_move, this, parent->GetId());

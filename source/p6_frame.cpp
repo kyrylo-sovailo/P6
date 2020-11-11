@@ -20,6 +20,7 @@ void p6::Frame::_on_paint(wxPaintEvent &e)
 void p6::Frame::_on_size(wxSizeEvent &e)
 {
 	_main_panel.need_refresh();
+	_frame->Layout();
 }
 
 p6::Frame::Frame() :
@@ -31,8 +32,10 @@ p6::Frame::Frame() :
 	_side_panel(this),
 	_mouse(this)
 {
+	_frame->SetSizer(_sizer);
 	_frame->Bind(wxEVT_PAINT, &Frame::_on_paint, this, _frame->GetId());
 	_frame->Bind(wxEVT_SIZE, &Frame::_on_size, this, _frame->GetId());
+	_frame->Show();
 }
 
 wxFrame *p6::Frame::frame()

@@ -43,9 +43,8 @@ void p6::ForceBar::_on_force_y(wxCommandEvent &e)
 	}
 }
 
-p6::ForceBar::ForceBar(Frame *frame)
+p6::ForceBar::ForceBar(Frame *frame) : _frame(frame)
 {
-	_frame = frame;
 	wxWindow *parent = frame->side_panel()->panel();
 	
 	//Static x
@@ -70,10 +69,10 @@ p6::ForceBar::ForceBar(Frame *frame)
 void p6::ForceBar::show()
 {
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
-	sizer->Add(_x_static, 0, wxEXPAND | wxALL, 10);
-	sizer->Add(_x_text, 0, wxEXPAND | wxALL, 10);
-	sizer->Add(_y_static, 0, wxEXPAND | wxALL, 10);
-	sizer->Add(_y_text, 0, wxEXPAND | wxALL, 10);
+	sizer->Add(_x_static,	0, wxEXPAND | wxALL, 10);
+	sizer->Add(_x_text,		0, wxEXPAND | wxALL, 10);
+	sizer->Add(_y_static,	0, wxEXPAND | wxALL, 10);
+	sizer->Add(_y_text,		0, wxEXPAND | wxALL, 10);
 	sizer->ShowItems(true);
 }
 

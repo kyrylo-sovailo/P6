@@ -72,15 +72,15 @@ void p6::SidePanel::_switch(Mode mode)
 p6::SidePanel::SidePanel(Frame *frame) :
 	_frame(frame),
 	_panel(new wxPanel(frame->frame(), wxID_ANY)),
-	_sizer(new wxBoxSizer(wxHORIZONTAL)),
+	_sizer(new wxBoxSizer(wxVERTICAL)),
 	_node_bar(frame),
 	_stick_bar(frame),
 	_force_bar(frame),
 	_material_bar(frame),
 	_move_bar(frame)
 {
-	_panel->Show(false);
-	_sizer->Add(_panel, 4, wxEXPAND | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
+	frame->sizer()->Add(_panel, 1, wxEXPAND, 0);
+	_panel->SetSizer(_sizer);
 	_material_bar.show();
 }
 

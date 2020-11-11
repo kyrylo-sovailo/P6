@@ -52,9 +52,11 @@ void p6::MaterialBar::_on_apply(wxCommandEvent &e)
 		Construction *con = _frame->construction();
 		String name = _name_text->GetValue().ToStdString();
 		String formula = _formula_text->GetValue().ToStdString();
-		if (_nonlinear_check->GetValue()) con->create_nonlinear_material(name, formula);
-		else con->create_linear_material(name, string_to_real(formula));
+		uint material = _nonlinear_check->GetValue() ?
+			con->create_nonlinear_material(name, formula) :
+			con->create_linear_material(name, string_to_real(formula));
 		_frame->side_panel()->refresh_materials();
+		_material_choice->SetSelection(material);
 	}
 	catch (std::exception &e)
 	{
@@ -83,13 +85,13 @@ void p6::MaterialBar::_on_nonlinear(wxCommandEvent &e)
 void p6::MaterialBar::_on_formula(wxCommandEvent &e)
 {}
 
-p6::MaterialBar::MaterialBar(Frame *frame)
+p6::MaterialBar::MaterialBar(Frame *frame) : _frame(frame)
 {
-	_frame = frame;
 	wxWindow *parent = frame->side_panel()->panel();
 
 	//Material choice
 	_material_choice = new wxChoice(parent, wxID_ANY);
+	parent->Bind(wxEVT_CHOICE, &MaterialBar::_on_choice, this, _material_choice->GetId());
 	//Name static text
 	_name_static = new wxStaticText(parent, wxID_ANY, "Name:");
 	//Name edit
@@ -98,6 +100,8 @@ p6::MaterialBar::MaterialBar(Frame *frame)
 	//Nonlinear check
 	_nonlinear_check = new wxCheckBox(parent, wxID_ANY, "Non-linear");
 	parent->Bind(wxEVT_CHECKBOX, &MaterialBar::_on_nonlinear, this, _nonlinear_check->GetId());
+	//Formula static text
+	_formula_static = new wxStaticText(parent, wxID_ANY, "Modulus / formula:");
 	//Formula edit
 	_formula_text = new wxTextCtrl(parent, wxID_ANY);
 	parent->Bind(wxEVT_TEXT, &MaterialBar::_on_formula, this, _formula_text->GetId());
@@ -117,13 +121,13 @@ p6::MaterialBar::MaterialBar(Frame *frame)
 void p6::MaterialBar::show()
 {
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
-	sizer->Add(_material_choice, 0, wxLEFT | wxEXPAND, 10);
-	sizer->Add(_name_static, 0, wxLEFT | wxEXPAND, 10);
-	sizer->Add(_name_text, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_nonlinear_check, 0, wxALL, 10);
-	sizer->Add(_formula_static, 0, wxLEFT | wxEXPAND, 10);
-	sizer->Add(_formula_text, 0, wxLEFT | wxEXPAND, 10);
-	sizer->Add(_buttons_sizer, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_material_choice,	0, wxALL | wxEXPAND, 10);
+	sizer->Add(_name_static,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_name_text,			0, wxALL | wxEXPAND, 10);
+	sizer->Add(_nonlinear_check,	0, wxALL | wxEXPAND, 10);
+	sizer->Add(_formula_static,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_formula_text,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_buttons_sizer,		0, wxALL | wxEXPAND, 10);
 	sizer->ShowItems(true);
 }
 
@@ -132,7 +136,8 @@ void p6::MaterialBar::refresh_materials()
 	wxWindow *parent = _frame->side_panel()->panel();
 
 	//Unbind old
-	int c = _material_choice->GetSelection();
+	int choice = _material_choice->GetSelection();
+	bool shown = _material_choice->IsShown();
 	parent->Unbind(wxEVT_CHOICE, &MaterialBar::_on_choice, this, _material_choice->GetId());
 	
 	//Create new
@@ -148,7 +153,8 @@ void p6::MaterialBar::refresh_materials()
 	_material_choice = newchoice;
 
 	//Bind new
-	_material_choice->SetSelection(c);
+	_material_choice->SetSelection(choice);
+	_material_choice->Show(shown);
 	parent->Bind(wxEVT_CHOICE, &MaterialBar::_on_choice, this, _material_choice->GetId());
 }
 

@@ -188,7 +188,7 @@ wxBitmap p6::ToolBar::_load_png(const String filepath)
 	return bitmap;
 }
 
-p6::ToolBar::ToolBar(Frame *frame)
+p6::ToolBar::ToolBar(Frame *frame) : _frame(frame)
 {
 	wxToolBar *toolbar = frame->frame()->CreateToolBar(wxID_ANY, wxID_ANY, "Toolbar");
 

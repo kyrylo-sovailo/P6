@@ -62,9 +62,8 @@ void p6::NodeBar::_on_y(wxCommandEvent &e)
 	}
 }
 
-p6::NodeBar::NodeBar(Frame *frame)
+p6::NodeBar::NodeBar(Frame *frame) : _frame(frame)
 {
-	_frame = frame;
 	wxWindow *parent = _frame->side_panel()->panel();
 
 	//Free check
@@ -94,12 +93,12 @@ p6::NodeBar::NodeBar(Frame *frame)
 void p6::NodeBar::show()
 {
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
-	sizer->Add(_free_check, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_fixed_check, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_x_static, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_x_text, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_y_static, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_y_text, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_free_check,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_fixed_check,	0, wxALL | wxEXPAND, 10);
+	sizer->Add(_x_static,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_x_text,			0, wxALL | wxEXPAND, 10);
+	sizer->Add(_y_static,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_y_text,			0, wxALL | wxEXPAND, 10);
 	sizer->ShowItems(true);
 }
 

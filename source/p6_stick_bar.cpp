@@ -33,9 +33,8 @@ void p6::StickBar::_on_material(wxCommandEvent &e)
 	}
 }
 
-p6::StickBar::StickBar(Frame *frame)
+p6::StickBar::StickBar(Frame *frame) : _frame(frame)
 {
-	_frame = frame;
 	wxWindow *parent = frame->side_panel()->panel();
 
 	//Material static text
@@ -75,16 +74,16 @@ p6::StickBar::StickBar(Frame *frame)
 void p6::StickBar::show()
 {
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
-	sizer->Add(_material_static, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_material_choice, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_area_static, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_area_text, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_length_static, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_length_text, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_strain_static, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_strain_text, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_force_static, 0, wxALL | wxEXPAND, 10);
-	sizer->Add(_force_text, 0, wxALL | wxEXPAND, 10);
+	sizer->Add(_material_static,	0, wxALL | wxEXPAND, 10);
+	sizer->Add(_material_choice,	0, wxALL | wxEXPAND, 10);
+	sizer->Add(_area_static,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_area_text,			0, wxALL | wxEXPAND, 10);
+	sizer->Add(_length_static,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_length_text,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_strain_static,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_strain_text,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_force_static,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_force_text,			0, wxALL | wxEXPAND, 10);
 	sizer->ShowItems(true);
 }
 
@@ -166,7 +165,8 @@ void p6::StickBar::refresh_materials()
 	wxWindow *parent = _frame->side_panel()->panel();
 
 	//Unbind old
-	int c = _material_choice->GetSelection();
+	int choice = _material_choice->GetSelection();
+	bool shown = _material_choice->IsShown();
 	parent->Unbind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
 
 	//Create new
@@ -182,7 +182,8 @@ void p6::StickBar::refresh_materials()
 	_material_choice = newchoice;
 
 	//Bind new
-	_material_choice->SetSelection(c);
+	_material_choice->SetSelection(choice);
+	_material_choice->Show(shown);
 	parent->Bind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
 }
 

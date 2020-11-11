@@ -145,9 +145,8 @@ void p6::MenuBar::_on_menu_help(wxCommandEvent &e)
 	wxMessageBox("The developer highly recommends praying to Pinkie Pie to make it work", "Help", wxICON_INFORMATION, _frame->frame());
 }
 
-p6::MenuBar::MenuBar(Frame *frame)
+p6::MenuBar::MenuBar(Frame *frame) : _frame(frame)
 {
-	_frame = frame;
 	wxMenuBar *menubar = new wxMenuBar();
 
 	//File

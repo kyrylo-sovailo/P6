@@ -17,10 +17,10 @@ wxPoint p6::MainPanel::_real_to_pixel(Coord coord, wxPoint offset) const
 		_panel->GetSize().y / 2 - (coord.y - center.y) * pixels_in_meter);
 }
 
-p6::MainPanel::MainPanel(Frame *frame)
+p6::MainPanel::MainPanel(Frame *frame) :
+	_frame(frame),
+	_panel(new wxPanel(frame->frame()))
 {
-	_frame = frame;
-	_panel = new wxPanel(frame->frame());
 	_panel->Show(false);
 	frame->sizer()->Add(_panel, 4, wxEXPAND | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
 }

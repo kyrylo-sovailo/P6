@@ -29,7 +29,7 @@ void p6::MoveBar::_on_shift_x(wxCommandEvent &e)
 void p6::MoveBar::_on_shift_y(wxCommandEvent &e)
 {}
 
-p6::MoveBar::MoveBar(Frame *frame)
+p6::MoveBar::MoveBar(Frame *frame) : _frame(frame)
 {}
 
 void p6::MoveBar::show()
