@@ -23,6 +23,8 @@ namespace p6
 	private:
 		Frame *_frame;
 		wxMenuBar *_menu;
+		wxMenuItem *_file_load;
+		wxMenuItem *_file_import;
 		String _file;
 
 		void _on_menu_file_load(wxCommandEvent &e);
@@ -35,6 +37,7 @@ namespace p6
 
 	public:
 		MenuBar(Frame *frame);
+		void refresh();
 	};
 }
 

@@ -9,6 +9,7 @@
 */
 
 #include "../header/p6_common.hpp"
+
 #include <cmath>
 #include <sstream>
 
@@ -33,6 +34,11 @@ p6::String p6::real_to_string(real r)
 p6::real p6::sqr(real x) noexcept
 {
 	return x * x;
+}
+
+p6::real p6::pi() noexcept
+{
+	return 3.14159265358979323846;
 }
 
 p6::Coord::Coord() noexcept : x(0.0), y(0.0)
@@ -79,4 +85,24 @@ p6::real p6::Coord::distance(const Coord coord[2]) const noexcept
 	else return sqrt(
 		sqr(k * coord[0].x + (1.0 - k) * coord[1].x - x) +
 		sqr(k * coord[0].y + (1.0 - k) * coord[1].y - y));
+}
+
+p6::real p6::Coord::modulus() const noexcept
+{
+	return sqrt(sqr(x) + sqr(y));
+}
+
+p6::real p6::Coord::angle() const noexcept
+{
+	if (x == 0.0 && y == 0.0) return 0.0;
+	else if (abs(x) > abs(y))
+	{
+		if (x > 0) return atan(y / x);
+		return pi() + atan(y / x);
+	}
+	else
+	{
+		if (y > 0) return 2.0 * pi() - atan(x / y);
+		return 1.5 * pi() - atan(x / y);
+	}
 }

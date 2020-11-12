@@ -25,9 +25,15 @@ namespace p6
 		wxTextCtrl *_x_text;
 		wxStaticText *_y_static;
 		wxTextCtrl *_y_text;
+		wxStaticText *_modulus_static;
+		wxTextCtrl *_modulus_text;
+		wxStaticText *_angle_static;
+		wxTextCtrl *_angle_text;
 		
-		void _on_force_x(wxCommandEvent &e);
-		void _on_force_y(wxCommandEvent &e);
+		void _on_x(wxCommandEvent &e);
+		void _on_y(wxCommandEvent &e);
+		void _on_modulus(wxCommandEvent &e);
+		void _on_angle(wxCommandEvent &e);
 	
 	public:
 		ForceBar(Frame *frame);

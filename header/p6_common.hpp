@@ -25,6 +25,9 @@ namespace p6
 	///Square of real number
 	real sqr(real x) noexcept;
 
+	///Pi number
+	real pi() noexcept;
+
 	///Coordinate vector
 	struct Coord
 	{
@@ -38,6 +41,8 @@ namespace p6
 		Coord operator/(real coef)			const noexcept;
 		real distance(Coord coord)			const noexcept;
 		real distance(const Coord coord[2])	const noexcept;
+		real modulus()						const noexcept;
+		real angle()						const noexcept;
 	};
 
 	///String used in P6

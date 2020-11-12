@@ -151,11 +151,11 @@ p6::MenuBar::MenuBar(Frame *frame) : _frame(frame)
 
 	//File
 	wxMenu *filemenu = new wxMenu();
-	wxMenuItem *item = filemenu->Append(wxID_ANY, "Load", "Load construction from file");
-	frame->frame()->Bind(wxEVT_MENU, &MenuBar::_on_menu_file_load, this, item->GetId());
-	item = filemenu->Append(wxID_ANY, "Import", "Import construction from file");
-	frame->frame()->Bind(wxEVT_MENU, &MenuBar::_on_menu_file_import, this, item->GetId());
-	item = filemenu->Append(wxID_ANY, "Save", "Save construction to file");
+	_file_load = filemenu->Append(wxID_ANY, "Load", "Load construction from file");
+	frame->frame()->Bind(wxEVT_MENU, &MenuBar::_on_menu_file_load, this, _file_load->GetId());
+	_file_import = filemenu->Append(wxID_ANY, "Import", "Import construction from file");
+	frame->frame()->Bind(wxEVT_MENU, &MenuBar::_on_menu_file_import, this, _file_import->GetId());
+	wxMenuItem *item = filemenu->Append(wxID_ANY, "Save", "Save construction to file");
 	frame->frame()->Bind(wxEVT_MENU, &MenuBar::_on_menu_file_save, this, item->GetId());
 	item = filemenu->Append(wxID_ANY, "Save as", "Save construction another file");
 	frame->frame()->Bind(wxEVT_MENU, &MenuBar::_on_menu_file_save_as, this, item->GetId());
@@ -176,4 +176,11 @@ p6::MenuBar::MenuBar(Frame *frame) : _frame(frame)
 	menubar->Append(helpmenu, "Help");
 
 	frame->frame()->SetMenuBar(menubar);
+}
+
+void p6::MenuBar::refresh()
+{
+	bool sim = _frame->toolbar()->simulation();
+	_file_load->Enable(!sim);
+	_file_import->Enable(!sim);
 }

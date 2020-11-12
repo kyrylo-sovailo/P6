@@ -13,7 +13,10 @@
 #include "../header/p6_nonlinear_material.hpp"
 #include <wx/file.h>
 #include <cassert>
-#include <cmath>
+#include <Eigen>
+
+class p6::Construction::Vector : public Eigen::Vector<p6::real, Eigen::Dynamic> {};
+class p6::Construction::Matrix : public Eigen::Matrix<p6::real, Eigen::Dynamic, Eigen::Dynamic> {};
 
 p6::uint p6::Construction::create_node(Coord coord, bool free)
 {
@@ -534,6 +537,15 @@ p6::uint p6::Construction::_variable_number() const noexcept
 	return 2 * _nfree;
 }
 
+void p6::Construction::_check_materials_specified() const
+{
+	for (uint i = 0; i < _stick.size(); i++)
+	{
+		assert(_stick[i].material < _material.size() || _stick[i].material == (uint)-1);
+		if (_stick[i].material == (uint)-1) throw std::runtime_error("Material is not specified");
+	}
+}
+
 void p6::Construction::_create_map(std::vector<uint> *node_to_free)
 {
 	_nfree = 0;
@@ -553,7 +565,7 @@ p6::real p6::Construction::_get_tolerance() const
 	real minforce = std::numeric_limits<real>::infinity();
 	for (uint i = 0; i < _force.size(); i++)
 	{
-		real newforce = sqrt(sqr(_force[i].direction.x) + sqr(_force[i].direction.y));
+		real newforce = _force[i].direction.modulus();
 		if (newforce < minforce) minforce = newforce;
 	}
 	return minforce / 1000.0;
@@ -561,10 +573,10 @@ p6::real p6::Construction::_get_tolerance() const
 
 void p6::Construction::_create_vectors(
 	const std::vector <uint> *node_to_free,
-	Eigen::Vector<real, Eigen::Dynamic> *s,
-	Eigen::Vector<real, Eigen::Dynamic> *z,
-	Eigen::Vector<real, Eigen::Dynamic> *m,
-	Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic> *d) const
+	Vector *s,
+	Vector *z,
+	Vector *m,
+	Matrix *d) const
 {
 	s->resize(_variable_number());
 	for (uint i = 0; i < _node.size(); i++)
@@ -583,7 +595,7 @@ void p6::Construction::_create_vectors(
 
 void p6::Construction::_set_z_to_external_forces(
 	const std::vector <uint> *node_to_free,
-	Eigen::Vector<real, Eigen::Dynamic> *z) const
+	Vector *z) const
 {
 	for (uint i = 0; i < _force.size(); i++)
 	{
@@ -599,7 +611,7 @@ void p6::Construction::_set_z_to_external_forces(
 
 void p6::Construction::_set_d_to_zero(
 	const std::vector <uint> *node_to_free,
-	Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic> *d) const
+	Matrix *d) const
 {
 	for (uint i = 0; i < _stick.size(); i++)
 	{
@@ -629,7 +641,7 @@ void p6::Construction::_set_d_to_zero(
 p6::Coord p6::Construction::_get_delta(
 	uint stick,
 	const std::vector <uint> *node_to_free,
-	const Eigen::Vector<real, Eigen::Dynamic> *s) const
+	const Vector *s) const
 {
 	const uint *node = _stick[stick].node;
 	Coord coord[2];
@@ -648,15 +660,15 @@ p6::Coord p6::Construction::_get_delta(
 void p6::Construction::_modify_z_with_stick_force(
 	uint stick,
 	const std::vector <uint> *node_to_free,
-	const Eigen::Vector<real, Eigen::Dynamic> *s,
-	Eigen::Vector<real, Eigen::Dynamic> *z) const
+	const Vector *s,
+	Vector *z) const
 {
 	const Material *material = _material[_stick[stick].material];
 	const uint *node = _stick[stick].node;
 	Coord delta = _get_delta(stick, node_to_free, s);
-	real length = sqrt(sqr(delta.x) + sqr(delta.y));
+	real length = delta.modulus();
 	real initial_length = _node[node[0]].coord.distance(_node[node[1]].coord);
-	real force = _stick[stick].area * (length / initial_length - 1.0);
+	real force = _stick[stick].area * material->stress(length / initial_length - 1.0);
 
 	for (uint i = 0; i < 2; i++)
 	{
@@ -673,13 +685,13 @@ void p6::Construction::_modify_z_with_stick_force(
 void p6::Construction::_modify_d_with_stick_force(
 	uint stick,
 	const std::vector <uint> *node_to_free,
-	const Eigen::Vector<real, Eigen::Dynamic> *s,
-	Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic> *d) const
+	const Vector *s,
+	Matrix *d) const
 {
 	const Material *material = _material[_stick[stick].material];
 	const uint *node = _stick[stick].node;
 	Coord delta = _get_delta(stick, node_to_free, s);
-	real length = sqrt(sqr(delta.x) + sqr(delta.y));
+	real length = delta.modulus();
 	real initial_length = _node[node[0]].coord.distance(_node[node[1]].coord);
 	real strain = length / initial_length - 1.0;
 
@@ -719,7 +731,7 @@ void p6::Construction::_modify_d_with_stick_force(
 	}
 }
 
-p6::real p6::Construction::_get_error(const Eigen::Vector<real, Eigen::Dynamic> *z) const
+p6::real p6::Construction::_get_error(const Vector *z) const
 {
 	real error = 0.0;
 	for (int i = 0; i < z->rows(); i++)
@@ -732,7 +744,7 @@ p6::real p6::Construction::_get_error(const Eigen::Vector<real, Eigen::Dynamic> 
 
 void p6::Construction::_apply_state_vector(
 	const std::vector<uint> *node_to_free,
-	const Eigen::Vector<real, Eigen::Dynamic> *s)
+	const Vector *s)
 {
 	for (uint i = 0; i < _node.size(); i++)
 	{
@@ -745,7 +757,7 @@ void p6::Construction::_apply_state_vector(
 	}
 }
 
-bool p6::Construction::_is_adequat(const Eigen::Vector<real, Eigen::Dynamic> *m) const
+bool p6::Construction::_is_adequat(const Vector *m) const
 {
 	bool adequat = true;
 	for (int i = 0; i < m->rows(); i++)
@@ -758,8 +770,8 @@ bool p6::Construction::_is_adequat(const Eigen::Vector<real, Eigen::Dynamic> *m)
 
 p6::real  p6::Construction::_get_flow_coefficient(
 	const std::vector <uint> *node_to_free,
-	const Eigen::Vector<real, Eigen::Dynamic> *s,
-	const Eigen::Vector<real, Eigen::Dynamic> *z) const
+	const Vector *s,
+	const Vector *z) const
 {
 	real coef = std::numeric_limits<real>::infinity();
 	for (uint i = 0; i < _stick.size(); i++)
@@ -771,8 +783,8 @@ p6::real  p6::Construction::_get_flow_coefficient(
 			if (_node[node[j]].free)
 			{
 				uint free = node_to_free->at(node[j]);
-				real newcoef = sqrt(sqr(delta.x) + sqr(delta.y)) /
-					sqrt(sqr((*z)(_node_equation_fx(free))) + sqr((*z)(_node_equation_fy(free))));
+				real length = delta.modulus();
+				real newcoef = length / sqrt(sqr((*z)(_node_equation_fx(free))) + sqr((*z)(_node_equation_fy(free))));
 				if (newcoef < coef) coef = newcoef;
 			}
 		}
@@ -785,7 +797,10 @@ void p6::Construction::simulate(bool sim)
 	if (sim == _simulation) return;
 	else if (!sim) { _simulation = false; return; }
 
-	//Creating general-to-free and free-to general maps
+	//Checking if materials are specified
+	_check_materials_specified();
+
+	//Creating node-to-free map
 	std::vector<uint> node_to_free;
 	_create_map(&node_to_free);
 
@@ -793,10 +808,10 @@ void p6::Construction::simulate(bool sim)
 	real tolerance = _get_tolerance();
 
 	//Creating vectors and matrixes
-	Eigen::Vector<real, Eigen::Dynamic> s;					//State vector
-	Eigen::Vector<real, Eigen::Dynamic> z;					//Should-be-zero value
-	Eigen::Vector<real, Eigen::Dynamic> m;					//Modification of state vector
-	Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic>	d;	//Derivative of should-be-zero value
+	Vector s;					//State vector
+	Vector z;					//Should-be-zero value
+	Vector m;					//Modification of state vector
+	Matrix	d;	//Derivative of should-be-zero value
 	_create_vectors(&node_to_free, &s, &z, &m, &d);
 
 	//Iterating
@@ -816,7 +831,7 @@ void p6::Construction::simulate(bool sim)
 		else if (error < last_error) not_converge_count = 0;
 		else if (++not_converge_count == 1000000) throw (std::runtime_error("Simulation does not converge"));
 		s += 0.001 * z;
-		/*Eigen::HouseholderQR<Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic>> qr(d);
+		/*Eigen::HouseholderQR<Matrix> qr(d);
 		m = qr.solve(z);
 		if (_is_adequat(&m)) s -= m;
 		else s += 0.001 * _get_flow_coefficient(&node_to_free, &s, &z) * z;*/

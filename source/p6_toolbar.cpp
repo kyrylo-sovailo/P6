@@ -31,6 +31,7 @@ void p6::ToolBar::_on_simulate(wxCommandEvent &e)
 			wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame());
 		}
 	}
+	_frame->menubar()->refresh();
 	_frame->main_panel()->need_refresh();
 	_frame->side_panel()->refresh();
 	_refresh();

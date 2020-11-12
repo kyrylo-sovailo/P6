@@ -13,13 +13,15 @@
 
 #include "p6_material.hpp"
 #include <vector>
-#include <Eigen>
 
 namespace p6
 {
 	class Construction
 	{
 	private:
+		class Vector;
+		class Matrix;
+
 		struct Header
 		{
 			char signature[8] = { 'P','6', 'C', 'N', 'S', 'T', '0', '\0'};
@@ -66,43 +68,44 @@ namespace p6
 		uint _node_variable_x(uint free)	const noexcept;
 		uint _node_variable_y(uint free)	const noexcept;
 		uint _variable_number()				const noexcept;
+		void _check_materials_specified() const;
 		void _create_map(std::vector<uint> *node_to_free);
 		real _get_tolerance() const;
 		void _create_vectors(
 			const std::vector <uint> *node_to_free,
-			Eigen::Vector<real, Eigen::Dynamic> *s,
-			Eigen::Vector<real, Eigen::Dynamic> *z,
-			Eigen::Vector<real, Eigen::Dynamic> *m,
-			Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic> *d) const;
+			Vector *s,
+			Vector *z,
+			Vector *m,
+			Matrix *d) const;
 		void _set_z_to_external_forces(
 			const std::vector <uint> *node_to_free,
-			Eigen::Vector<real, Eigen::Dynamic> *z) const;
+			Vector *z) const;
 		void _set_d_to_zero(
 			const std::vector <uint> *node_to_free,
-			Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic> *d) const;
+			Matrix *d) const;
 		Coord _get_delta(
 			uint stick,
 			const std::vector <uint> *node_to_free,
-			const Eigen::Vector<real, Eigen::Dynamic> *s) const;
+			const Vector *s) const;
 		void _modify_z_with_stick_force(
 			uint stick,
 			const std::vector <uint> *node_to_free,
-			const Eigen::Vector<real, Eigen::Dynamic> *s,
-			Eigen::Vector<real, Eigen::Dynamic> *z) const;
+			const Vector *s,
+			Vector *z) const;
 		void _modify_d_with_stick_force(
 			uint stick,
 			const std::vector <uint> *node_to_free,
-			const Eigen::Vector<real, Eigen::Dynamic> *s,
-			Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic> *d) const;
-		real _get_error(const Eigen::Vector<real, Eigen::Dynamic> *z) const;
-		bool _is_adequat(const Eigen::Vector<real, Eigen::Dynamic> *m) const;
+			const Vector *s,
+			Matrix *d) const;
+		real _get_error(const Vector *z) const;
+		bool _is_adequat(const Vector *m) const;
 		real _get_flow_coefficient(
 			const std::vector <uint> *node_to_free,
-			const Eigen::Vector<real, Eigen::Dynamic> *s,
-			const Eigen::Vector<real, Eigen::Dynamic> *z) const;
+			const Vector *s,
+			const Vector *z) const;
 		void _apply_state_vector(
 			const std::vector<uint> *node_to_free,
-			const Eigen::Vector<real, Eigen::Dynamic> *s);
+			const Vector *s);
 		
 
 	public:
