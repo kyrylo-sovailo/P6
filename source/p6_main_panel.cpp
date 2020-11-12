@@ -35,21 +35,19 @@ wxSize p6::MainPanel::size() const
 	return _panel->GetSize();
 }
 
-wxPoint p6::MainPanel::offset() const
-{
-	return _panel->GetClientAreaOrigin();
-}
-
 void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 {
-	bool sim = _frame->construction()->simulation();
+	bool sim = _frame->toolbar()->simulation();
 	Construction *con = _frame->construction();
 
 	//Calculate max strain
 	real max_strain = 0.0;
-	for (uint i = 0; i < con->get_stick_count(); i++)
+	if (sim)
 	{
-		if (con->get_stick_strain(i) > max_strain) max_strain = con->get_stick_strain(i);
+		for (uint i = 0; i < con->get_stick_count(); i++)
+		{
+			if (con->get_stick_strain(i) > max_strain) max_strain = con->get_stick_strain(i);
+		}
 	}
 
 	//Draw sticks
@@ -61,19 +59,20 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 		wxColour colour;
 		if (sim)
 		{
-			real strain = con->get_stick_strain(i) / max_strain;
-
-			if (strain > 0)
+			real strain = con->get_stick_strain(i);
+			if (strain == 0) colour = wxColour(128, 128, 128);
+			else if (strain > 0)
 			{
-				real rg = std::max(128.0 - 128.0 * strain, 0.0);
-				real b = std::min(128.0 + 127 * strain, 255.0);
+				//Blue
+				real rg = std::max(128.0 - 128.0 * strain / max_strain, 0.0);
+				real b = std::min(128.0 + 127 * strain / max_strain, 255.0);
 				colour = wxColour(rg, rg, b);
 			}
 			else
 			{
 				//Red
-				real gb = std::max(128.0 + 128 * strain, 0.0);
-				real r = std::min(128.0 - 127.0 * strain, 255.0);
+				real gb = std::max(128.0 + 128 * strain / max_strain, 0.0);
+				real r = std::min(128.0 - 127.0 * strain / max_strain, 255.0);
 				colour = wxColour(r, gb, gb);
 			}
 		}
@@ -100,7 +99,7 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 		const real coef = 0.1;
 
 		Coord a = con->get_node_coord(con->get_force_node(i));
-		Coord ba = con->get_force_direction(i) * meters_in_newton;
+		Coord ba = con->get_force_direction(i) * meters_in_newton * (-1.0);
 		Coord bc = Coord(
 			cos(angle) * ba.x - sin(angle) * ba.y,
 			sin(angle) * ba.x + cos(angle) * ba.y) * coef;
@@ -247,5 +246,5 @@ void p6::MainPanel::select_items()
 
 void p6::MainPanel::need_refresh()
 {
-	_panel->Refresh();
+	_frame->frame()->Refresh();
 }

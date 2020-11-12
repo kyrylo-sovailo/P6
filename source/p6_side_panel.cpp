@@ -13,60 +13,88 @@
 
 void p6::SidePanel::_switch(Mode mode)
 {
-	if (_mode == mode) return;
-
-	//Hiding
-	switch (_mode)
+	if (_mode == mode)
 	{
-	case Mode::node:
-		_node_bar.hide();
-		break;
+		//Refreshing
+		switch (mode)
+		{
+		case Mode::node:
+			_node_bar.refresh();
+			break;
 
-	case Mode::stick:
-		_stick_bar.hide();
-		break;
+		case Mode::stick:
+			_stick_bar.refresh();
+			break;
 
-	case Mode::force:
-		_force_bar.hide();
-		break;
+		case Mode::force:
+			_force_bar.refresh();
+			break;
 
-	case Mode::move:
-		_move_bar.hide();
-		break;
+		case Mode::move:
+			_move_bar.refresh();
+			break;
 
-	default:
-		_material_bar.hide();
-		break;
+		default:
+			_material_bar.refresh();
+			break;
+		}
 	}
-
-	//Showing
-	switch (mode)
+	else
 	{
-	case Mode::node:
-		_node_bar.refresh();
-		_node_bar.show();
-		break;
+		//Hiding
+		switch (_mode)
+		{
+		case Mode::node:
+			_node_bar.hide();
+			break;
 
-	case Mode::stick:
-		_stick_bar.refresh();
-		_stick_bar.show();
-		break;
+		case Mode::stick:
+			_stick_bar.hide();
+			break;
 
-	case Mode::force:
-		_force_bar.refresh();
-		_force_bar.show();
-		break;
+		case Mode::force:
+			_force_bar.hide();
+			break;
 
-	case Mode::move:
-		_move_bar.refresh();
-		_move_bar.show();
-		break;
+		case Mode::move:
+			_move_bar.hide();
+			break;
 
-	default:
-		_material_bar.show();
-		break;
+		default:
+			_material_bar.hide();
+			break;
+		}
+
+		//Showing
+		switch (mode)
+		{
+		case Mode::node:
+			_node_bar.refresh();
+			_node_bar.show();
+			break;
+
+		case Mode::stick:
+			_stick_bar.refresh();
+			_stick_bar.show();
+			break;
+
+		case Mode::force:
+			_force_bar.refresh();
+			_force_bar.show();
+			break;
+
+		case Mode::move:
+			_move_bar.refresh();
+			_move_bar.show();
+			break;
+
+		default:
+			_material_bar.refresh();
+			_material_bar.show();
+			break;
+		}
+		_mode = mode;
 	}
-	_mode = mode;
 }
 
 p6::SidePanel::SidePanel(Frame *frame) :

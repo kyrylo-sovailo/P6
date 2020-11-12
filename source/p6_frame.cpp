@@ -14,7 +14,7 @@
 void p6::Frame::_on_paint(wxPaintEvent &e)
 {
 	wxPaintDC dc(_frame);
-	_main_panel.render(&dc, _main_panel.offset());
+	_main_panel.render(&dc, _frame->GetClientAreaOrigin());
 }
 
 void p6::Frame::_on_size(wxSizeEvent &e)

@@ -39,7 +39,7 @@ p6::Coord::Coord() noexcept : x(0.0), y(0.0)
 {
 }
 
-p6::Coord::Coord(real x, real y) noexcept : x(x), y(x)
+p6::Coord::Coord(real x, real y) noexcept : x(x), y(y)
 {
 }
 

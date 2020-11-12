@@ -100,11 +100,13 @@ void p6::NodeBar::show()
 	sizer->Add(_y_static,		0, wxALL | wxEXPAND, 10);
 	sizer->Add(_y_text,			0, wxALL | wxEXPAND, 10);
 	sizer->ShowItems(true);
+	_frame->side_panel()->panel()->Layout();
 }
 
 void p6::NodeBar::refresh()
 {
 	Construction *con = _frame->construction();
+	bool sim = _frame->toolbar()->simulation();
 	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
 
 	//Setting free
@@ -116,7 +118,9 @@ void p6::NodeBar::refresh()
 			if (free_value != con->get_node_free(*i)) { free_equal = false; break; }
 		}
 		_free_check->SetValue(!free_equal || free_value);
+		_free_check->Enable(!sim);
 		_fixed_check->SetValue(!free_equal || !free_value);
+		_fixed_check->Enable(!sim);
 	}
 
 	//Setting x
@@ -129,6 +133,7 @@ void p6::NodeBar::refresh()
 		}
 		if (x_equal) _x_text->ChangeValue(real_to_string(x_value));
 		else _x_text->ChangeValue("");
+		_x_text->Enable(!sim);
 	}
 
 	//Setting y
@@ -141,10 +146,12 @@ void p6::NodeBar::refresh()
 		}
 		if (y_equal) _y_text->ChangeValue(real_to_string(y_value));
 		else _y_text->ChangeValue("");
+		_y_text->Enable(!sim);
 	}
 }
 
 void p6::NodeBar::hide()
 {
 	_frame->side_panel()->sizer()->ShowItems(false);
+	_frame->side_panel()->sizer()->Clear();
 }

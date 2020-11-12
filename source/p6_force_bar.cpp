@@ -74,10 +74,12 @@ void p6::ForceBar::show()
 	sizer->Add(_y_static,	0, wxEXPAND | wxALL, 10);
 	sizer->Add(_y_text,		0, wxEXPAND | wxALL, 10);
 	sizer->ShowItems(true);
+	_frame->side_panel()->panel()->Layout();
 }
 
 void p6::ForceBar::refresh()
 {
+	bool sim = _frame->toolbar()->simulation();
 	std::set<uint> *selected_forces = &_frame->main_panel()->selected_forces;
 
 	//Set x
@@ -90,6 +92,7 @@ void p6::ForceBar::refresh()
 		}
 		if (x_equal) _x_text->ChangeValue(real_to_string(x_value));
 		else _x_text->ChangeValue("");
+		_x_text->Enable(!sim);
 	}
 
 	//Set y
@@ -102,10 +105,12 @@ void p6::ForceBar::refresh()
 		}
 		if (y_equal) _y_text->ChangeValue(real_to_string(y_value));
 		else _y_text->ChangeValue("");
+		_y_text->Enable(!sim);
 	}
 }
 
 void p6::ForceBar::hide()
 {
 	_frame->side_panel()->sizer()->ShowItems(false);
+	_frame->side_panel()->sizer()->Clear();
 }

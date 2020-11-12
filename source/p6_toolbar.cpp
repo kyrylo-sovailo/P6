@@ -14,23 +14,26 @@
 
 void p6::ToolBar::_on_simulate(wxCommandEvent &e)
 {
-	if (_tool == Tool::simulate)
+	if (_simulation)
 	{
 		_frame->construction()->simulate(false);
-		_tool = Tool::no;
+		_simulation = false;
 	}
 	else
 	{
 		try
 		{
 			_frame->construction()->simulate(true);
-			_tool = Tool::simulate;
+			_simulation = true;
 		}
 		catch (std::exception &e)
 		{
 			wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame());
 		}
 	}
+	_frame->main_panel()->need_refresh();
+	_frame->side_panel()->refresh();
+	_refresh();
 }
 
 void p6::ToolBar::_on_select(wxCommandEvent &e)
@@ -42,6 +45,7 @@ void p6::ToolBar::_on_select(wxCommandEvent &e)
 	_frame->main_panel()->selected_forces.clear();
 	_frame->main_panel()->need_refresh();
 	_frame->side_panel()->refresh();
+	_refresh();
 }
 
 void p6::ToolBar::_on_area(wxCommandEvent &e)
@@ -53,12 +57,14 @@ void p6::ToolBar::_on_area(wxCommandEvent &e)
 	_frame->main_panel()->selected_forces.clear();
 	_frame->main_panel()->need_refresh();
 	_frame->side_panel()->refresh();
+	_refresh();
 }
 
 void p6::ToolBar::_on_move(wxCommandEvent &e)
 {
 	if (_tool == Tool::move) _tool = Tool::no;
 	else _tool = Tool::move;
+	_refresh();
 }
 
 void p6::ToolBar::_on_node(wxCommandEvent &e)
@@ -84,6 +90,7 @@ void p6::ToolBar::_on_node(wxCommandEvent &e)
 		_frame->main_panel()->need_refresh();
 		_frame->side_panel()->refresh();
 	}
+	_refresh();
 }
 
 void p6::ToolBar::_on_stick(wxCommandEvent &e)
@@ -119,6 +126,7 @@ void p6::ToolBar::_on_stick(wxCommandEvent &e)
 		_frame->main_panel()->need_refresh();
 		_frame->side_panel()->refresh();
 	}
+	_refresh();
 }
 
 void p6::ToolBar::_on_force(wxCommandEvent &e)
@@ -143,24 +151,25 @@ void p6::ToolBar::_on_force(wxCommandEvent &e)
 		_frame->main_panel()->need_refresh();
 		_frame->side_panel()->refresh();
 	}
+	_refresh();
 }
 
 void p6::ToolBar::_on_delete(wxCommandEvent &e)
 {
 	MainPanel *main = _frame->main_panel();
 	if (_tool == Tool::delet) _tool = Tool::no;
-	else
+	else if (!main->selected_forces.empty() || !main->selected_nodes.empty() || !main->selected_sticks.empty())
 	{
 		//Delete forces
-		for (auto i = main->selected_forces.cbegin(); i != main->selected_forces.cend(); i++)
+		for (auto i = main->selected_forces.crbegin(); i != main->selected_forces.crend(); i++)
 			_frame->construction()->delete_force(*i);
 
 		//Delete selected sticks
-		for (auto i = main->selected_sticks.cbegin(); i != main->selected_sticks.cend(); i++)
+		for (auto i = main->selected_sticks.crbegin(); i != main->selected_sticks.crend(); i++)
 			_frame->construction()->delete_stick(*i);
 
 		//Delete nodes
-		for (auto i = main->selected_nodes.cbegin(); i != main->selected_nodes.cend(); i++)
+		for (auto i = main->selected_nodes.crbegin(); i != main->selected_nodes.crend(); i++)
 			_frame->construction()->delete_node(*i);
 
 		main->selected_nodes.clear();
@@ -169,6 +178,8 @@ void p6::ToolBar::_on_delete(wxCommandEvent &e)
 		_frame->main_panel()->need_refresh();
 		_frame->side_panel()->refresh();
 	}
+	else _tool = Tool::delet;
+	_refresh();
 }
 
 wxBitmap p6::ToolBar::_load_png(const String filepath)
@@ -186,6 +197,22 @@ wxBitmap p6::ToolBar::_load_png(const String filepath)
 		bitmap = wxBitmap::NewFromPNGData(memory.data(), memory.size());
 	}
 	return bitmap;
+}
+
+void p6::ToolBar::_refresh()
+{
+	if (_simulation && (_tool == Tool::delet || _tool == Tool::move)) _tool = Tool::no;
+	wxToolBar *toolbar = _frame->frame()->GetToolBar();
+	toolbar->ToggleTool(_simulate->GetId(), _simulation);
+	toolbar->ToggleTool(_select->GetId(), _tool == Tool::select);
+	toolbar->ToggleTool(_area->GetId(), _tool == Tool::area);
+	toolbar->ToggleTool(_move->GetId(), _tool == Tool::move);
+	toolbar->EnableTool(_move->GetId(), !_simulation);
+	toolbar->ToggleTool(_node->GetId(), _tool == Tool::node);
+	toolbar->ToggleTool(_stick->GetId(), _tool == Tool::stick);
+	toolbar->ToggleTool(_force->GetId(), _tool == Tool::force);
+	toolbar->ToggleTool(_delete->GetId(), _tool == Tool::delet);
+	toolbar->EnableTool(_delete->GetId(), !_simulation);
 }
 
 p6::ToolBar::ToolBar(Frame *frame) : _frame(frame)
@@ -277,4 +304,9 @@ p6::ToolBar::ToolBar(Frame *frame) : _frame(frame)
 p6::ToolBar::Tool p6::ToolBar::tool() const
 {
 	return _tool;
+}
+
+bool p6::ToolBar::simulation() const
+{
+	return _simulation;
 }

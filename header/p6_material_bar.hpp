@@ -28,18 +28,19 @@ namespace p6
 		wxStaticText *_formula_static;
 		wxTextCtrl *_formula_text;
 		wxBoxSizer *_buttons_sizer;
+		wxButton *_button_new;
+		wxButton *_button_apply;
+		wxButton *_button_delete;
 
 		void _on_choice(wxCommandEvent &e);
-		void _on_name(wxCommandEvent &e);
 		void _on_new(wxCommandEvent &e);
 		void _on_apply(wxCommandEvent &e);
 		void _on_delete(wxCommandEvent &e);
-		void _on_nonlinear(wxCommandEvent &e);
-		void _on_formula(wxCommandEvent &e);
 
 	public:
 		MaterialBar(Frame *frame);
 		void show();
+		void refresh();
 		void refresh_materials();
 		void hide();
 	};

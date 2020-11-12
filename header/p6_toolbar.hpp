@@ -24,7 +24,6 @@ namespace p6
 		enum class Tool
 		{
 			no,
-			simulate,
 			select,
 			area,
 			move,
@@ -46,6 +45,7 @@ namespace p6
 		wxToolBarToolBase *_force;
 		wxToolBarToolBase *_delete;
 		Tool _tool = Tool::no;
+		bool _simulation = false;
 
 		void _on_simulate(wxCommandEvent &e);
 		void _on_select(wxCommandEvent &e);
@@ -55,11 +55,13 @@ namespace p6
 		void _on_stick(wxCommandEvent &e);
 		void _on_force(wxCommandEvent &e);
 		void _on_delete(wxCommandEvent &e);
+		void _refresh();
 		static wxBitmap _load_png(const String filepath);
 
 	public:
 		ToolBar(Frame *frame);
 		Tool tool() const;
+		bool simulation() const;
 	};
 }
 

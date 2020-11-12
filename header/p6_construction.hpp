@@ -13,10 +13,11 @@
 
 #include "p6_material.hpp"
 #include <vector>
+#include <Eigen>
 
 namespace p6
 {
-	struct Construction
+	class Construction
 	{
 	private:
 		struct Header
@@ -57,6 +58,52 @@ namespace p6
 		std::vector<Force> _force;
 		std::vector<Material*> _material;
 		bool _simulation;
+		uint _nfree;
+
+		uint _node_equation_fx(uint free)	const noexcept;
+		uint _node_equation_fy(uint free)	const noexcept;
+		uint _equation_number()				const noexcept;
+		uint _node_variable_x(uint free)	const noexcept;
+		uint _node_variable_y(uint free)	const noexcept;
+		uint _variable_number()				const noexcept;
+		void _create_map(std::vector<uint> *node_to_free);
+		real _get_tolerance() const;
+		void _create_vectors(
+			const std::vector <uint> *node_to_free,
+			Eigen::Vector<real, Eigen::Dynamic> *s,
+			Eigen::Vector<real, Eigen::Dynamic> *z,
+			Eigen::Vector<real, Eigen::Dynamic> *m,
+			Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic> *d) const;
+		void _set_z_to_external_forces(
+			const std::vector <uint> *node_to_free,
+			Eigen::Vector<real, Eigen::Dynamic> *z) const;
+		void _set_d_to_zero(
+			const std::vector <uint> *node_to_free,
+			Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic> *d) const;
+		Coord _get_delta(
+			uint stick,
+			const std::vector <uint> *node_to_free,
+			const Eigen::Vector<real, Eigen::Dynamic> *s) const;
+		void _modify_z_with_stick_force(
+			uint stick,
+			const std::vector <uint> *node_to_free,
+			const Eigen::Vector<real, Eigen::Dynamic> *s,
+			Eigen::Vector<real, Eigen::Dynamic> *z) const;
+		void _modify_d_with_stick_force(
+			uint stick,
+			const std::vector <uint> *node_to_free,
+			const Eigen::Vector<real, Eigen::Dynamic> *s,
+			Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic> *d) const;
+		real _get_error(const Eigen::Vector<real, Eigen::Dynamic> *z) const;
+		bool _is_adequat(const Eigen::Vector<real, Eigen::Dynamic> *m) const;
+		real _get_flow_coefficient(
+			const std::vector <uint> *node_to_free,
+			const Eigen::Vector<real, Eigen::Dynamic> *s,
+			const Eigen::Vector<real, Eigen::Dynamic> *z) const;
+		void _apply_state_vector(
+			const std::vector<uint> *node_to_free,
+			const Eigen::Vector<real, Eigen::Dynamic> *s);
+		
 
 	public:
 		//Node
@@ -104,7 +151,6 @@ namespace p6
 		void load(const String filepath);
 		void import(const String filepath);
 		void simulate(bool sim);
-		bool simulation()								const;
 		~Construction();
 	};
 }

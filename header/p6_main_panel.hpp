@@ -54,7 +54,6 @@ namespace p6
 		MainPanel(Frame *frame);
 		wxPanel *panel();
 		wxSize size()							const;
-		wxPoint offset()						const;
 		void render(wxDC *dc, wxPoint offset)	const;
 		Item get_item(wxPoint a)				const;
 		Coord pixel_to_real(wxPoint point)		const;

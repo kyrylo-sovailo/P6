@@ -55,19 +55,22 @@ p6::StickBar::StickBar(Frame *frame) : _frame(frame)
 	_length_static = new wxStaticText(parent, wxID_ANY, "Length:");
 	_length_static->Show(false);
 	//Length text
-	_length_text = new wxTextCtrl(parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	_length_text = new wxTextCtrl(parent, wxID_ANY);
+	_length_text->Enable(false);
 	_length_text->Show(false);
 	//Strain static text
 	_strain_static = new wxStaticText(parent, wxID_ANY, "Strain:");
 	_strain_static->Show(false);
 	//Strain text
-	_strain_text = new wxTextCtrl(parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	_strain_text = new wxTextCtrl(parent, wxID_ANY);
+	_strain_text->Enable(false);
 	_strain_text->Show(false);
 	//Force static text
 	_force_static = new wxStaticText(parent, wxID_ANY, "Force:");
 	_force_static->Show(false);
 	//Force text
-	_force_text = new wxTextCtrl(parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	_force_text = new wxTextCtrl(parent, wxID_ANY);
+	_force_text->Enable(false);
 	_force_text->Show(false);
 }
 
@@ -80,16 +83,23 @@ void p6::StickBar::show()
 	sizer->Add(_area_text,			0, wxALL | wxEXPAND, 10);
 	sizer->Add(_length_static,		0, wxALL | wxEXPAND, 10);
 	sizer->Add(_length_text,		0, wxALL | wxEXPAND, 10);
+	sizer->Show(true);
 	sizer->Add(_strain_static,		0, wxALL | wxEXPAND, 10);
 	sizer->Add(_strain_text,		0, wxALL | wxEXPAND, 10);
 	sizer->Add(_force_static,		0, wxALL | wxEXPAND, 10);
 	sizer->Add(_force_text,			0, wxALL | wxEXPAND, 10);
-	sizer->ShowItems(true);
+	if (_frame->toolbar()->simulation()) sizer->ShowItems(true);
+	//P6 refreshes bars before showing
+	//So even if I hide panels during refresh, they will be shown here
+	//That's why I need some extra code
+	//But with Enable() works fine, it isn't changed when Show()
+	_frame->side_panel()->panel()->Layout();
 }
 
 void p6::StickBar::refresh()
 {
 	std::set<uint> *selected_sticks = &_frame->main_panel()->selected_sticks;
+	bool sim = _frame->toolbar()->simulation();
 	Construction *con = _frame->construction();
 
 	//Setting material
@@ -102,6 +112,7 @@ void p6::StickBar::refresh()
 		}
 		if (!material_equal) _material_choice->SetSelection(wxNOT_FOUND);
 		else _material_choice->SetSelection(material_value);
+		_material_choice->Enable(!sim);
 	}
 
 	//Setting area
@@ -114,6 +125,7 @@ void p6::StickBar::refresh()
 		}
 		if (area_equal) _area_text->ChangeValue(real_to_string(area_value));
 		else _area_text->ChangeValue("");
+		_area_text->Enable(!sim);
 	}
 
 	//Setting length
@@ -124,15 +136,15 @@ void p6::StickBar::refresh()
 		{
 			if (length_value != con->get_stick_length(*i)) { length_equal = false; break; }
 		}
-		if (!length_equal) _length_text->ChangeValue(real_to_string(length_value));
+		if (length_equal) _length_text->ChangeValue(real_to_string(length_value));
 		else _length_text->ChangeValue("");
 	}
 
-	_strain_static->Show(con->simulation());
-	_strain_text->Show(con->simulation());
-	_force_static->Show(con->simulation());
-	_force_text->Show(con->simulation());
-	if (con->simulation())
+	_strain_static->Show(sim);
+	_strain_text->Show(sim);
+	_force_static->Show(sim);
+	_force_text->Show(sim);
+	if (sim)
 	{
 		//Setting strain
 		{
@@ -167,6 +179,7 @@ void p6::StickBar::refresh_materials()
 	//Unbind old
 	int choice = _material_choice->GetSelection();
 	bool shown = _material_choice->IsShown();
+	bool enabled = _material_choice->IsEnabled();
 	parent->Unbind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
 
 	//Create new
@@ -184,10 +197,12 @@ void p6::StickBar::refresh_materials()
 	//Bind new
 	_material_choice->SetSelection(choice);
 	_material_choice->Show(shown);
+	_material_choice->Enable(enabled);
 	parent->Bind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
 }
 
 void p6::StickBar::hide()
 {
 	_frame->side_panel()->sizer()->ShowItems(false);
+	_frame->side_panel()->sizer()->Clear();
 }
