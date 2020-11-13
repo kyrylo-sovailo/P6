@@ -1,3 +1,6 @@
+# P6 #
+tmp/
+
 # C++ compiler #
 ################
 *.lib
@@ -27,3 +30,7 @@ Thumbs.db
 **/Debug/
 **/Release/
 **/x64/
+*.exe.manifest
+*.iobj
+*.ipdb
+*.pdb
