@@ -21,31 +21,31 @@
 
 namespace p6
 {
+	///Application's window
 	class Frame
 	{
 	private:
-		wxFrame *_frame;
-		wxBoxSizer *_sizer;
-		ToolBar _toolbar;
-		MenuBar _menubar;
-		MainPanel _main_panel;
-		SidePanel _side_panel;
-		Mouse _mouse;
-		Construction _construction;
+		wxFrame *_frame;							///<wxWidget's window
+		wxBoxSizer *_sizer;							///<Sizer of wxWidget's window
+		ToolBar _toolbar;							///<Tool bar
+		MenuBar _menubar;							///<Menu bar
+		MainPanel _main_panel;						///<Main panel
+		SidePanel _side_panel;						///<Side panel
+		Mouse _mouse;								///<Mouse events' handler
+		Construction _construction;					///<Construction being edited
 
-		void _on_paint(wxPaintEvent &e);
-		void _on_size(wxSizeEvent &e);
+		void _on_paint(wxPaintEvent &e);			///<Handles paint event through calling p6::MainPanel::render()
+		void _on_size(wxSizeEvent &e);				///<Handles resize event
 
 	public:
-		Frame();
-		wxFrame *frame();
-		wxBoxSizer *sizer();
-		ToolBar *toolbar();
-		MenuBar *menubar();
-		MainPanel *main_panel();
-		SidePanel *side_panel();
-		Mouse *mouse();
-		Construction *construction();
+		Frame()							noexcept;	///<Creates window and it's components
+		wxFrame *frame()				noexcept;	///<Returns wxWidget's window
+		wxBoxSizer *sizer()				noexcept;	///<Returns sizer of wxWidget's window
+		ToolBar *toolbar()				noexcept;	///<Returns tool bar
+		MenuBar *menubar()				noexcept;	///<Returns menu bar
+		MainPanel *main_panel()			noexcept;	///<Returns main panel
+		SidePanel *side_panel()			noexcept;	///<Returns side panel
+		Construction *construction()	noexcept;	///<Returns construction being edited
 	};
 }
 

@@ -8,16 +8,17 @@
 	Reinventing bicycles since 2020
 */
 
+#include "../header/p6_main_panel.hpp"
 #include "../header/p6_frame.hpp"
 
-wxPoint p6::MainPanel::_real_to_pixel(Coord coord, wxPoint offset) const
+wxPoint p6::MainPanel::_real_to_pixel(Coord coord, wxPoint offset) const noexcept
 {
 	return offset + wxPoint(
-		_panel->GetSize().x / 2 + (coord.x - center.x) * pixels_in_meter,
-		_panel->GetSize().y / 2 - (coord.y - center.y) * pixels_in_meter);
+		_panel->GetSize().x / 2 + (coord.x - _center.x) * pixels_in_meter,
+		_panel->GetSize().y / 2 - (coord.y - _center.y) * pixels_in_meter);
 }
 
-p6::MainPanel::MainPanel(Frame *frame) :
+p6::MainPanel::MainPanel(Frame *frame) noexcept :
 	_frame(frame),
 	_panel(new wxPanel(frame->frame()))
 {
@@ -25,17 +26,17 @@ p6::MainPanel::MainPanel(Frame *frame) :
 	frame->sizer()->Add(_panel, 4, wxEXPAND | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
 }
 
-wxPanel *p6::MainPanel::panel()
+wxPanel *p6::MainPanel::panel() noexcept
 {
 	return _panel;
 }
 
-wxSize p6::MainPanel::size() const
+wxSize p6::MainPanel::size() const noexcept
 {
 	return _panel->GetSize();
 }
 
-void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
+void p6::MainPanel::render(wxDC *dc, wxPoint offset) const noexcept
 {
 	bool sim = _frame->toolbar()->simulation();
 	Construction *con = _frame->construction();
@@ -95,17 +96,10 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 	//Draw forces
 	for (uint i = 0; i < con->get_force_count(); i++)
 	{
-		const real angle = 30.0 * (M_PI / 180.0);
-		const real coef = 0.1;
-
 		Coord a = con->get_node_coord(con->get_force_node(i));
 		Coord ba = con->get_force_direction(i) * meters_in_newton * (-1.0);
-		Coord bc = Coord(
-			cos(angle) * ba.x - sin(angle) * ba.y,
-			sin(angle) * ba.x + cos(angle) * ba.y) * coef;
-		Coord bd = Coord(
-			cos(angle) * ba.x + sin(angle) * ba.y,
-			-sin(angle) * ba.x + cos(angle) * ba.y) * coef;
+		Coord bc = ba.rotate(30.0 * (pi() / 180.0)) * 0.1;
+		Coord bd = ba.rotate(-30.0 * (pi() / 180.0)) * 0.1;
 
 		wxPoint pa = _real_to_pixel(a, offset);
 		wxPoint pb = _real_to_pixel(a - ba, offset);
@@ -136,17 +130,26 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const
 	}
 
 	//Draw selection rect
-	if (selected_area_draw)
+	if (_area_select_draw)
 	{
 		dc->SetPen(wxPen(wxColour(0, 0, 0), 1, wxPENSTYLE_SHORT_DASH));
-		dc->DrawLine(selected_area_points[1], wxPoint(selected_area_points[0].x, selected_area_points[1].y));
-		dc->DrawLine(wxPoint(selected_area_points[0].x, selected_area_points[1].y), selected_area_points[0]);
-		dc->DrawLine(selected_area_points[0], wxPoint(selected_area_points[1].x, selected_area_points[0].y));
-		dc->DrawLine(wxPoint(selected_area_points[1].x, selected_area_points[0].y), selected_area_points[1]);
+		dc->DrawLine(_area_select_current, wxPoint(_area_select_begin.x, _area_select_current.y));
+		dc->DrawLine(wxPoint(_area_select_begin.x, _area_select_current.y), _area_select_begin);
+		dc->DrawLine(_area_select_begin, wxPoint(_area_select_current.x, _area_select_begin.y));
+		dc->DrawLine(wxPoint(_area_select_current.x, _area_select_begin.y), _area_select_current);
+	}
+
+	//Draw anchor
+	if (_frame->toolbar()->tool() == ToolBar::Tool::move)
+	{
+		wxPoint point = _real_to_pixel(_frame->side_panel()->move_bar()->anchor(), offset);
+		dc->SetPen(wxPen(wxColour(0, 0, 0), 1));
+		dc->SetBrush(wxBrush(wxColour(255, 0, 0)));
+		dc->DrawCircle(point, 5);
 	}
 }
 
-p6::MainPanel::Item p6::MainPanel::get_item(wxPoint point) const
+p6::MainPanel::Item p6::MainPanel::get_item(wxPoint point) const noexcept
 {
 	const Construction *con = _frame->construction();
 	Coord coord = pixel_to_real(point);
@@ -201,29 +204,45 @@ p6::MainPanel::Item p6::MainPanel::get_item(wxPoint point) const
 	return item;
 }
 
-p6::Coord p6::MainPanel::pixel_to_real(wxPoint point) const
+p6::Coord p6::MainPanel::pixel_to_real(wxPoint point) const noexcept
 {
 	return Coord(
-		center.x + (real)(point.x - _panel->GetSize().x / 2) / pixels_in_meter,
-		center.y + (real)(_panel->GetSize().y / 2 - point.y) / pixels_in_meter);
+		_center.x + (real)(point.x - _panel->GetSize().x / 2) / pixels_in_meter,
+		_center.y + (real)(_panel->GetSize().y / 2 - point.y) / pixels_in_meter);
 }
 
-void p6::MainPanel::select_items()
+void p6::MainPanel::area_select_begin(wxPoint point) noexcept
+{
+	_area_select_begin = point;
+	_area_select_current = point;
+	_area_select_draw = true;
+}
+
+void p6::MainPanel::area_select_continue(wxPoint point) noexcept
+{
+	if (_area_select_current != point)
+	{
+		_area_select_current = point;
+		need_refresh_image();
+	}
+}
+
+void p6::MainPanel::area_select_end(wxPoint point) noexcept
 {
 	selected_nodes.clear();
 	selected_sticks.clear();
 	selected_forces.clear();
 	Coord coords[2];
-	coords[0] = pixel_to_real(selected_area_points[0]);
-	coords[1] = pixel_to_real(selected_area_points[1]);
+	coords[0] = pixel_to_real(_area_select_begin);
+	coords[1] = pixel_to_real(point);
 	if (coords[0].x > coords[1].x) { wxCoord b = coords[1].x; coords[1].x = coords[0].x; coords[0].x = b; }
 	if (coords[0].y > coords[1].y) { wxCoord b = coords[1].y; coords[1].y = coords[0].y; coords[0].y = b; }
 	const Construction *con = _frame->construction();
 
 	for (uint i = 0; i < con->get_node_count(); i++)
 	{
-		if(coords[0].x < con->get_node_coord(i).x && con->get_node_coord(i).x < coords[1].x
-		&& coords[0].y < con->get_node_coord(i).y && con->get_node_coord(i).y < coords[1].y)
+		if (coords[0].x < con->get_node_coord(i).x && con->get_node_coord(i).x < coords[1].x
+			&& coords[0].y < con->get_node_coord(i).y && con->get_node_coord(i).y < coords[1].y)
 			selected_nodes.insert(i);
 	}
 
@@ -241,10 +260,24 @@ void p6::MainPanel::select_items()
 			selected_forces.insert(i);
 	}
 
-	need_refresh();
+	need_refresh_image();
+	_frame->side_panel()->refresh_controls();
 }
 
-void p6::MainPanel::need_refresh()
+void p6::MainPanel::drag_begin(wxPoint point) noexcept
+{
+	_old_center = _center;
+	_drag_begin = point;
+}
+
+void p6::MainPanel::drag_continue(wxPoint point) noexcept
+{
+	_center.x = _old_center.x + (_drag_begin.x - point.x) / pixels_in_meter;
+	_center.y = _old_center.y + (point.y - _drag_begin.y) / pixels_in_meter;
+	need_refresh_image();
+}
+
+void p6::MainPanel::need_refresh_image() noexcept
 {
 	_frame->frame()->Refresh();
 }

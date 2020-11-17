@@ -15,11 +15,11 @@
 
 namespace p6
 {
-	///Material. Defines properties of stick
+	///Material, together with length defines properties of stick
 	class Material
 	{
 	protected:
-		String _name;
+		String _name;											///<Material's name
 
 	public:
 		///Type of material
@@ -29,11 +29,11 @@ namespace p6
 			nonlinear
 		};
 
-		String name() const;							///< returns name of material
-		virtual Type type() const noexcept = 0;			///< Returns type of material
-		virtual real stress(real strain) const = 0;		///< Returns stress in dependence of strain
-		virtual real derivative(real strain) const = 0;	///< Returns derivative of stress by strain
-		virtual ~Material() = 0;						///< Destroys material
+		String name()						const noexcept;		///<Returns name of material
+		virtual Type type()					const noexcept = 0;	///<Returns type of material
+		virtual real stress(real strain)	const noexcept = 0;	///<Returns stress in dependence of strain
+		virtual real derivative(real strain)const noexcept = 0;	///<Returns derivative of stress by strain
+		virtual ~Material()					noexcept = 0;		///<Destroys material
 	};
 }
 

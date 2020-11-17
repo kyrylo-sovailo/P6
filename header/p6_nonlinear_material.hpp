@@ -17,7 +17,7 @@
 
 namespace p6
 {
-	///Material with arbitrary dependence of stress from strain
+	///Material with arbitrary dependence of stress in respect to strain
 	class NonlinearMaterial : public Material
 	{
 	private:
@@ -69,20 +69,20 @@ namespace p6
 			real derivative;
 		};
 
-		mutable real _last_strain;										///< Last given strain
-		mutable real _last_stress;										///< Stress from last given strain
-		mutable real _last_derivative;									///< Derivative from last given strain
-		String _formula;												///< Formula of stress in dependence of strain
-		std::vector<Operation> _operations;								///< Translated bytecode of the formula
+		mutable real _last_strain;									///<Last given strain
+		mutable real _last_stress;									///<Stress from last given strain
+		mutable real _last_derivative;								///<Derivative from last given strain
+		String _formula;											///<Formula of stress in dependence of strain
+		std::vector<Operation> _operations;							///<Translated byte-code of the formula
 
-		void _calculate() const;										///< Calculates stress and derivative from strain
+		void _calculate() const noexcept;							///<Calculates stress and derivative from strain
 
 	public:
-		NonlinearMaterial(const String &name, const String &formula);	///< Creates material from stress from strain formula
-		const String &formula();										///< Returns constant reference to formula
-		virtual Type type() const noexcept;								///< Returns type of material
-		virtual real stress(real strain) const;							///< Returns stress in dependence of strain
-		virtual real derivative(real strain) const;						///< Returns derivative of stress by strain
+		NonlinearMaterial(const String name, const String formula);	///<Creates material from stress from strain formula
+		String formula()							const noexcept;	///<Returns constant reference to formula
+		virtual Type type()							const noexcept;	///<Returns type of material
+		virtual real stress(real strain)			const noexcept;	///<Returns stress in dependence of strain
+		virtual real derivative(real strain)		const noexcept;	///<Returns derivative of stress by strain
 	};
 }
 

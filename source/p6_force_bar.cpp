@@ -22,10 +22,10 @@ void p6::ForceBar::_on_x(wxCommandEvent &e)
 		{
 			Coord direction = _frame->construction()->get_force_direction(*i);
 			direction.x = x;
-			_modulus_text->ChangeValue(real_to_string(direction.modulus()));
+			_modulus_text->ChangeValue(real_to_string(direction.norm()));
 			_angle_text->ChangeValue(real_to_string(180.0 * direction.angle() / pi()));
 			_frame->construction()->set_force_direction(*i, direction);
-			_frame->main_panel()->need_refresh();
+			_frame->main_panel()->need_refresh_image();
 		}
 	}
 }
@@ -39,10 +39,10 @@ void p6::ForceBar::_on_y(wxCommandEvent &e)
 		for (auto i = selected_forces->cbegin(); i != selected_forces->cend(); i++) {
 			Coord direction = _frame->construction()->get_force_direction(*i);
 			direction.y = y;
-			_modulus_text->ChangeValue(real_to_string(direction.modulus()));
+			_modulus_text->ChangeValue(real_to_string(direction.norm()));
 			_angle_text->ChangeValue(real_to_string(180.0 * direction.angle() / pi()));
 			_frame->construction()->set_force_direction(*i, direction);
-			_frame->main_panel()->need_refresh();
+			_frame->main_panel()->need_refresh_image();
 		}
 	}
 }
@@ -60,7 +60,7 @@ void p6::ForceBar::_on_modulus(wxCommandEvent &e)
 			_x_text->ChangeValue(real_to_string(direction.x));
 			_y_text->ChangeValue(real_to_string(direction.y));
 			_frame->construction()->set_force_direction(*i, direction);
-			_frame->main_panel()->need_refresh();
+			_frame->main_panel()->need_refresh_image();
 		}
 	}
 }
@@ -73,17 +73,17 @@ void p6::ForceBar::_on_angle(wxCommandEvent &e)
 		std::set<uint> *selected_forces = &_frame->main_panel()->selected_forces;
 		for (auto i = selected_forces->cbegin(); i != selected_forces->cend(); i++)
 		{
-			real modulus = _frame->construction()->get_force_direction(*i).modulus();
+			real modulus = _frame->construction()->get_force_direction(*i).norm();
 			Coord direction = Coord(modulus * sin(a), modulus * cos(a));
 			_x_text->ChangeValue(real_to_string(direction.x));
 			_y_text->ChangeValue(real_to_string(direction.y));
 			_frame->construction()->set_force_direction(*i, direction);
-			_frame->main_panel()->need_refresh();
+			_frame->main_panel()->need_refresh_image();
 		}
 	}
 }
 
-p6::ForceBar::ForceBar(Frame *frame) : _frame(frame)
+p6::ForceBar::ForceBar(Frame *frame)  noexcept : _frame(frame)
 {
 	wxWindow *parent = frame->side_panel()->panel();
 	
@@ -117,7 +117,7 @@ p6::ForceBar::ForceBar(Frame *frame) : _frame(frame)
 	_angle_text->Show(false);
 }
 
-void p6::ForceBar::show()
+void p6::ForceBar::show() noexcept
 {
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
 	sizer->Add(_x_static,		0, wxEXPAND | wxALL, 10);
@@ -132,7 +132,7 @@ void p6::ForceBar::show()
 	_frame->side_panel()->panel()->Layout();
 }
 
-void p6::ForceBar::refresh()
+void p6::ForceBar::refresh_controls() noexcept
 {
 	bool sim = _frame->toolbar()->simulation();
 	std::set<uint> *selected_forces = &_frame->main_panel()->selected_forces;
@@ -166,10 +166,10 @@ void p6::ForceBar::refresh()
 	//Set modulus
 	{
 		bool modulus_equal = true;
-		real modulus_value = _frame->construction()->get_force_direction(*selected_forces->cbegin()).modulus();
+		real modulus_value = _frame->construction()->get_force_direction(*selected_forces->cbegin()).norm();
 		for (auto i = ++selected_forces->cbegin(); i != selected_forces->cend(); i++)
 		{
-			if (modulus_value != _frame->construction()->get_force_direction(*i).modulus()) { modulus_equal = false; break; }
+			if (modulus_value != _frame->construction()->get_force_direction(*i).norm()) { modulus_equal = false; break; }
 		}
 		if (modulus_equal) _modulus_text->ChangeValue(real_to_string(modulus_value));
 		else _modulus_text->ChangeValue("");
@@ -190,7 +190,7 @@ void p6::ForceBar::refresh()
 	}
 }
 
-void p6::ForceBar::hide()
+void p6::ForceBar::hide() noexcept
 {
 	_frame->side_panel()->sizer()->ShowItems(false);
 	_frame->side_panel()->sizer()->Clear();

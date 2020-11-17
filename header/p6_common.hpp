@@ -16,43 +16,44 @@
 namespace p6
 {
 
-	///Real number used in P6
+	///Real number
 	typedef double real;
 
-	///uinteger number used in P6
+	///Unsigned integer number
 	typedef size_t uint;
 
-	///Square of real number
+	///Returns square of real number
 	real sqr(real x) noexcept;
 
-	///Pi number
+	///Returns pi number
 	real pi() noexcept;
 
 	///Coordinate vector
 	struct Coord
 	{
-		real x;
-		real y;
-		Coord()								noexcept;
-		Coord(real x, real y)				noexcept;
-		Coord operator+(Coord coord)		const noexcept;
-		Coord operator-(Coord coord)		const noexcept;
-		Coord operator*(real coef)			const noexcept;
-		Coord operator/(real coef)			const noexcept;
-		real distance(Coord coord)			const noexcept;
-		real distance(const Coord coord[2])	const noexcept;
-		real modulus()						const noexcept;
-		real angle()						const noexcept;
+		real x;												///<X coordinate
+		real y;												///<Y coordinate
+		Coord()								noexcept;		///<Creates zero coordinates
+		Coord(real x, real y)				noexcept;		///<Creates coordinates with given components
+		Coord operator+(Coord coord)		const noexcept;	///<Returns sum of two coordinates
+		Coord operator-(Coord coord)		const noexcept;	///<Returns difference between two coordinates
+		Coord operator*(real coef)			const noexcept;	///<Returns coordinates multiplied with scalar value
+		Coord operator/(real coef)			const noexcept;	///<Returns coordinates divided with scalar value
+		real distance(Coord coord)			const noexcept;	///<Returns distance to coordinates
+		real distance(const Coord coord[2])	const noexcept;	///<Returns distance to line or NaN
+		real norm()							const noexcept;	///<Returns norm of coordinates (considered as vector)
+		real angle()						const noexcept;	///<Returns angle of coordinates (considered as vector)
+		Coord rotate(real angle)			const noexcept;	///<Returns coordinates rotated by some angle (considered as vector)
 	};
 
 	///String used in P6
 	typedef std::string String;
 	
 	///Converts string ro real
-	real string_to_real(const String s);
+	real string_to_real(const String s) noexcept;
 
 	///Converts real to string
-	String real_to_string(real r);
+	String real_to_string(real r) noexcept;
 
 }
 

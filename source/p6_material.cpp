@@ -10,7 +10,7 @@
 
 #include "../header/p6_material.hpp"
 
-p6::String p6::Material::name() const
+p6::String p6::Material::name() const noexcept
 {
 	return _name;
 }

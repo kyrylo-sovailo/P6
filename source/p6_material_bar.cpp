@@ -76,7 +76,7 @@ void p6::MaterialBar::_on_delete(wxCommandEvent &e)
 	}
 }
 
-p6::MaterialBar::MaterialBar(Frame *frame) : _frame(frame)
+p6::MaterialBar::MaterialBar(Frame *frame)  noexcept : _frame(frame)
 {
 	wxWindow *parent = frame->side_panel()->panel();
 
@@ -106,7 +106,7 @@ p6::MaterialBar::MaterialBar(Frame *frame) : _frame(frame)
 	parent->Bind(wxEVT_BUTTON, &MaterialBar::_on_delete, this, _button_delete->GetId());
 }
 
-void p6::MaterialBar::show()
+void p6::MaterialBar::show() noexcept
 {
 	int c = _material_choice->GetSelection();
 	if (c == wxNOT_FOUND)
@@ -138,7 +138,7 @@ void p6::MaterialBar::show()
 	_frame->side_panel()->panel()->Layout();
 }
 
-void p6::MaterialBar::refresh()
+void p6::MaterialBar::refresh_controls() noexcept
 {
 	bool sim = _frame->toolbar()->simulation();
 	_name_text->Enable(!sim);
@@ -149,7 +149,7 @@ void p6::MaterialBar::refresh()
 	_button_delete->Enable(!sim);
 }
 
-void p6::MaterialBar::refresh_materials()
+void p6::MaterialBar::refresh_materials() noexcept
 {
 	wxWindow *parent = _frame->side_panel()->panel();
 
@@ -176,7 +176,7 @@ void p6::MaterialBar::refresh_materials()
 	parent->Bind(wxEVT_CHOICE, &MaterialBar::_on_choice, this, _material_choice->GetId());
 }
 
-void p6::MaterialBar::hide()
+void p6::MaterialBar::hide() noexcept
 {
 	_frame->side_panel()->sizer()->ShowItems(false);
 	_frame->side_panel()->sizer()->Detach(_buttons_sizer);

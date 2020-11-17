@@ -18,26 +18,27 @@ namespace p6
 {
 	class Frame;
 
+	///Window's menu bar is used mostly for file operations
 	class MenuBar
 	{
 	private:
-		Frame *_frame;
-		wxMenuBar *_menu;
-		wxMenuItem *_file_load;
-		wxMenuItem *_file_import;
-		String _file;
+		Frame *_frame;								///<Application's window				
+		wxMenuBar *_menu;							///<wxWidgets's menu
+		wxMenuItem *_file_load;						///<wxWidgets's "Load file" menu item
+		wxMenuItem *_file_import;					///<wxWidgets's "Import file" menu item
+		String _file;								///<Current file's path
 
-		void _on_menu_file_load(wxCommandEvent &e);
-		void _on_menu_file_import(wxCommandEvent &e);
-		void _on_menu_file_save(wxCommandEvent &e);
-		void _on_menu_file_save_as(wxCommandEvent &e);
-		void _on_menu_export_png(wxCommandEvent &e);
-		void _on_menu_export_jpeg(wxCommandEvent &e);
-		void _on_menu_help(wxCommandEvent &e);
+		void _on_file_load(wxCommandEvent &e);		///<Handles press on "file load" menu item, loads construction
+		void _on_file_import(wxCommandEvent &e);	///<Handles press on "file import" menu item, imports construction
+		void _on_file_save(wxCommandEvent &e);		///<Handles press on "file save" menu item, asks file name if unknown and saves construction
+		void _on_file_save_as(wxCommandEvent &e);	///<Handles press on "file save as" menu item, asks file name and saves construction to it
+		void _on_export_png(wxCommandEvent &e);		///<Handles press on "export PNG" menu item, saves construction image in PNG format
+		void _on_export_jpeg(wxCommandEvent &e);	///<Handles press on "export JPEG" menu item, saves construction image in JPEG format
+		void _on_help(wxCommandEvent &e);			///<Handles press on "help" menu item, displays help message
 
 	public:
-		MenuBar(Frame *frame);
-		void refresh();
+		MenuBar(Frame *frame)	noexcept;			///<Creates menu bar
+		void refresh_controls() noexcept;			///<Refreshes activeness of menu items
 	};
 }
 

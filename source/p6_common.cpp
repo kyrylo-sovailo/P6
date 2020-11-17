@@ -13,7 +13,7 @@
 #include <cmath>
 #include <sstream>
 
-p6::real p6::string_to_real(const String s)
+p6::real p6::string_to_real(const String s) noexcept
 {
 	std::stringstream ss;
 	real r;
@@ -22,7 +22,7 @@ p6::real p6::string_to_real(const String s)
 	else return nan("");
 }
 
-p6::String p6::real_to_string(real r)
+p6::String p6::real_to_string(real r) noexcept
 {
 	std::stringstream ss;
 	String s;
@@ -87,7 +87,7 @@ p6::real p6::Coord::distance(const Coord coord[2]) const noexcept
 		sqr(k * coord[0].y + (1.0 - k) * coord[1].y - y));
 }
 
-p6::real p6::Coord::modulus() const noexcept
+p6::real p6::Coord::norm() const noexcept
 {
 	return sqrt(sqr(x) + sqr(y));
 }
@@ -105,4 +105,9 @@ p6::real p6::Coord::angle() const noexcept
 		if (y > 0) return 2.0 * pi() - atan(x / y);
 		return 1.5 * pi() - atan(x / y);
 	}
+}
+
+p6::Coord p6::Coord::rotate(real angle) const noexcept
+{
+	return Coord(cos(angle) * x - sin(angle) * y, sin(angle) * x + cos(angle) * y);
 }

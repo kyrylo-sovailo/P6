@@ -16,11 +16,13 @@
 
 namespace p6
 {
+	///App refresents application
 	class App : public wxApp
 	{
 	private:
-		Frame *_frame;
-		virtual bool OnInit();
+		Frame *_frame;			///<Pointer to application's window
+
+		virtual bool OnInit();	///< Handler that is called after application's creations. Creates p6::Frame
 	};
 }
 

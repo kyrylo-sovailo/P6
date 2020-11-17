@@ -19,25 +19,25 @@ namespace p6
 {
 	class Frame;
 
+	///Mouse events handler
 	struct Mouse
 	{
 	private:
-		Frame *_frame;
-		bool _pressed;
-		MainPanel::Item _pressed_item;
-		wxPoint _pressed_point;
-		bool _moving;
-		int _wheel;
-		int _wheel_force;
-		Coord _old_center;
+		Frame *_frame;							///<Application's window
+		bool _pressed;							///<True if mouse button is pressed
+		bool _moving;							///<True if mouse button was moved during press
+		MainPanel::Item _pressed_item;			///<Item mouse was pressed on
+		wxPoint _pressed_point;					///<Point mouse was pressed on
+		int _wheel;								///<State of mouse wheel used for scaling coordinates
+		int _wheel_force;						///<State of mouse wheel used for scaling forces
 
-		void _on_left_down(wxMouseEvent &e);
-		void _on_left_up(wxMouseEvent &e);
-		void _on_move(wxMouseEvent &e);
-		void _on_wheel(wxMouseEvent &e);
+		void _on_left_down(wxMouseEvent &e);	///<Handles mouse press event
+		void _on_left_up(wxMouseEvent &e);		///<Handles mouse unpress event
+		void _on_move(wxMouseEvent &e);			///<Handles mouse move event
+		void _on_wheel(wxMouseEvent &e);		///<Handles mouse wheel rotation event
 
 	public:
-		Mouse(Frame *frame);
+		Mouse(Frame *frame) noexcept;			///<Creates mouse event handler
 	};
 }
 

@@ -19,11 +19,11 @@ void p6::Frame::_on_paint(wxPaintEvent &e)
 
 void p6::Frame::_on_size(wxSizeEvent &e)
 {
-	_main_panel.need_refresh();
+	_main_panel.need_refresh_image();
 	_frame->Layout();
 }
 
-p6::Frame::Frame() :
+p6::Frame::Frame()  noexcept :
 	_frame(new wxFrame(nullptr, wxID_ANY, "P6")),
 	_sizer(new wxBoxSizer(wxHORIZONTAL)),
 	_menubar(this),
@@ -38,42 +38,37 @@ p6::Frame::Frame() :
 	_frame->Show();
 }
 
-wxFrame *p6::Frame::frame()
+wxFrame *p6::Frame::frame() noexcept
 {
 	return _frame;
 }
 
-wxBoxSizer *p6::Frame::sizer()
+wxBoxSizer *p6::Frame::sizer() noexcept
 {
 	return _sizer;
 }
 
-p6::ToolBar *p6::Frame::toolbar()
+p6::ToolBar *p6::Frame::toolbar() noexcept
 {
 	return &_toolbar;
 }
 
-p6::MenuBar *p6::Frame::menubar()
+p6::MenuBar *p6::Frame::menubar() noexcept
 {
 	return &_menubar;
 }
 
-p6::MainPanel *p6::Frame::main_panel()
+p6::MainPanel *p6::Frame::main_panel() noexcept
 {
 	return &_main_panel;
 }
 
-p6::SidePanel *p6::Frame::side_panel()
+p6::SidePanel *p6::Frame::side_panel() noexcept
 {
 	return &_side_panel;
 }
 
-p6::Mouse *p6::Frame::mouse()
-{
-	return &_mouse;
-}
-
-p6::Construction *p6::Frame::construction()
+p6::Construction *p6::Frame::construction() noexcept
 {
 	return &_construction;
 }

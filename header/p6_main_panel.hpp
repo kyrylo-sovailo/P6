@@ -11,6 +11,7 @@
 #ifndef P6_MAIN_PANEL
 #define P6_MAIN_PANEL
 
+#include "p6_common.hpp"
 #include <wx/wx.h>
 #include <set>
 
@@ -18,16 +19,23 @@ namespace p6
 {
 	class Frame;
 
+	///Main panel that displays construction graphically
 	class MainPanel
 	{
 	private:
-		Frame *_frame;
-		wxPanel *_panel;
-		
-		wxPoint _real_to_pixel(Coord coord, wxPoint offset)	const;
+		Frame *_frame;					///<Application's window
+		wxPanel *_panel;				///<wxWidet's panel
+		wxPoint _area_select_begin;		///<Begin point of area selecting
+		wxPoint _area_select_current;	///<Current point of area selecting (needs to be saved because rendering happens in another function)
+		bool _area_select_draw;			///<Indicator if area is being selected
+		Coord _center;					///<Coordinates of view center
+		Coord _old_center;				///<Coordinates of old view center when being dragged
+		wxPoint _drag_begin;			///<Begin point of dragging
+
+		wxPoint _real_to_pixel(Coord coord, wxPoint offset)	const noexcept;	///<Transforms meter coordinates to pixel coordinates
 
 	public:
-		///Structure representing item type and it's inddex
+		///Item that could be displayed on main panel
 		struct Item
 		{
 			enum class Type
@@ -35,30 +43,32 @@ namespace p6
 				no,
 				node,
 				stick,
-				force
+				force,
+				anchor
 			};
 
 			Type type;
 			uint index;
 		};
 
-		real pixels_in_meter = 30.0;
-		real meters_in_newton = 1.0;
-		Coord center;
-		std::set<uint> selected_nodes;
-		std::set<uint> selected_sticks;
-		std::set<uint> selected_forces;
-		wxPoint selected_area_points[2];
-		bool selected_area_draw;
-
-		MainPanel(Frame *frame);
-		wxPanel *panel();
-		wxSize size()							const;
-		void render(wxDC *dc, wxPoint offset)	const;
-		Item get_item(wxPoint a)				const;
-		Coord pixel_to_real(wxPoint point)		const;
-		void select_items();
-		void need_refresh();
+		real pixels_in_meter = 30.0;								///<Pixels per meter rate
+		real meters_in_newton = 1.0;								///<Meters on newton rate (to display forces)
+		std::set<uint> selected_nodes;								///<Selected nodes
+		std::set<uint> selected_sticks;								///<Selected sticks
+		std::set<uint> selected_forces;								///<Selected forces
+		
+		MainPanel(Frame *frame)					noexcept;			///<Creates main panel
+		wxPanel *panel()						noexcept;			///<Returns wxWidet's panel
+		wxSize size()							const noexcept;		///<Returns Panel's size
+		void render(wxDC *dc, wxPoint offset)	const noexcept;		///<Renders into given drawing context with given offset
+		Item get_item(wxPoint point)			const noexcept;		///<Returns item located in given coordinates
+		Coord pixel_to_real(wxPoint point)		const noexcept;		///<Transforms pixel coordinates to meter coordinates
+		void area_select_begin(wxPoint point)	noexcept;			///<Begins area selecting
+		void area_select_continue(wxPoint point)noexcept;			///<Continues area selecting
+		void area_select_end(wxPoint point)		noexcept;			///<Ends area selecting, selects items
+		void drag_begin(wxPoint point)			noexcept;			///<Begins view dragging
+		void drag_continue(wxPoint point)		noexcept;			///<Continues view dragging
+		void need_refresh_image()				noexcept;			///<Indicats that image needs to be redrawn
 	};
 }
 

@@ -22,10 +22,12 @@ namespace p6
 {
 	class Frame;
 
+	///Side panel is container that displays one of bars
 	class SidePanel
 	{
 	private:
-		enum class Mode
+		///List of available bars
+		enum class Bar
 		{
 			node,
 			stick,
@@ -34,24 +36,25 @@ namespace p6
 			material
 		};
 
-		Frame *_frame;
-		wxPanel *_panel;
-		wxBoxSizer *_sizer;
-		NodeBar _node_bar;
-		StickBar _stick_bar;
-		ForceBar _force_bar;
-		MaterialBar _material_bar;
-		MoveBar _move_bar;
-		Mode _mode = Mode::material;
+		Frame *_frame;						///<Application's window
+		wxPanel *_panel;					///<wxWidget's panel
+		wxBoxSizer *_sizer;					///<Sizer of wxWidget's panel
+		NodeBar _node_bar;					///<Node bar
+		StickBar _stick_bar;				///<Stick bar
+		ForceBar _force_bar;				///<Force bar
+		MaterialBar _material_bar;			///<Material bar
+		MoveBar _move_bar;					///<Move bar
+		Bar _bar = Bar::material;			///<Bar being displayed
 
-		void _switch(Mode mode);
+		void _switch(Bar bar);				///<Show certain bar
 
 	public:
-		SidePanel(Frame *frame);
-		wxPanel *panel();
-		wxBoxSizer *sizer();
-		void refresh();
-		void refresh_materials();
+		SidePanel(Frame *frame)	noexcept;	///<Creates side panel
+		wxPanel *panel()		noexcept;	///<Returns wxWidget's panel
+		wxBoxSizer *sizer()		noexcept;	///<Returns wxWidget's sizer
+		MoveBar *move_bar()		noexcept;	///<Returns move bar
+		void refresh_controls()	noexcept;	///<Refreshes contents of displayed bar's components, except of material choices
+		void refresh_materials()noexcept;	///<Refreshes contents of material choices
 	};
 }
 

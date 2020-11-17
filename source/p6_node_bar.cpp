@@ -18,7 +18,7 @@ void p6::NodeBar::_on_free(wxCommandEvent &e)
 	_fixed_check->SetValue(!_free_check->GetValue());
 	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		_frame->construction()->set_node_free(*i, _free_check->GetValue());
-	_frame->main_panel()->need_refresh();
+	_frame->main_panel()->need_refresh_image();
 }
 
 void p6::NodeBar::_on_fixed(wxCommandEvent &e)
@@ -27,7 +27,7 @@ void p6::NodeBar::_on_fixed(wxCommandEvent &e)
 	_free_check->SetValue(!_fixed_check->GetValue());
 	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		_frame->construction()->set_node_free(*i, _free_check->GetValue());
-	_frame->main_panel()->need_refresh();
+	_frame->main_panel()->need_refresh_image();
 }
 
 void p6::NodeBar::_on_x(wxCommandEvent &e)
@@ -42,7 +42,7 @@ void p6::NodeBar::_on_x(wxCommandEvent &e)
 			coord.x = x;
 			_frame->construction()->set_node_coord(*i, coord);
 		}
-		_frame->main_panel()->need_refresh();
+		_frame->main_panel()->need_refresh_image();
 	}
 }
 
@@ -58,11 +58,11 @@ void p6::NodeBar::_on_y(wxCommandEvent &e)
 			coord.y = y;
 			_frame->construction()->set_node_coord(*i, coord);
 		}
-		_frame->main_panel()->need_refresh();
+		_frame->main_panel()->need_refresh_image();
 	}
 }
 
-p6::NodeBar::NodeBar(Frame *frame) : _frame(frame)
+p6::NodeBar::NodeBar(Frame *frame) noexcept : _frame(frame)
 {
 	wxWindow *parent = _frame->side_panel()->panel();
 
@@ -90,7 +90,7 @@ p6::NodeBar::NodeBar(Frame *frame) : _frame(frame)
 	parent->Bind(wxEVT_TEXT, &NodeBar::_on_y, this, _y_text->GetId());
 }
 
-void p6::NodeBar::show()
+void p6::NodeBar::show() noexcept
 {
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
 	sizer->Add(_free_check,		0, wxALL | wxEXPAND, 10);
@@ -103,7 +103,7 @@ void p6::NodeBar::show()
 	_frame->side_panel()->panel()->Layout();
 }
 
-void p6::NodeBar::refresh()
+void p6::NodeBar::refresh_controls() noexcept
 {
 	Construction *con = _frame->construction();
 	bool sim = _frame->toolbar()->simulation();
@@ -150,7 +150,7 @@ void p6::NodeBar::refresh()
 	}
 }
 
-void p6::NodeBar::hide()
+void p6::NodeBar::hide() noexcept
 {
 	_frame->side_panel()->sizer()->ShowItems(false);
 	_frame->side_panel()->sizer()->Clear();

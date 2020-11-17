@@ -17,27 +17,28 @@ namespace p6
 {
 	class Frame;
 
+	///Node bar is used to read and edit data of selected nodes in text form, one of possible contents of side bar
 	class NodeBar
 	{
 	private:
-		Frame *_frame;
-		wxCheckBox *_free_check;
-		wxCheckBox *_fixed_check;
-		wxStaticText *_x_static;
-		wxTextCtrl *_x_text;
-		wxStaticText *_y_static;
-		wxTextCtrl *_y_text;
+		Frame *_frame;						///<Application's window
+		wxCheckBox *_free_check;			///<Check box deciding if all nodes are free
+		wxCheckBox *_fixed_check;			///<Check box deciding if all nodes are fixed
+		wxStaticText *_x_static;			///<Text explaining nodes' X coordinate edit box
+		wxTextCtrl *_x_text;				///<Nodes' X coordinate edit box
+		wxStaticText *_y_static;			///<Text explaining nodes' Y coordinate edit box
+		wxTextCtrl *_y_text;				///<Nodes' Y coordinate edit box
 
-		void _on_free(wxCommandEvent &e);
-		void _on_fixed(wxCommandEvent &e);
-		void _on_x(wxCommandEvent &e);
-		void _on_y(wxCommandEvent &e);
+		void _on_free(wxCommandEvent &e);	///<Handles checking "free" check box, frees all nodes
+		void _on_fixed(wxCommandEvent &e);	///<Handles checking "fixed" check box, fixes all nodes
+		void _on_x(wxCommandEvent &e);		///<Handles text input in node's X coordinate edit box, sets X coordinate of all selected nodes
+		void _on_y(wxCommandEvent &e);		///<Handles text input in node's Y coordinate edit box, sets Y coordinate of all selected nodes
 
 	public:
-		NodeBar(Frame *frame);
-		void show();
-		void refresh();
-		void hide();
+		NodeBar(Frame *frame)	noexcept;	///<Creates node bar
+		void show()				noexcept;	///<Adds bar's components to side bar
+		void refresh_controls()	noexcept;	///<Refreshes contents and activeness of bar's components
+		void hide()				noexcept;	///<Removes bar's components from side bar
 	};
 }
 

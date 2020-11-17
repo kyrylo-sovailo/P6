@@ -33,7 +33,7 @@ void p6::StickBar::_on_material(wxCommandEvent &e)
 	}
 }
 
-p6::StickBar::StickBar(Frame *frame) : _frame(frame)
+p6::StickBar::StickBar(Frame *frame)  noexcept : _frame(frame)
 {
 	wxWindow *parent = frame->side_panel()->panel();
 
@@ -74,7 +74,7 @@ p6::StickBar::StickBar(Frame *frame) : _frame(frame)
 	_force_text->Show(false);
 }
 
-void p6::StickBar::show()
+void p6::StickBar::show() noexcept
 {
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
 	sizer->Add(_material_static,	0, wxALL | wxEXPAND, 10);
@@ -96,7 +96,7 @@ void p6::StickBar::show()
 	_frame->side_panel()->panel()->Layout();
 }
 
-void p6::StickBar::refresh()
+void p6::StickBar::refresh_controls() noexcept
 {
 	std::set<uint> *selected_sticks = &_frame->main_panel()->selected_sticks;
 	bool sim = _frame->toolbar()->simulation();
@@ -172,7 +172,7 @@ void p6::StickBar::refresh()
 	}
 }
 
-void p6::StickBar::refresh_materials()
+void p6::StickBar::refresh_materials() noexcept
 {
 	wxWindow *parent = _frame->side_panel()->panel();
 
@@ -201,7 +201,7 @@ void p6::StickBar::refresh_materials()
 	parent->Bind(wxEVT_CHOICE, &StickBar::_on_material, this, _material_choice->GetId());
 }
 
-void p6::StickBar::hide()
+void p6::StickBar::hide() noexcept
 {
 	_frame->side_panel()->sizer()->ShowItems(false);
 	_frame->side_panel()->sizer()->Clear();

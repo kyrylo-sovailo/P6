@@ -14,7 +14,7 @@
 #include <cstring>
 #include <cassert>
 
-p6::NonlinearMaterial::NonlinearMaterial(const String &name, const String &formula)
+p6::NonlinearMaterial::NonlinearMaterial(const String name, const String formula)
 {
 	if (name == "") throw std::runtime_error("Name of material cannot be empty");
 	_name = name;
@@ -214,7 +214,7 @@ p6::NonlinearMaterial::NonlinearMaterial(const String &name, const String &formu
 	}
 }
 
-const p6::String &p6::NonlinearMaterial::formula()
+p6::String p6::NonlinearMaterial::formula() const noexcept
 {
 	return _formula;
 }
@@ -224,7 +224,7 @@ p6::Material::Type p6::NonlinearMaterial::type() const noexcept
 	return p6::Material::Type::nonlinear;
 }
 
-p6::real p6::NonlinearMaterial::stress(real strain) const
+p6::real p6::NonlinearMaterial::stress(real strain) const noexcept
 {
 	if (strain != _last_strain)
 	{
@@ -234,7 +234,7 @@ p6::real p6::NonlinearMaterial::stress(real strain) const
 	return _last_stress;
 }
 
-p6::real p6::NonlinearMaterial::derivative(real strain) const
+p6::real p6::NonlinearMaterial::derivative(real strain) const noexcept
 {
 	if (strain != _last_strain)
 	{
@@ -244,7 +244,7 @@ p6::real p6::NonlinearMaterial::derivative(real strain) const
 	return _last_derivative;
 }
 
-void p6::NonlinearMaterial::_calculate() const
+void p6::NonlinearMaterial::_calculate() const noexcept
 {
 	std::vector<StackElement> stack;
 

@@ -18,7 +18,7 @@
 class p6::Construction::Vector : public Eigen::Vector<p6::real, Eigen::Dynamic> {};
 class p6::Construction::Matrix : public Eigen::Matrix<p6::real, Eigen::Dynamic, Eigen::Dynamic> {};
 
-p6::uint p6::Construction::create_node(Coord coord, bool free)
+p6::uint p6::Construction::create_node(Coord coord, bool free) noexcept
 {
 	assert(!_simulation);
 	assert(coord.x == coord.x);
@@ -30,7 +30,7 @@ p6::uint p6::Construction::create_node(Coord coord, bool free)
 	return _node.size() - 1;
 }
 
-void p6::Construction::delete_node(uint node)
+void p6::Construction::delete_node(uint node) noexcept
 {
 	assert(!_simulation);
 	for (uint i = _stick.size() - 1; i != (uint)-1; i--)
@@ -53,7 +53,7 @@ void p6::Construction::delete_node(uint node)
 	_node.erase(_node.cbegin() + node);
 }
 
-void p6::Construction::set_node_coord(uint node, Coord coord)
+void p6::Construction::set_node_coord(uint node, Coord coord) noexcept
 {
 	assert(!_simulation);
 	assert(coord.x == coord.x);
@@ -61,28 +61,28 @@ void p6::Construction::set_node_coord(uint node, Coord coord)
 	_node[node].coord = coord;
 }
 
-void p6::Construction::set_node_free(uint node, bool free)
+void p6::Construction::set_node_free(uint node, bool free) noexcept
 {
 	assert(!_simulation);
 	_node[node].free = free;
 }
 
-p6::uint p6::Construction::get_node_count() const
+p6::uint p6::Construction::get_node_count() const noexcept
 {
 	return _node.size();
 }
 
-p6::Coord p6::Construction::get_node_coord(uint node) const
+p6::Coord p6::Construction::get_node_coord(uint node) const noexcept
 {
 	return _simulation ? _node[node].coord_simulated : _node[node].coord;
 }
 
-bool p6::Construction::get_node_free(uint node) const
+bool p6::Construction::get_node_free(uint node) const noexcept
 {
 	return _node[node].free;
 }
 
-p6::uint p6::Construction::create_stick(const uint node[2], uint material, real area)
+p6::uint p6::Construction::create_stick(const uint node[2], uint material, real area) noexcept
 {
 	assert(!_simulation);
 	assert(area >= 0);
@@ -105,47 +105,47 @@ p6::uint p6::Construction::create_stick(const uint node[2], uint material, real 
 	return _stick.size() - 1;
 }
 
-void p6::Construction::delete_stick(uint stick)
+void p6::Construction::delete_stick(uint stick) noexcept
 {
 	assert(!_simulation);
 	_stick.erase(_stick.cbegin() + stick);
 }
 
-void p6::Construction::set_stick_material(uint stick, uint material)
+void p6::Construction::set_stick_material(uint stick, uint material) noexcept
 {
 	assert(!_simulation);
 	_stick[stick].material = material;
 }
 
-void p6::Construction::set_stick_area(uint stick, real area)
+void p6::Construction::set_stick_area(uint stick, real area) noexcept
 {
 	assert(!_simulation);
 	assert(area == area);
 	_stick[stick].area = area;
 }
 
-p6::uint p6::Construction::get_stick_count() const
+p6::uint p6::Construction::get_stick_count() const noexcept
 {
 	return _stick.size();
 }
 
-p6::uint p6::Construction::get_stick_material(uint stick) const
+p6::uint p6::Construction::get_stick_material(uint stick) const noexcept
 {
 	return _stick[stick].material;
 }
 
-p6::real p6::Construction::get_stick_area(uint stick) const
+p6::real p6::Construction::get_stick_area(uint stick) const noexcept
 {
 	return _stick[stick].area;
 }
 
-void p6::Construction::get_stick_node(uint stick, uint node[2]) const
+void p6::Construction::get_stick_node(uint stick, uint node[2]) const noexcept
 {
 	node[0] = _stick[stick].node[0];
 	node[1] = _stick[stick].node[1];
 }
 
-p6::real p6::Construction::get_stick_length(uint stick) const
+p6::real p6::Construction::get_stick_length(uint stick) const noexcept
 {
 	const Node *node[2] = { &_node[_stick[stick].node[0]], &_node[_stick[stick].node[1]] };
 	return _simulation ?
@@ -153,7 +153,7 @@ p6::real p6::Construction::get_stick_length(uint stick) const
 		node[0]->coord.distance(node[1]->coord);
 }
 
-p6::real p6::Construction::get_stick_strain(uint stick) const
+p6::real p6::Construction::get_stick_strain(uint stick) const noexcept
 {
 	assert(_simulation);
 	const Node *node[2] = { &_node[_stick[stick].node[0]], &_node[_stick[stick].node[1]] };
@@ -163,13 +163,13 @@ p6::real p6::Construction::get_stick_strain(uint stick) const
 		) - 1.0;
 }
 
-p6::real p6::Construction::get_stick_force(uint stick) const
+p6::real p6::Construction::get_stick_force(uint stick) const noexcept
 {
 	assert(_simulation);
 	return _stick[stick].area * _material[_stick[stick].material]->stress(get_stick_strain(stick));
 }
 
-p6::uint p6::Construction::create_force(uint node, Coord direction)
+p6::uint p6::Construction::create_force(uint node, Coord direction) noexcept
 {
 	assert(!_simulation);
 	assert(direction.x == direction.x);
@@ -182,13 +182,13 @@ p6::uint p6::Construction::create_force(uint node, Coord direction)
 	return _force.size() - 1;
 }
 
-void p6::Construction::delete_force(uint force)
+void p6::Construction::delete_force(uint force) noexcept
 {
 	assert(!_simulation);
 	_force.erase(_force.cbegin() + force);
 }
 
-void p6::Construction::set_force_direction(uint force, Coord direction)
+void p6::Construction::set_force_direction(uint force, Coord direction) noexcept
 {
 	assert(!_simulation);
 	assert(direction.x == direction.x);
@@ -196,22 +196,22 @@ void p6::Construction::set_force_direction(uint force, Coord direction)
 	_force[force].direction = direction;
 }
 
-p6::uint p6::Construction::get_force_count() const
+p6::uint p6::Construction::get_force_count() const noexcept
 {
 	return _force.size();
 }
 
-p6::Coord p6::Construction::get_force_direction(uint force) const
+p6::Coord p6::Construction::get_force_direction(uint force) const noexcept
 {
 	return _force[force].direction;
 }
 
-p6::uint p6::Construction::get_force_node(uint force) const
+p6::uint p6::Construction::get_force_node(uint force) const noexcept
 {
 	return _force[force].node;
 }
 
-p6::uint p6::Construction::create_linear_material(const String name, real modulus)
+p6::uint p6::Construction::create_linear_material(const String name, real modulus) noexcept
 {
 	assert(!_simulation);
 	for (uint i = 0; i < _material.size(); i++)
@@ -246,7 +246,7 @@ p6::uint p6::Construction::create_nonlinear_material(const String name, const St
 	return _material.size() - 1;
 }
 
-void p6::Construction::delete_material(uint material)
+void p6::Construction::delete_material(uint material) noexcept
 {
 	assert(!_simulation);
 	for (uint i = 0; i < _stick.size(); i++)
@@ -257,28 +257,28 @@ void p6::Construction::delete_material(uint material)
 	_material.erase(_material.cbegin() + material);
 }
 
-p6::uint p6::Construction::get_material_count() const
+p6::uint p6::Construction::get_material_count() const noexcept
 {
 	return _material.size();
 }
 
-p6::String p6::Construction::get_material_name(uint material) const
+p6::String p6::Construction::get_material_name(uint material) const noexcept
 {
 	return _material[material]->name();
 }
 
-p6::Material::Type p6::Construction::get_material_type(uint material) const
+p6::Material::Type p6::Construction::get_material_type(uint material) const noexcept
 {
 	return _material[material]->type();
 }
 
-p6::real p6::Construction::get_material_modulus(uint material) const
+p6::real p6::Construction::get_material_modulus(uint material) const noexcept
 {
 	assert(_material[material]->type() == Material::Type::linear);
 	return ((LinearMaterial*)_material[material])->modulus();
 }
 
-p6::String p6::Construction::get_material_formula(uint material) const
+p6::String p6::Construction::get_material_formula(uint material) const noexcept
 {
 	assert(_material[material]->type() == Material::Type::nonlinear);
 	return ((NonlinearMaterial*)_material[material])->formula();
@@ -546,7 +546,7 @@ void p6::Construction::_check_materials_specified() const
 	}
 }
 
-void p6::Construction::_create_map(std::vector<uint> *node_to_free)
+void p6::Construction::_create_map(std::vector<uint> *node_to_free) noexcept
 {
 	_nfree = 0;
 	node_to_free->resize(_node.size(), (uint)-1);
@@ -560,12 +560,12 @@ void p6::Construction::_create_map(std::vector<uint> *node_to_free)
 	}
 }
 
-p6::real p6::Construction::_get_tolerance() const
+p6::real p6::Construction::_get_tolerance() const noexcept
 {
 	real minforce = std::numeric_limits<real>::infinity();
 	for (uint i = 0; i < _force.size(); i++)
 	{
-		real newforce = _force[i].direction.modulus();
+		real newforce = _force[i].direction.norm();
 		if (newforce < minforce) minforce = newforce;
 	}
 	return minforce / 1000.0;
@@ -576,7 +576,7 @@ void p6::Construction::_create_vectors(
 	Vector *s,
 	Vector *z,
 	Vector *m,
-	Matrix *d) const
+	Matrix *d) const noexcept
 {
 	s->resize(_variable_number());
 	for (uint i = 0; i < _node.size(); i++)
@@ -595,7 +595,7 @@ void p6::Construction::_create_vectors(
 
 void p6::Construction::_set_z_to_external_forces(
 	const std::vector <uint> *node_to_free,
-	Vector *z) const
+	Vector *z) const noexcept
 {
 	for (uint i = 0; i < _force.size(); i++)
 	{
@@ -611,7 +611,7 @@ void p6::Construction::_set_z_to_external_forces(
 
 void p6::Construction::_set_d_to_zero(
 	const std::vector <uint> *node_to_free,
-	Matrix *d) const
+	Matrix *d) const noexcept
 {
 	for (uint i = 0; i < _stick.size(); i++)
 	{
@@ -641,7 +641,7 @@ void p6::Construction::_set_d_to_zero(
 p6::Coord p6::Construction::_get_delta(
 	uint stick,
 	const std::vector <uint> *node_to_free,
-	const Vector *s) const
+	const Vector *s) const noexcept
 {
 	const uint *node = _stick[stick].node;
 	Coord coord[2];
@@ -661,12 +661,12 @@ void p6::Construction::_modify_z_with_stick_force(
 	uint stick,
 	const std::vector <uint> *node_to_free,
 	const Vector *s,
-	Vector *z) const
+	Vector *z) const noexcept
 {
 	const Material *material = _material[_stick[stick].material];
 	const uint *node = _stick[stick].node;
 	Coord delta = _get_delta(stick, node_to_free, s);
-	real length = delta.modulus();
+	real length = delta.norm();
 	real initial_length = _node[node[0]].coord.distance(_node[node[1]].coord);
 	real force = _stick[stick].area * material->stress(length / initial_length - 1.0);
 
@@ -686,12 +686,12 @@ void p6::Construction::_modify_d_with_stick_force(
 	uint stick,
 	const std::vector <uint> *node_to_free,
 	const Vector *s,
-	Matrix *d) const
+	Matrix *d) const noexcept
 {
 	const Material *material = _material[_stick[stick].material];
 	const uint *node = _stick[stick].node;
 	Coord delta = _get_delta(stick, node_to_free, s);
-	real length = delta.modulus();
+	real length = delta.norm();
 	real initial_length = _node[node[0]].coord.distance(_node[node[1]].coord);
 	real strain = length / initial_length - 1.0;
 
@@ -731,7 +731,7 @@ void p6::Construction::_modify_d_with_stick_force(
 	}
 }
 
-p6::real p6::Construction::_get_error(const Vector *z) const
+p6::real p6::Construction::_get_residuum(const Vector *z) const noexcept
 {
 	real error = 0.0;
 	for (int i = 0; i < z->rows(); i++)
@@ -744,7 +744,7 @@ p6::real p6::Construction::_get_error(const Vector *z) const
 
 void p6::Construction::_apply_state_vector(
 	const std::vector<uint> *node_to_free,
-	const Vector *s)
+	const Vector *s) noexcept
 {
 	for (uint i = 0; i < _node.size(); i++)
 	{
@@ -757,7 +757,7 @@ void p6::Construction::_apply_state_vector(
 	}
 }
 
-bool p6::Construction::_is_adequat(const Vector *m) const
+bool p6::Construction::_is_adequat(const Vector *m) const noexcept
 {
 	bool adequat = true;
 	for (int i = 0; i < m->rows(); i++)
@@ -771,7 +771,7 @@ bool p6::Construction::_is_adequat(const Vector *m) const
 p6::real  p6::Construction::_get_flow_coefficient(
 	const std::vector <uint> *node_to_free,
 	const Vector *s,
-	const Vector *z) const
+	const Vector *z) const noexcept
 {
 	real coef = std::numeric_limits<real>::infinity();
 	for (uint i = 0; i < _stick.size(); i++)
@@ -783,7 +783,7 @@ p6::real  p6::Construction::_get_flow_coefficient(
 			if (_node[node[j]].free)
 			{
 				uint free = node_to_free->at(node[j]);
-				real length = delta.modulus();
+				real length = delta.norm();
 				real newcoef = length / sqrt(sqr((*z)(_node_equation_fx(free))) + sqr((*z)(_node_equation_fy(free))));
 				if (newcoef < coef) coef = newcoef;
 			}
@@ -826,7 +826,7 @@ void p6::Construction::simulate(bool sim)
 			_modify_z_with_stick_force(i, &node_to_free, &s, &z);
 			_modify_d_with_stick_force(i, &node_to_free, &s, &d);
 		}
-		real error = _get_error(&z);
+		real error = _get_residuum(&z);
 		if (error < tolerance) break;
 		else if (error < last_error) not_converge_count = 0;
 		else if (++not_converge_count == 1000000) throw (std::runtime_error("Simulation does not converge"));

@@ -11,52 +11,48 @@
 #include "../header/p6_side_panel.hpp"
 #include "../header/p6_frame.hpp"
 
-void p6::SidePanel::_switch(Mode mode)
+void p6::SidePanel::_switch(Bar bar)
 {
-	if (_mode == mode)
+	if (_bar == bar)
 	{
 		//Refreshing
-		switch (mode)
+		switch (bar)
 		{
-		case Mode::node:
-			_node_bar.refresh();
+		case Bar::node:
+			_node_bar.refresh_controls();
 			break;
 
-		case Mode::stick:
-			_stick_bar.refresh();
+		case Bar::stick:
+			_stick_bar.refresh_controls();
 			break;
 
-		case Mode::force:
-			_force_bar.refresh();
-			break;
-
-		case Mode::move:
-			_move_bar.refresh();
+		case Bar::force:
+			_force_bar.refresh_controls();
 			break;
 
 		default:
-			_material_bar.refresh();
+			_material_bar.refresh_controls();
 			break;
 		}
 	}
 	else
 	{
 		//Hiding
-		switch (_mode)
+		switch (_bar)
 		{
-		case Mode::node:
+		case Bar::node:
 			_node_bar.hide();
 			break;
 
-		case Mode::stick:
+		case Bar::stick:
 			_stick_bar.hide();
 			break;
 
-		case Mode::force:
+		case Bar::force:
 			_force_bar.hide();
 			break;
 
-		case Mode::move:
+		case Bar::move:
 			_move_bar.hide();
 			break;
 
@@ -66,38 +62,37 @@ void p6::SidePanel::_switch(Mode mode)
 		}
 
 		//Showing
-		switch (mode)
+		switch (bar)
 		{
-		case Mode::node:
-			_node_bar.refresh();
+		case Bar::node:
+			_node_bar.refresh_controls();
 			_node_bar.show();
 			break;
 
-		case Mode::stick:
-			_stick_bar.refresh();
+		case Bar::stick:
+			_stick_bar.refresh_controls();
 			_stick_bar.show();
 			break;
 
-		case Mode::force:
-			_force_bar.refresh();
+		case Bar::force:
+			_force_bar.refresh_controls();
 			_force_bar.show();
 			break;
 
-		case Mode::move:
-			_move_bar.refresh();
+		case Bar::move:
 			_move_bar.show();
 			break;
 
 		default:
-			_material_bar.refresh();
+			_material_bar.refresh_controls();
 			_material_bar.show();
 			break;
 		}
-		_mode = mode;
+		_bar = bar;
 	}
 }
 
-p6::SidePanel::SidePanel(Frame *frame) :
+p6::SidePanel::SidePanel(Frame *frame) noexcept :
 	_frame(frame),
 	_panel(new wxPanel(frame->frame(), wxID_ANY)),
 	_sizer(new wxBoxSizer(wxVERTICAL)),
@@ -112,44 +107,49 @@ p6::SidePanel::SidePanel(Frame *frame) :
 	_material_bar.show();
 }
 
-wxPanel *p6::SidePanel::panel()
+wxPanel *p6::SidePanel::panel() noexcept
 {
 	return _panel;
 }
 
-wxBoxSizer *p6::SidePanel::sizer()
+wxBoxSizer *p6::SidePanel::sizer() noexcept
 {
 	return _sizer;
 }
 
-void p6::SidePanel::refresh()
+p6::MoveBar *p6::SidePanel::move_bar() noexcept
+{
+	return &_move_bar;
+}
+
+void p6::SidePanel::refresh_controls() noexcept
 {
 	const std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
 	const std::set<uint> *selected_sticks = &_frame->main_panel()->selected_sticks;
 	const std::set<uint> *selected_forces = &_frame->main_panel()->selected_forces;
 	if (_frame->toolbar()->tool() == ToolBar::Tool::move)
 	{
-		_switch(Mode::move);
+		_switch(Bar::move);
 	}
 	else if (!selected_nodes->empty() && selected_sticks->empty() && selected_forces->empty())
 	{
-		_switch(Mode::node);
+		_switch(Bar::node);
 	}
 	else if (!selected_sticks->empty() && selected_nodes->empty() && selected_forces->empty())
 	{
-		_switch(Mode::stick);
+		_switch(Bar::stick);
 	}
 	else if (!selected_forces->empty() && selected_nodes->empty() && selected_sticks->empty())
 	{
-		_switch(Mode::force);
+		_switch(Bar::force);
 	}
 	else
 	{
-		_switch(Mode::material);
+		_switch(Bar::material);
 	}
 }
 
-void p6::SidePanel::refresh_materials()
+void p6::SidePanel::refresh_materials() noexcept
 {
 	_stick_bar.refresh_materials();
 	_material_bar.refresh_materials();
