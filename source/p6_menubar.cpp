@@ -140,6 +140,11 @@ void p6::MenuBar::_on_export_jpeg(wxCommandEvent &e)
 	}
 }
 
+void p6::MenuBar::_on_view_grid(wxCommandEvent &e)
+{
+	_frame->main_panel()->grid_draw(e.IsChecked());
+}
+
 void p6::MenuBar::_on_help(wxCommandEvent &e)
 {
 	wxMessageBox("The developer highly recommends praying to Pinkie Pie to make it work", "Help", wxICON_INFORMATION, _frame->frame());
@@ -168,6 +173,12 @@ p6::MenuBar::MenuBar(Frame *frame) noexcept : _frame(frame)
 	item = exportmenu->Append(wxID_ANY, "JPEG", "Export image as JPEG");
 	frame->frame()->Bind(wxEVT_MENU, &MenuBar::_on_export_jpeg, this, item->GetId());
 	menubar->Append(exportmenu, "Export");
+
+	//View
+	wxMenu *viewmenu = new wxMenu();
+	item = viewmenu->AppendCheckItem(wxID_ANY, "Grid", "Enable and disable grid");
+	frame->frame()->Bind(wxEVT_MENU, &MenuBar::_on_view_grid, this, item->GetId());
+	menubar->Append(viewmenu, "View");
 
 	//Help
 	wxMenu *helpmenu = new wxMenu();

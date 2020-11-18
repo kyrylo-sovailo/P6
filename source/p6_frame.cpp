@@ -10,10 +10,11 @@
 
 #include "../header/p6_force_bar.hpp"
 #include "../header/p6_frame.hpp"
+#include <wx/dcbuffer.h>
 
 void p6::Frame::_on_paint(wxPaintEvent &e)
 {
-	wxPaintDC dc(_frame);
+	wxAutoBufferedPaintDC dc(_frame);
 	_main_panel.render(&dc, _frame->GetClientAreaOrigin());
 }
 
@@ -32,6 +33,7 @@ p6::Frame::Frame()  noexcept :
 	_side_panel(this),
 	_mouse(this)
 {
+	_frame->SetBackgroundStyle(wxBG_STYLE_PAINT);
 	_frame->SetSizer(_sizer);
 	_frame->Bind(wxEVT_PAINT, &Frame::_on_paint, this, _frame->GetId());
 	_frame->Bind(wxEVT_SIZE, &Frame::_on_size, this, _frame->GetId());

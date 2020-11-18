@@ -34,11 +34,12 @@ namespace p6
 		void _on_file_save_as(wxCommandEvent &e);	///<Handles press on "file save as" menu item, asks file name and saves construction to it
 		void _on_export_png(wxCommandEvent &e);		///<Handles press on "export PNG" menu item, saves construction image in PNG format
 		void _on_export_jpeg(wxCommandEvent &e);	///<Handles press on "export JPEG" menu item, saves construction image in JPEG format
+		void _on_view_grid(wxCommandEvent &e);		///<Handles press on "grid" menu item, turns grid on and off
 		void _on_help(wxCommandEvent &e);			///<Handles press on "help" menu item, displays help message
-
+		
 	public:
 		MenuBar(Frame *frame)	noexcept;			///<Creates menu bar
-		void refresh() noexcept;			///<Refreshes activeness of menu items
+		void refresh()			noexcept;			///<Refreshes activeness of menu items
 	};
 }
 

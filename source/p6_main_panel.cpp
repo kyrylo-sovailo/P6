@@ -38,6 +38,45 @@ wxSize p6::MainPanel::size() const noexcept
 
 void p6::MainPanel::render(wxDC *dc, wxPoint offset) const noexcept
 {
+	//Clear background
+	dc->SetBackground(wxBrush(wxColour(255, 255, 255)));
+	dc->Clear();
+
+	//Draw grid
+	if (_grid_draw)
+	{
+		dc->SetPen(wxPen(wxColour(200, 200, 200), 1));
+		wxPoint start_pixel = _real_to_pixel(Coord(floor(_center.x), floor(_center.y)), wxPoint(0, 0));
+		int meter = 0;
+		while (start_pixel.x + meter * pixels_in_meter < size().x)
+		{
+			wxCoord x_pixel = start_pixel.x + meter * pixels_in_meter;
+			dc->DrawLine(offset + wxPoint(x_pixel, 0), offset + wxPoint(x_pixel, size().y));
+			meter++;
+		}
+		meter = -1;
+		while (start_pixel.x + meter * pixels_in_meter >= 0)
+		{
+			wxCoord x_pixel = start_pixel.x + meter * pixels_in_meter;
+			dc->DrawLine(offset + wxPoint(x_pixel, 0), offset + wxPoint(x_pixel, size().y));
+			meter--;
+		}
+		meter = 0;
+		while (start_pixel.y + meter * pixels_in_meter < size().y)
+		{
+			wxCoord y_pixel = start_pixel.y + meter * pixels_in_meter;
+			dc->DrawLine(offset + wxPoint(0, y_pixel), offset + wxPoint(size().x, y_pixel));
+			meter++;
+		}
+		meter = -1;
+		while (start_pixel.y + meter * pixels_in_meter >= 0)
+		{
+			wxCoord y_pixel = start_pixel.y + meter * pixels_in_meter;
+			dc->DrawLine(offset + wxPoint(0, y_pixel), offset + wxPoint(size().x, y_pixel));
+			meter--;
+		}
+	}
+
 	bool sim = _frame->toolbar()->simulation();
 	Construction *con = _frame->construction();
 
@@ -289,6 +328,12 @@ void p6::MainPanel::drag_continue(wxPoint point) noexcept
 {
 	_center.x = _old_center.x + (_drag_begin.x - point.x) / pixels_in_meter;
 	_center.y = _old_center.y + (point.y - _drag_begin.y) / pixels_in_meter;
+	need_refresh();
+}
+
+void p6::MainPanel::grid_draw(bool grid) noexcept
+{
+	_grid_draw = grid;
 	need_refresh();
 }
 

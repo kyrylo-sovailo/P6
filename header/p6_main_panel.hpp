@@ -27,7 +27,8 @@ namespace p6
 		wxPanel *_panel;				///<wxWidet's panel
 		wxPoint _area_select_begin;		///<Begin point of area selecting
 		wxPoint _area_select_current;	///<Current point of area selecting (needs to be saved because rendering happens in another function)
-		bool _area_select_draw;			///<Indicator if area is being selected
+		bool _area_select_draw;			///<Indicator if area selection needs to be drawn
+		bool _grid_draw;				///<Indicator if grid needs to be drawn
 		Coord _center;					///<Coordinates of view center
 		Coord _old_center;				///<Coordinates of old view center when being dragged
 		wxPoint _drag_begin;			///<Begin point of dragging
@@ -69,7 +70,8 @@ namespace p6
 		void area_select_end(wxPoint point)		noexcept;			///<Ends area selecting, selects items
 		void drag_begin(wxPoint point)			noexcept;			///<Begins view dragging
 		void drag_continue(wxPoint point)		noexcept;			///<Continues view dragging
-		void need_refresh()				noexcept;			///<Indicats that image needs to be redrawn
+		void grid_draw(bool grid)				noexcept;			///<Sets if grid needs to be drawn
+		void need_refresh()						noexcept;			///<Indicats that image needs to be redrawn
 	};
 }
 
