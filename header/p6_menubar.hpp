@@ -38,7 +38,7 @@ namespace p6
 
 	public:
 		MenuBar(Frame *frame)	noexcept;			///<Creates menu bar
-		void refresh_controls() noexcept;			///<Refreshes activeness of menu items
+		void refresh() noexcept;			///<Refreshes activeness of menu items
 	};
 }
 

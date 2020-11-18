@@ -133,10 +133,10 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const noexcept
 	if (_area_select_draw)
 	{
 		dc->SetPen(wxPen(wxColour(0, 0, 0), 1, wxPENSTYLE_SHORT_DASH));
-		dc->DrawLine(_area_select_current, wxPoint(_area_select_begin.x, _area_select_current.y));
-		dc->DrawLine(wxPoint(_area_select_begin.x, _area_select_current.y), _area_select_begin);
-		dc->DrawLine(_area_select_begin, wxPoint(_area_select_current.x, _area_select_begin.y));
-		dc->DrawLine(wxPoint(_area_select_current.x, _area_select_begin.y), _area_select_current);
+		dc->DrawLine(offset + _area_select_current, offset + wxPoint(_area_select_begin.x, _area_select_current.y));
+		dc->DrawLine(offset + wxPoint(_area_select_begin.x, _area_select_current.y), offset + _area_select_begin);
+		dc->DrawLine(offset + _area_select_begin, offset + wxPoint(_area_select_current.x, _area_select_begin.y));
+		dc->DrawLine(offset + wxPoint(_area_select_current.x, _area_select_begin.y), offset + _area_select_current);
 	}
 
 	//Draw anchor
@@ -154,6 +154,17 @@ p6::MainPanel::Item p6::MainPanel::get_item(wxPoint point) const noexcept
 	const Construction *con = _frame->construction();
 	Coord coord = pixel_to_real(point);
 
+	//Checking for clicking anchor
+	if (_frame->toolbar()->tool() == ToolBar::Tool::move)
+	{
+		if (coord.distance(_frame->side_panel()->move_bar()->anchor()) * pixels_in_meter < 5.0)
+		{
+			Item item;
+			item.type = Item::Type::anchor;
+			return item;
+		}
+	}
+
 	//Checking for clicking node
 	for (uint i = 0; i < con->get_node_count(); i++)
 	{
@@ -162,6 +173,7 @@ p6::MainPanel::Item p6::MainPanel::get_item(wxPoint point) const noexcept
 			Item item;
 			item.type = Item::Type::node;
 			item.index = i;
+			item.selected = selected_nodes.count(i);
 			return item;
 		}
 	}
@@ -179,6 +191,7 @@ p6::MainPanel::Item p6::MainPanel::get_item(wxPoint point) const noexcept
 			Item item;
 			item.type = Item::Type::stick;
 			item.index = i;
+			item.selected = selected_sticks.count(i);
 			return item;
 		}
 	}
@@ -195,6 +208,7 @@ p6::MainPanel::Item p6::MainPanel::get_item(wxPoint point) const noexcept
 			Item item;
 			item.type = Item::Type::force;
 			item.index = i;
+			item.selected = selected_forces.count(i);
 			return item;
 		}
 	}
@@ -223,20 +237,21 @@ void p6::MainPanel::area_select_continue(wxPoint point) noexcept
 	if (_area_select_current != point)
 	{
 		_area_select_current = point;
-		need_refresh_image();
+		need_refresh();
 	}
 }
 
 void p6::MainPanel::area_select_end(wxPoint point) noexcept
 {
+	_area_select_draw = false;
 	selected_nodes.clear();
 	selected_sticks.clear();
 	selected_forces.clear();
 	Coord coords[2];
 	coords[0] = pixel_to_real(_area_select_begin);
 	coords[1] = pixel_to_real(point);
-	if (coords[0].x > coords[1].x) { wxCoord b = coords[1].x; coords[1].x = coords[0].x; coords[0].x = b; }
-	if (coords[0].y > coords[1].y) { wxCoord b = coords[1].y; coords[1].y = coords[0].y; coords[0].y = b; }
+	if (coords[0].x > coords[1].x) { real b = coords[1].x; coords[1].x = coords[0].x; coords[0].x = b; }
+	if (coords[0].y > coords[1].y) { real b = coords[1].y; coords[1].y = coords[0].y; coords[0].y = b; }
 	const Construction *con = _frame->construction();
 
 	for (uint i = 0; i < con->get_node_count(); i++)
@@ -260,8 +275,8 @@ void p6::MainPanel::area_select_end(wxPoint point) noexcept
 			selected_forces.insert(i);
 	}
 
-	need_refresh_image();
-	_frame->side_panel()->refresh_controls();
+	need_refresh();
+	_frame->side_panel()->refresh();
 }
 
 void p6::MainPanel::drag_begin(wxPoint point) noexcept
@@ -274,10 +289,10 @@ void p6::MainPanel::drag_continue(wxPoint point) noexcept
 {
 	_center.x = _old_center.x + (_drag_begin.x - point.x) / pixels_in_meter;
 	_center.y = _old_center.y + (point.y - _drag_begin.y) / pixels_in_meter;
-	need_refresh_image();
+	need_refresh();
 }
 
-void p6::MainPanel::need_refresh_image() noexcept
+void p6::MainPanel::need_refresh() noexcept
 {
 	_frame->frame()->Refresh();
 }

@@ -47,8 +47,9 @@ namespace p6
 				anchor
 			};
 
-			Type type;
-			uint index;
+			Type type;		///Type of item
+			uint index;		///Index of item, valid for node, stick and force
+			bool selected;	///Indicator if item is selected
 		};
 
 		real pixels_in_meter = 30.0;								///<Pixels per meter rate
@@ -68,7 +69,7 @@ namespace p6
 		void area_select_end(wxPoint point)		noexcept;			///<Ends area selecting, selects items
 		void drag_begin(wxPoint point)			noexcept;			///<Begins view dragging
 		void drag_continue(wxPoint point)		noexcept;			///<Continues view dragging
-		void need_refresh_image()				noexcept;			///<Indicats that image needs to be redrawn
+		void need_refresh()				noexcept;			///<Indicats that image needs to be redrawn
 	};
 }
 

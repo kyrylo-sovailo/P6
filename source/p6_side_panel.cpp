@@ -19,19 +19,23 @@ void p6::SidePanel::_switch(Bar bar)
 		switch (bar)
 		{
 		case Bar::node:
-			_node_bar.refresh_controls();
+			_node_bar.refresh();
 			break;
 
 		case Bar::stick:
-			_stick_bar.refresh_controls();
+			_stick_bar.refresh();
 			break;
 
 		case Bar::force:
-			_force_bar.refresh_controls();
+			_force_bar.refresh();
+			break;
+
+		case Bar::move:
+			_move_bar.refresh();
 			break;
 
 		default:
-			_material_bar.refresh_controls();
+			_material_bar.refresh();
 			break;
 		}
 	}
@@ -65,26 +69,27 @@ void p6::SidePanel::_switch(Bar bar)
 		switch (bar)
 		{
 		case Bar::node:
-			_node_bar.refresh_controls();
+			_node_bar.refresh();
 			_node_bar.show();
 			break;
 
 		case Bar::stick:
-			_stick_bar.refresh_controls();
+			_stick_bar.refresh();
 			_stick_bar.show();
 			break;
 
 		case Bar::force:
-			_force_bar.refresh_controls();
+			_force_bar.refresh();
 			_force_bar.show();
 			break;
 
 		case Bar::move:
+			_move_bar.refresh();
 			_move_bar.show();
 			break;
 
 		default:
-			_material_bar.refresh_controls();
+			_material_bar.refresh();
 			_material_bar.show();
 			break;
 		}
@@ -122,7 +127,7 @@ p6::MoveBar *p6::SidePanel::move_bar() noexcept
 	return &_move_bar;
 }
 
-void p6::SidePanel::refresh_controls() noexcept
+void p6::SidePanel::refresh() noexcept
 {
 	const std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
 	const std::set<uint> *selected_sticks = &_frame->main_panel()->selected_sticks;

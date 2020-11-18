@@ -37,7 +37,7 @@ namespace p6
 	public:
 		NodeBar(Frame *frame)	noexcept;	///<Creates node bar
 		void show()				noexcept;	///<Adds bar's components to side bar
-		void refresh_controls()	noexcept;	///<Refreshes contents and activeness of bar's components
+		void refresh()			noexcept;	///<Refreshes contents of bar's components
 		void hide()				noexcept;	///<Removes bar's components from side bar
 	};
 }

@@ -22,19 +22,32 @@ void p6::Mouse::_on_left_down(wxMouseEvent &e)
 void p6::Mouse::_on_left_up(wxMouseEvent &e)
 {
 	ToolBar *toolbar = _frame->toolbar();
+	
+	//Delete node/stick/force
 	if (!_moving
+	&& toolbar->tool() == ToolBar::Tool::delet
+	&& _pressed_item.type != MainPanel::Item::Type::no
+	&& !toolbar->simulation())
+	{
+		if (_pressed_item.type == MainPanel::Item::Type::node) _frame->construction()->delete_node(_pressed_item.index);
+		else if (_pressed_item.type == MainPanel::Item::Type::stick) _frame->construction()->delete_stick(_pressed_item.index);
+		else _frame->construction()->delete_force(_pressed_item.index);
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
+	}
+	//Select node
+	else if (!_moving
 	&& _pressed_item.type == MainPanel::Item::Type::node)
 	{
-		//Select node
 		std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
-		if (!selected_nodes->count(_pressed_item.index))
+		if (!_pressed_item.selected)
 		{
+			//Create stick (in stick mode i selected 2 nodes)
 			selected_nodes->insert(_pressed_item.index);
 			if (toolbar->tool() == ToolBar::Tool::stick
 				&& selected_nodes->size() == 2
 				&& !toolbar->simulation())
 			{
-				//Create stick (in stick mode i selected 2 nodes)
 				uint node[2];
 				node[0] = *selected_nodes->cbegin();
 				node[1] = *++selected_nodes->cbegin();
@@ -43,79 +56,84 @@ void p6::Mouse::_on_left_up(wxMouseEvent &e)
 			}
 		}
 		else selected_nodes->erase(_pressed_item.index);
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls();
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
 	}
+	//Select stick
 	else if (!_moving
 	&& _pressed_item.type == MainPanel::Item::Type::stick)
 	{
-		//Select stick
 		std::set<uint> *selected_sticks = &_frame->main_panel()->selected_sticks;
-		if (selected_sticks->count(_pressed_item.index)) selected_sticks->erase(_pressed_item.index);
+		if (_pressed_item.selected) selected_sticks->erase(_pressed_item.index);
 		else selected_sticks->insert(_pressed_item.index);
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls();
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
 	}
+	//Select force
 	else if (!_moving
 	&& _pressed_item.type == MainPanel::Item::Type::force)
 	{
-		//Select force
 		std::set<uint> *selected_forces = &_frame->main_panel()->selected_forces;
-		if (selected_forces->count(_pressed_item.index)) selected_forces->erase(_pressed_item.index);
+		if (_pressed_item.selected) selected_forces->erase(_pressed_item.index);
 		else selected_forces->insert(_pressed_item.index);
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls();
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
 	}
+	//Create node
 	else if (!_moving
 	&& toolbar->tool() == ToolBar::Tool::node
 	&& !toolbar->simulation())
 	{
-		//Create node
 		_frame->construction()->create_node(_frame->main_panel()->pixel_to_real(e.GetPosition()), true);
-		_frame->main_panel()->need_refresh_image();
+		_frame->main_panel()->need_refresh();
 	}
-	else if (!_moving
-	&& toolbar->tool() == ToolBar::Tool::delet
-	&& _pressed_item.type != MainPanel::Item::Type::no
-	&& !toolbar->simulation())
+	//Finish construction or view dragging (redirection to move bar)
+	else if (_moving
+		&& _pressed_item.type != MainPanel::Item::Type::no
+		&& _pressed_item.type != MainPanel::Item::Type::anchor
+		&& _pressed_item.selected
+		&& toolbar->tool() == ToolBar::Tool::move)
 	{
-		//Delete node/stick/force
-		if (_pressed_item.type == MainPanel::Item::Type::node) _frame->construction()->delete_node(_pressed_item.index);
-		else if (_pressed_item.type == MainPanel::Item::Type::stick) _frame->construction()->delete_stick(_pressed_item.index);
-		else _frame->construction()->delete_force(_pressed_item.index);
+		_frame->side_panel()->move_bar()->drag_continue(e.GetPosition());
 	}
+	//Finish anchor dragging
+	else if (_moving
+		&& _pressed_item.type == MainPanel::Item::Type::anchor)
+	{
+		_frame->side_panel()->move_bar()->set_anchor(e.GetPosition());
+	}
+	//Finish area selection
 	else if (_moving
 	&& toolbar->tool() == ToolBar::Tool::area)
 	{
-		//Finish area selection
 		_frame->main_panel()->area_select_end(e.GetPosition());
 	}
+	//Finish force creation
 	else if (_moving
 	&& _pressed_item.type == MainPanel::Item::Type::force
 	&& toolbar->tool() == ToolBar::Tool::force
 	&& !toolbar->simulation())
 	{
-		//Finish force creation
 		MainPanel *main_panel = _frame->main_panel();
 		Construction *con = _frame->construction();
 		Coord point_coord = main_panel->pixel_to_real(e.GetPosition());
 		Coord node_coord = con->get_node_coord(con->get_force_node(_pressed_item.index));
 		Coord direction = (point_coord - node_coord) / main_panel->meters_in_newton;
 		_frame->construction()->set_force_direction(_pressed_item.index, direction);
-		_frame->main_panel()->need_refresh_image();
+		_frame->main_panel()->need_refresh();
 	}
+	//Finish node dragging
 	else if (_moving
 	&& _pressed_item.type == MainPanel::Item::Type::node
 	&& !toolbar->simulation())
 	{
-		//Finish node dragging
 		_frame->construction()->set_node_coord(_pressed_item.index, _frame->main_panel()->pixel_to_real(e.GetPosition()));
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls(); //Theoretically doesn't need to refresh for example force bar
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh(); //Theoretically doesn't need to refresh for example force bar
 	}
+	//Finish dragging view
 	else if (_moving)
 	{
-		//Finish dragging view (actually never finished)
 		_frame->main_panel()->drag_continue(e.GetPosition());
 	}
 	_pressed = false;
@@ -124,19 +142,34 @@ void p6::Mouse::_on_left_up(wxMouseEvent &e)
 void p6::Mouse::_on_move(wxMouseEvent &e)
 {
 	if (!_pressed) return;
-
 	ToolBar *toolbar = _frame->toolbar();
-	if (toolbar->tool() == ToolBar::Tool::area)
+	
+	//Construction or view dragging (redirection to move bar)
+	if (_pressed_item.type != MainPanel::Item::Type::no
+		&& _pressed_item.type != MainPanel::Item::Type::anchor
+		&& _pressed_item.selected
+		&& toolbar->tool() == ToolBar::Tool::move)
 	{
-		//Area selection
+		if (!_moving) _frame->side_panel()->move_bar()->drag_begin(e.GetPosition());
+		else _frame->side_panel()->move_bar()->drag_continue(e.GetPosition());
+	}
+	//Anchor dragging
+	else if (_moving
+		&& _pressed_item.type == MainPanel::Item::Type::anchor)
+	{
+		_frame->side_panel()->move_bar()->set_anchor(e.GetPosition());
+	}
+	//Area selection
+	else if (toolbar->tool() == ToolBar::Tool::area)
+	{
 		if (!_moving) _frame->main_panel()->area_select_begin(e.GetPosition());
 		else _frame->main_panel()->area_select_continue(e.GetPosition());
 	}
+	//Force creation
 	else if (_pressed_item.type == MainPanel::Item::Type::node
 	&& toolbar->tool() == ToolBar::Tool::force
 	&& !toolbar->simulation())
 	{
-		//Force creation
 		MainPanel *main_panel = _frame->main_panel(); 
 		Construction *con = _frame->construction();
 		Coord point_coord = main_panel->pixel_to_real(e.GetPosition());
@@ -144,32 +177,32 @@ void p6::Mouse::_on_move(wxMouseEvent &e)
 		Coord direction = (point_coord - node_coord) / main_panel->meters_in_newton;
 		_pressed_item.type = MainPanel::Item::Type::force;
 		_pressed_item.index = con->create_force(_pressed_item.index, direction);
-		_frame->main_panel()->need_refresh_image();
+		_frame->main_panel()->need_refresh();
 	}
+	//Continue force creation
 	else if (_pressed_item.type == MainPanel::Item::Type::force
 	&& toolbar->tool() == ToolBar::Tool::force
 	&& !toolbar->simulation())
 	{
-		//Continue force creation
 		MainPanel *main_panel = _frame->main_panel();
 		Construction *con = _frame->construction();
 		Coord point_coord = main_panel->pixel_to_real(e.GetPosition());
 		Coord node_coord = con->get_node_coord(con->get_force_node(_pressed_item.index));
 		Coord direction = (point_coord - node_coord) / main_panel->meters_in_newton;
 		con->set_force_direction(_pressed_item.index, direction);
-		_frame->main_panel()->need_refresh_image();
+		_frame->main_panel()->need_refresh();
 	}
+	//Node dragging
 	else if (_pressed_item.type == MainPanel::Item::Type::node
 	&& !toolbar->simulation())
 	{
-		//Node dragging
 		_frame->construction()->set_node_coord(_pressed_item.index, _frame->main_panel()->pixel_to_real(e.GetPosition()));
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls(); //Theoretically doesn't need to refresh for example force bar
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh(); //Theoretically doesn't need to refresh for example force bar
 	}
+	//View dragging
 	else
 	{
-		//View dragging
 		if (!_moving) _frame->main_panel()->drag_begin(e.GetPosition());
 		else _frame->main_panel()->drag_continue(e.GetPosition());
 	}
@@ -192,7 +225,7 @@ void p6::Mouse::_on_wheel(wxMouseEvent &e)
 		else if (e.GetWheelRotation() < 0) _wheel--;
 		_frame->main_panel()->pixels_in_meter = 30.0 * exp2(_wheel);
 	}
-	_frame->main_panel()->need_refresh_image();
+	_frame->main_panel()->need_refresh();
 }
 
 p6::Mouse::Mouse(Frame *frame) noexcept : _frame(frame)

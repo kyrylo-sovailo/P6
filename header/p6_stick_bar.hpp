@@ -39,7 +39,7 @@ namespace p6
 	public:
 		StickBar(Frame *frame)		noexcept;	///<Creates stick bar
 		void show()					noexcept;	///<Adds bar's components to side bar
-		void refresh_controls()		noexcept;	///<Refreshes contents of bar's components, except choice box
+		void refresh()				noexcept;	///<Refreshes contents of bar's components, except choice box
 		void refresh_materials()	noexcept;	///<Refreshes content of material choice box
 		void hide()					noexcept;	///<Removes bar's components from side bar
 	};

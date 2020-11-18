@@ -138,7 +138,7 @@ void p6::MaterialBar::show() noexcept
 	_frame->side_panel()->panel()->Layout();
 }
 
-void p6::MaterialBar::refresh_controls() noexcept
+void p6::MaterialBar::refresh() noexcept
 {
 	bool sim = _frame->toolbar()->simulation();
 	_name_text->Enable(!sim);

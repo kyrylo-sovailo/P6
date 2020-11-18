@@ -49,12 +49,12 @@ namespace p6
 		void _switch(Bar bar);				///<Show certain bar
 
 	public:
-		SidePanel(Frame *frame)	noexcept;	///<Creates side panel
-		wxPanel *panel()		noexcept;	///<Returns wxWidget's panel
-		wxBoxSizer *sizer()		noexcept;	///<Returns wxWidget's sizer
-		MoveBar *move_bar()		noexcept;	///<Returns move bar
-		void refresh_controls()	noexcept;	///<Refreshes contents of displayed bar's components, except of material choices
-		void refresh_materials()noexcept;	///<Refreshes contents of material choices
+		SidePanel(Frame *frame)		noexcept;	///<Creates side panel
+		wxPanel *panel()			noexcept;	///<Returns wxWidget's panel
+		wxBoxSizer *sizer()			noexcept;	///<Returns wxWidget's sizer
+		MoveBar *move_bar()			noexcept;	///<Returns move bar
+		void refresh()				noexcept;	///<Refreshes contents of bar's components, except choice boxes
+		void refresh_materials()	noexcept;	///<Refreshes contents of choice boxes
 	};
 }
 

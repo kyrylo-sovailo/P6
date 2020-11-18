@@ -10,7 +10,6 @@
 
 #include "../header/p6_node_bar.hpp"
 #include "../header/p6_frame.hpp"
-#include <set>
 
 void p6::NodeBar::_on_free(wxCommandEvent &e)
 {
@@ -18,7 +17,7 @@ void p6::NodeBar::_on_free(wxCommandEvent &e)
 	_fixed_check->SetValue(!_free_check->GetValue());
 	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		_frame->construction()->set_node_free(*i, _free_check->GetValue());
-	_frame->main_panel()->need_refresh_image();
+	_frame->main_panel()->need_refresh();
 }
 
 void p6::NodeBar::_on_fixed(wxCommandEvent &e)
@@ -27,7 +26,7 @@ void p6::NodeBar::_on_fixed(wxCommandEvent &e)
 	_free_check->SetValue(!_fixed_check->GetValue());
 	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		_frame->construction()->set_node_free(*i, _free_check->GetValue());
-	_frame->main_panel()->need_refresh_image();
+	_frame->main_panel()->need_refresh();
 }
 
 void p6::NodeBar::_on_x(wxCommandEvent &e)
@@ -42,7 +41,7 @@ void p6::NodeBar::_on_x(wxCommandEvent &e)
 			coord.x = x;
 			_frame->construction()->set_node_coord(*i, coord);
 		}
-		_frame->main_panel()->need_refresh_image();
+		_frame->main_panel()->need_refresh();
 	}
 }
 
@@ -58,7 +57,7 @@ void p6::NodeBar::_on_y(wxCommandEvent &e)
 			coord.y = y;
 			_frame->construction()->set_node_coord(*i, coord);
 		}
-		_frame->main_panel()->need_refresh_image();
+		_frame->main_panel()->need_refresh();
 	}
 }
 
@@ -103,7 +102,7 @@ void p6::NodeBar::show() noexcept
 	_frame->side_panel()->panel()->Layout();
 }
 
-void p6::NodeBar::refresh_controls() noexcept
+void p6::NodeBar::refresh() noexcept
 {
 	Construction *con = _frame->construction();
 	bool sim = _frame->toolbar()->simulation();

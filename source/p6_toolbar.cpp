@@ -31,10 +31,10 @@ void p6::ToolBar::_on_simulate(wxCommandEvent &e)
 			wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame());
 		}
 	}
-	_frame->menubar()->refresh_controls();
-	_frame->main_panel()->need_refresh_image();
-	_frame->side_panel()->refresh_controls();
-	_refresh_icons();
+	_frame->menubar()->refresh();
+	_frame->main_panel()->need_refresh();
+	_frame->side_panel()->refresh();
+	_refresh();
 }
 
 void p6::ToolBar::_on_select(wxCommandEvent &e)
@@ -44,9 +44,9 @@ void p6::ToolBar::_on_select(wxCommandEvent &e)
 	_frame->main_panel()->selected_nodes.clear();
 	_frame->main_panel()->selected_sticks.clear();
 	_frame->main_panel()->selected_forces.clear();
-	_frame->main_panel()->need_refresh_image();
-	_frame->side_panel()->refresh_controls();
-	_refresh_icons();
+	_frame->main_panel()->need_refresh();
+	_frame->side_panel()->refresh();
+	_refresh();
 }
 
 void p6::ToolBar::_on_area(wxCommandEvent &e)
@@ -56,18 +56,18 @@ void p6::ToolBar::_on_area(wxCommandEvent &e)
 	_frame->main_panel()->selected_nodes.clear();
 	_frame->main_panel()->selected_sticks.clear();
 	_frame->main_panel()->selected_forces.clear();
-	_frame->main_panel()->need_refresh_image();
-	_frame->side_panel()->refresh_controls();
-	_refresh_icons();
+	_frame->main_panel()->need_refresh();
+	_frame->side_panel()->refresh();
+	_refresh();
 }
 
 void p6::ToolBar::_on_move(wxCommandEvent &e)
 {
 	if (_tool == Tool::move) _tool = Tool::no;
 	else _tool = Tool::move;
-	_refresh_icons();
-	_frame->main_panel()->need_refresh_image();
-	_frame->side_panel()->refresh_controls();
+	_refresh();
+	_frame->main_panel()->need_refresh();
+	_frame->side_panel()->refresh();
 }
 
 void p6::ToolBar::_on_node(wxCommandEvent &e)
@@ -79,9 +79,9 @@ void p6::ToolBar::_on_node(wxCommandEvent &e)
 	{
 		//Choose only nodes
 		main->selected_sticks.clear();
-		main->selected_sticks.clear();
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls();
+		main->selected_forces.clear();
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
 	}
 	else
 	{
@@ -90,10 +90,10 @@ void p6::ToolBar::_on_node(wxCommandEvent &e)
 		main->selected_nodes.clear();
 		main->selected_sticks.clear();
 		main->selected_forces.clear();
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls();
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
 	}
-	_refresh_icons();
+	_refresh();
 }
 
 void p6::ToolBar::_on_stick(wxCommandEvent &e)
@@ -108,16 +108,16 @@ void p6::ToolBar::_on_stick(wxCommandEvent &e)
 		node[1] = *++main->selected_nodes.cbegin();
 		main->selected_nodes.clear();
 		_frame->construction()->create_stick(node, (uint)-1, 0.0);
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls();
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
 	}
 	else if (!main->selected_sticks.empty() && (!main->selected_nodes.empty() || !main->selected_forces.empty()))
 	{
 		//Choose only sticks
 		main->selected_nodes.clear();
 		main->selected_forces.clear();
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls();
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
 	}
 	else
 	{
@@ -126,10 +126,10 @@ void p6::ToolBar::_on_stick(wxCommandEvent &e)
 		main->selected_nodes.clear();
 		main->selected_sticks.clear();
 		main->selected_forces.clear();
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls();
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
 	}
-	_refresh_icons();
+	_refresh();
 }
 
 void p6::ToolBar::_on_force(wxCommandEvent &e)
@@ -141,8 +141,8 @@ void p6::ToolBar::_on_force(wxCommandEvent &e)
 		//Choose only forces
 		main->selected_nodes.clear();
 		main->selected_sticks.clear();
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls();
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
 	}
 	else
 	{
@@ -151,10 +151,10 @@ void p6::ToolBar::_on_force(wxCommandEvent &e)
 		main->selected_nodes.clear();
 		main->selected_sticks.clear();
 		main->selected_forces.clear();
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls();
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
 	}
-	_refresh_icons();
+	_refresh();
 }
 
 void p6::ToolBar::_on_delete(wxCommandEvent &e)
@@ -178,11 +178,11 @@ void p6::ToolBar::_on_delete(wxCommandEvent &e)
 		main->selected_nodes.clear();
 		main->selected_sticks.clear();
 		main->selected_forces.clear();
-		_frame->main_panel()->need_refresh_image();
-		_frame->side_panel()->refresh_controls();
+		_frame->main_panel()->need_refresh();
+		_frame->side_panel()->refresh();
 	}
 	else _tool = Tool::delet;
-	_refresh_icons();
+	_refresh();
 }
 
 wxBitmap p6::ToolBar::_load_png(const String filepath) noexcept
@@ -202,7 +202,7 @@ wxBitmap p6::ToolBar::_load_png(const String filepath) noexcept
 	return bitmap;
 }
 
-void p6::ToolBar::_refresh_icons() noexcept
+void p6::ToolBar::_refresh() noexcept
 {
 	if (_simulation && (_tool == Tool::delet || _tool == Tool::move)) _tool = Tool::no;
 	wxToolBar *toolbar = _frame->frame()->GetToolBar();

@@ -96,7 +96,7 @@ void p6::StickBar::show() noexcept
 	_frame->side_panel()->panel()->Layout();
 }
 
-void p6::StickBar::refresh_controls() noexcept
+void p6::StickBar::refresh() noexcept
 {
 	std::set<uint> *selected_sticks = &_frame->main_panel()->selected_sticks;
 	bool sim = _frame->toolbar()->simulation();

@@ -23,8 +23,8 @@ void p6::MenuBar::_on_file_load(wxCommandEvent &e)
 			_frame->main_panel()->selected_nodes.clear();
 			_frame->main_panel()->selected_sticks.clear();
 			_frame->main_panel()->selected_forces.clear();
-			_frame->main_panel()->need_refresh_image();
-			_frame->side_panel()->refresh_controls();
+			_frame->main_panel()->need_refresh();
+			_frame->side_panel()->refresh();
 			_frame->side_panel()->refresh_materials();
 		}
 		catch (std::exception &e)
@@ -60,8 +60,8 @@ void p6::MenuBar::_on_file_import(wxCommandEvent &e)
 			{
 				_frame->main_panel()->selected_forces.insert(i);
 			}
-			_frame->main_panel()->need_refresh_image();
-			_frame->side_panel()->refresh_controls();
+			_frame->main_panel()->need_refresh();
+			_frame->side_panel()->refresh();
 			_frame->side_panel()->refresh_materials();
 		}
 		catch (std::exception &e)
@@ -178,7 +178,7 @@ p6::MenuBar::MenuBar(Frame *frame) noexcept : _frame(frame)
 	frame->frame()->SetMenuBar(menubar);
 }
 
-void p6::MenuBar::refresh_controls() noexcept
+void p6::MenuBar::refresh() noexcept
 {
 	bool sim = _frame->toolbar()->simulation();
 	_file_load->Enable(!sim);

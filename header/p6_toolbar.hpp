@@ -57,7 +57,7 @@ namespace p6
 		void _on_stick(wxCommandEvent &e);		///<Handles press on stick tool, turns stick tool on or off, or selects nodes only, or creates stick between two selected nodes
 		void _on_force(wxCommandEvent &e);		///<Handles press on node tool, turns node tool on or off, or selects forces only
 		void _on_delete(wxCommandEvent &e);		///<Handles press on deletion tool, turns deletion tool on or off, or deletes selected items
-		void _refresh_icons() noexcept;			///<Refresh states and activeness of buttons
+		void _refresh() noexcept;				///<Refresh states and activeness of buttons
 		static wxBitmap _load_png(const String filepath) noexcept;	///<Loads bitmap from PNG file
 
 	public:

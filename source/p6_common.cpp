@@ -97,13 +97,17 @@ p6::real p6::Coord::angle() const noexcept
 	if (x == 0.0 && y == 0.0) return 0.0;
 	else if (abs(x) > abs(y))
 	{
-		if (x > 0) return atan(y / x);
-		return pi() + atan(y / x);
+		if (x > 0)
+		{
+			if (y > 0) return atan(y / x);
+			else return 2.0 * pi() + atan(y / x);
+		}
+		else return pi() + atan(y / x);
 	}
 	else
 	{
-		if (y > 0) return 2.0 * pi() - atan(x / y);
-		return 1.5 * pi() - atan(x / y);
+		if (y > 0) return 0.5 * pi() - atan(x / y);
+		else return 1.5 * pi() - atan(x / y);
 	}
 }
 
