@@ -11,7 +11,7 @@
 #include "../header/p6_linear_material.hpp"
 #include <stdexcept>
 
-p6::LinearMaterial::LinearMaterial(const String name, real modulus) noexcept
+p6::LinearMaterial::LinearMaterial(const String name, real modulus)
 {
 	if (name == "") throw std::runtime_error("Name of material cannot be empty");
 	if (!(modulus > 0.0)) throw std::runtime_error("Young's modulus must be greater then zero");

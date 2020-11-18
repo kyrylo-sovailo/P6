@@ -321,8 +321,7 @@ void p6::NonlinearMaterial::_calculate() const noexcept
 	}
 
 	//Checking stack
-	if (stack.size() != 1)
-		throw std::logic_error("NonlinearMaterial: stack size at end is not 1\n");
+	assert(stack.size() == 1);
 
 	//Saving result
 	_last_stress = stack[0].value;

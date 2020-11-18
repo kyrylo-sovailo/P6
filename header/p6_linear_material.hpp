@@ -23,7 +23,7 @@ namespace p6
 		real _modulus;													///<Young's modulus
 
 	public:
-		LinearMaterial(const String name, real modulus) noexcept;		///<Creates material from Young's modulus
+		LinearMaterial(const String name, real modulus);				///<Creates material from Young's modulus
 		real modulus()									const noexcept;	///<Returns Young's modulus
 		virtual Type type() 							const noexcept;	///<Returns type of material
 		virtual real stress(real strain)				const noexcept;	///<Returns stress in dependence of strain
