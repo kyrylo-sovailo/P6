@@ -13,8 +13,13 @@
 
 p6::LinearMaterial::LinearMaterial(const String name, real modulus)
 {
-	if (name == "") throw std::runtime_error("Name of material cannot be empty");
-	if (!(modulus > 0.0)) throw std::runtime_error("Young's modulus must be greater then zero");
+	if (name == "") throw std::runtime_error("Material name can not be empty");
+	if (modulus != modulus)
+		throw std::runtime_error("Young's modulus can not be NaN");
+	if (modulus == std::numeric_limits<real>::infinity())
+		throw std::runtime_error("Young's modulus can not be infinity");
+	if (modulus <= 0.0)
+		throw std::runtime_error("Young's modulus can not be less or equal zero");
 	_name = name;
 	_modulus = modulus;
 }

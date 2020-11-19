@@ -16,7 +16,7 @@
 
 p6::NonlinearMaterial::NonlinearMaterial(const String name, const String formula)
 {
-	if (name == "") throw std::runtime_error("Name of material cannot be empty");
+	if (name == "") throw std::runtime_error("Material name can not be empty");
 	_name = name;
 	_formula = formula;
 	_last_strain = nan("");
@@ -28,7 +28,7 @@ p6::NonlinearMaterial::NonlinearMaterial(const String name, const String formula
 		if (!(('0' <= c && c <= '9')
 		|| ('a' <= c && c <= 'z')
 		|| strchr("()+-*/. ", c) != nullptr))
-			throw std::runtime_error("NonlinearMaterial::parse() : illegal symbol");
+			throw std::runtime_error("Illegal symbol");
 	}
 
 	//Parsing and primary check (check s)
@@ -42,6 +42,10 @@ p6::NonlinearMaterial::NonlinearMaterial(const String name, const String formula
 			Word newword;
 			newword.type = Word::Type::REAL;
 			newword.number = strtod(p, &end);
+			if (newword.number != newword.number)
+				throw std::runtime_error("NaN is not allowed");
+			if (abs(newword.number) == std::numeric_limits<real>::infinity())
+				throw std::runtime_error("Infinity is not allowed");
 			p = end;
 			left.push_back(newword);
 		}
@@ -55,7 +59,7 @@ p6::NonlinearMaterial::NonlinearMaterial(const String name, const String formula
 			else if (length == 3 && memcmp(p, "cos", 3) == 0) newword.type = Word::Type::COS;
 			else if (length == 2 && memcmp(p, "ln", 2) == 0) newword.type = Word::Type::LN;
 			else if (length == 3 && memcmp(p, "exp", 3) == 0) newword.type = Word::Type::EXP;
-			else throw std::runtime_error("NonlinearMaterial::parse(): invalid identifier\n");
+			else throw std::runtime_error("Invalid identifier");
 			p += length;
 			left.push_back(newword);
 		}
@@ -75,7 +79,7 @@ p6::NonlinearMaterial::NonlinearMaterial(const String name, const String formula
 			p++;
 		}
 		else if (*p == ' ') p++;
-		else throw std::runtime_error("NonlinearMaterial::parse(): illegal word begin\n");
+		else throw std::runtime_error("Invalid identifier");
 	}
 
 	//Secondary check (ckeck sequent operators and identifiers, setermining unar minus)
@@ -98,15 +102,15 @@ p6::NonlinearMaterial::NonlinearMaterial(const String name, const String formula
 					left[i].type == Word::Type::COS			||
 					left[i].type == Word::Type::LN			||
 					left[i].type == Word::Type::EXP			||
-					left[i].type == Word::Type::REAL			||
+					left[i].type == Word::Type::REAL		||
 					left[i].type == Word::Type::STRAIN		||
 					left[i].type == Word::Type::OPEN) continue;
 			}
-			throw std::runtime_error("NonlinearMaterial::parse(): illegal operator usage\n");
+			throw std::runtime_error("Illegal operator usage");
 		}
 		//Need operators
 		else if (
-			left[i - 1].type == Word::Type::REAL		||
+			left[i - 1].type == Word::Type::REAL	||
 			left[i - 1].type == Word::Type::STRAIN	||
 			left[i - 1].type == Word::Type::CLOSE)
 		{
@@ -116,13 +120,13 @@ p6::NonlinearMaterial::NonlinearMaterial(const String name, const String formula
 				left[i].type == Word::Type::MUL ||
 				left[i].type == Word::Type::DIV ||
 				left[i].type == Word::Type::CLOSE) continue;
-			throw std::runtime_error("NonlinearMaterial::parse(): illegal number usage\n");
+			throw std::runtime_error("Illegal number usage");
 		}
 		//Need opening bracket
 		else
 		{
 			if (i < left.size() && left[i].type == Word::Type::OPEN) continue;
-			throw std::runtime_error("NonlinearMaterial::parse(): illegal function usage\n");
+			throw std::runtime_error("Illegal function usage");
 		}
 	}
 
@@ -140,7 +144,7 @@ p6::NonlinearMaterial::NonlinearMaterial(const String name, const String formula
 		}
 	}
 	if (bracketcount != 0)
-		throw std::runtime_error("NonlinearMaterial::parse(): illegal bracket usage\n");
+		throw std::runtime_error("Illegal bracket usage");
 
 	//Transforming to inverse polish notation (pulling right)
 	std::vector<Word::Type> stack;
@@ -274,8 +278,9 @@ void p6::NonlinearMaterial::_calculate() const noexcept
 			break;
 
 		case Operation::SUB:
-			(stack.end() - 2)->value -= stack.back().value;
-			(stack.end() - 2)->derivative -= stack.back().derivative; stack.pop_back();
+			(stack.end() - 2)->value = stack.back().value - (stack.end() - 2)->value;
+			(stack.end() - 2)->derivative = stack.back().derivative - (stack.end() - 2)->derivative;
+			stack.pop_back();
 			break;
 
 		case Operation::MUL:
@@ -288,11 +293,16 @@ void p6::NonlinearMaterial::_calculate() const noexcept
 
 		case Operation::DIV:
 			(stack.end() - 2)->derivative =
-				((stack.end() - 2)->derivative * stack.back().value -
-				 (stack.end() - 2)->value * stack.back().derivative) / 
-				 (stack.back().value * stack.back().value);
-			(stack.end() - 2)->value /= stack.back().value;
+				(stack.back().derivative * (stack.end() - 2)->value -
+				stack.back().value * (stack.end() - 2)->derivative) /
+				 ((stack.end() - 2)->value * (stack.end() - 2)->value);
+			(stack.end() - 2)->value = stack.back().value / (stack.end() - 2)->value;
 			stack.pop_back();
+			break;
+
+		case Operation::NEG:
+			stack.back().derivative = -stack.back().derivative;
+			stack.back().value = -stack.back().value;
 			break;
 
 		case Operation::SIN:
