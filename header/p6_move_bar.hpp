@@ -13,6 +13,7 @@
 
 #include "p6_common.hpp"
 #include <wx/wx.h>
+#include <vector>
 
 namespace p6
 {
