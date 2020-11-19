@@ -77,23 +77,23 @@ p6::StickBar::StickBar(Frame *frame)  noexcept : _frame(frame)
 void p6::StickBar::show() noexcept
 {
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
-	sizer->Add(_material_static,	0, wxALL | wxEXPAND, 10);
-	sizer->Add(_material_choice,	0, wxALL | wxEXPAND, 10);
-	sizer->Add(_area_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_area_text,			0, wxALL | wxEXPAND, 10);
-	sizer->Add(_length_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_length_text,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_material_static,	0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_material_choice,	0, wxEXPAND | wxALL, 5);
+	sizer->Add(_area_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_area_text,			0, wxEXPAND | wxALL, 5);
+	sizer->Add(_length_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_length_text,		0, wxEXPAND | wxALL, 5);
 	sizer->Show(true);
-	sizer->Add(_strain_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_strain_text,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_force_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_force_text,			0, wxALL | wxEXPAND, 10);
+	sizer->Add(_strain_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_strain_text,		0, wxEXPAND | wxALL, 5);
+	sizer->Add(_force_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_force_text,			0, wxEXPAND | wxALL, 5);
 	if (_frame->toolbar()->simulation()) sizer->ShowItems(true);
 	//P6 refreshes bars before showing
 	//So even if I hide panels during refresh, they will be shown here
 	//That's why I need some extra code
 	//But with Enable() works fine, it isn't changed when Show()
-	_frame->side_panel()->panel()->Layout();
+	_frame->frame()->Layout();
 }
 
 void p6::StickBar::refresh() noexcept

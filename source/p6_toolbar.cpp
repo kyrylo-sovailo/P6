@@ -187,18 +187,9 @@ void p6::ToolBar::_on_delete(wxCommandEvent &e)
 
 wxBitmap p6::ToolBar::_load_png(const String filepath) noexcept
 {
-	if (!wxFileExists(filepath)) return wxNullBitmap;
-	wxFile file(filepath, wxFile::OpenMode::read);
-	if (!file.IsOpened()) return wxNullBitmap;
-	file.Seek(0, wxSeekMode::wxFromEnd);
-	std::vector<char> memory(file.Tell());
-	file.Seek(0, wxSeekMode::wxFromStart);
-	file.Read(&memory[0], memory.size());
-	wxBitmap bitmap;
-	{
-		wxLogNull lognull;
-		bitmap = wxBitmap::NewFromPNGData(memory.data(), memory.size());
-	}
+	wxLogNull lognull;
+	wxBitmap bitmap = wxBitmap(filepath, wxBITMAP_TYPE_PNG);
+	if (bitmap.IsNull()) bitmap = wxBitmap(16, 16);
 	return bitmap;
 }
 

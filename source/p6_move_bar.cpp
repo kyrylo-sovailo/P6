@@ -276,23 +276,23 @@ void p6::MoveBar::show() noexcept
 	_shift_y_text->ChangeValue("");
 
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
-	sizer->Add(_anchor_x_static,	0, wxALL | wxEXPAND, 10);
-	sizer->Add(_anchor_x_text,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_anchor_y_static,	0, wxALL | wxEXPAND, 10);
-	sizer->Add(_anchor_y_text,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_scale_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_scale_text,			0, wxALL | wxEXPAND, 10);
-	sizer->Add(_angle_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_angle_text,			0, wxALL | wxEXPAND, 10);
-	sizer->Add(_shift_x_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_shift_x_text,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_shift_y_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_shift_y_text,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_allowed_shift,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_allowed_scale,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_allowed_rotate,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_anchor_x_static,	0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_anchor_x_text,		0, wxEXPAND | wxALL, 5);
+	sizer->Add(_anchor_y_static,	0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_anchor_y_text,		0, wxEXPAND | wxALL, 5);
+	sizer->Add(_scale_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_scale_text,			0, wxEXPAND | wxALL, 5);
+	sizer->Add(_angle_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_angle_text,			0, wxEXPAND | wxALL, 5);
+	sizer->Add(_shift_x_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_shift_x_text,		0, wxEXPAND | wxALL, 5);
+	sizer->Add(_shift_y_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_shift_y_text,		0, wxEXPAND | wxALL, 5);
+	sizer->Add(_allowed_shift,		0, wxEXPAND | wxALL, 5);
+	sizer->Add(_allowed_scale,		0, wxEXPAND | wxALL, 5);
+	sizer->Add(_allowed_rotate,		0, wxEXPAND | wxALL, 5);
 	sizer->ShowItems(true);
-	_frame->side_panel()->panel()->Layout();
+	_frame->frame()->Layout();
 	_frame->main_panel()->need_refresh();
 }
 

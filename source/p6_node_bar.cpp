@@ -92,14 +92,14 @@ p6::NodeBar::NodeBar(Frame *frame) noexcept : _frame(frame)
 void p6::NodeBar::show() noexcept
 {
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
-	sizer->Add(_free_check,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_fixed_check,	0, wxALL | wxEXPAND, 10);
-	sizer->Add(_x_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_x_text,			0, wxALL | wxEXPAND, 10);
-	sizer->Add(_y_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_y_text,			0, wxALL | wxEXPAND, 10);
+	sizer->Add(_free_check,		0, wxEXPAND | wxALL, 5);
+	sizer->Add(_fixed_check,	0, wxEXPAND | wxALL, 5);
+	sizer->Add(_x_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_x_text,			0, wxEXPAND | wxALL, 5);
+	sizer->Add(_y_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_y_text,			0, wxEXPAND | wxALL, 5);
 	sizer->ShowItems(true);
-	_frame->side_panel()->panel()->Layout();
+	_frame->frame()->Layout();
 }
 
 void p6::NodeBar::refresh() noexcept

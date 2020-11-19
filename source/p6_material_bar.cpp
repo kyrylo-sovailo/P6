@@ -96,13 +96,13 @@ p6::MaterialBar::MaterialBar(Frame *frame)  noexcept : _frame(frame)
 	//New-accept-delete buttons
 	_buttons_sizer = new wxBoxSizer(wxHORIZONTAL);
 	_button_new = new wxButton(parent, wxID_ANY, "New");
-	_buttons_sizer->Add(_button_new, 1, wxALL, 10);
+	_buttons_sizer->Add(_button_new, 1, wxALL, 5);
 	parent->Bind(wxEVT_BUTTON, &MaterialBar::_on_new, this, _button_new->GetId());
 	_button_apply = new wxButton(parent, wxID_ANY, "Apply");
-	_buttons_sizer->Add(_button_apply, 1, wxALL, 10);
+	_buttons_sizer->Add(_button_apply, 1, wxALL, 5);
 	parent->Bind(wxEVT_BUTTON, &MaterialBar::_on_apply, this, _button_apply->GetId());
 	_button_delete = new wxButton(parent, wxID_ANY, "Delete");
-	_buttons_sizer->Add(_button_delete, 1, wxALL, 10);
+	_buttons_sizer->Add(_button_delete, 1, wxALL, 5);
 	parent->Bind(wxEVT_BUTTON, &MaterialBar::_on_delete, this, _button_delete->GetId());
 }
 
@@ -127,15 +127,15 @@ void p6::MaterialBar::show() noexcept
 	}
 
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
-	sizer->Add(_material_choice,	0, wxALL | wxEXPAND, 10);
-	sizer->Add(_name_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_name_text,			0, wxALL | wxEXPAND, 10);
-	sizer->Add(_nonlinear_check,	0, wxALL | wxEXPAND, 10);
-	sizer->Add(_formula_static,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_formula_text,		0, wxALL | wxEXPAND, 10);
-	sizer->Add(_buttons_sizer,		0, wxALL | wxEXPAND, 10);
+	sizer->Add(_material_choice,	0, wxEXPAND | wxALL, 5);
+	sizer->Add(_name_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_name_text,			0, wxEXPAND | wxALL, 5);
+	sizer->Add(_nonlinear_check,	0, wxEXPAND | wxALL, 5);
+	sizer->Add(_formula_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_formula_text,		0, wxEXPAND | wxALL, 5);
+	sizer->Add(_buttons_sizer,		0, wxEXPAND | wxALL, 5);
 	sizer->ShowItems(true);
-	_frame->side_panel()->panel()->Layout();
+	_frame->frame()->Layout();
 }
 
 void p6::MaterialBar::refresh() noexcept

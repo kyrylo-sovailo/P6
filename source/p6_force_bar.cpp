@@ -120,16 +120,16 @@ p6::ForceBar::ForceBar(Frame *frame)  noexcept : _frame(frame)
 void p6::ForceBar::show() noexcept
 {
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
-	sizer->Add(_x_static,		0, wxEXPAND | wxALL, 10);
-	sizer->Add(_x_text,			0, wxEXPAND | wxALL, 10);
-	sizer->Add(_y_static,		0, wxEXPAND | wxALL, 10);
-	sizer->Add(_y_text,			0, wxEXPAND | wxALL, 10);
-	sizer->Add(_modulus_static,	0, wxEXPAND | wxALL, 10);
-	sizer->Add(_modulus_text,	0, wxEXPAND | wxALL, 10);
-	sizer->Add(_angle_static,	0, wxEXPAND | wxALL, 10);
-	sizer->Add(_angle_text,		0, wxEXPAND | wxALL, 10);
+	sizer->Add(_x_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_x_text,			0, wxEXPAND | wxALL, 5);
+	sizer->Add(_y_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_y_text,			0, wxEXPAND | wxALL, 5);
+	sizer->Add(_modulus_static,	0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_modulus_text,	0, wxEXPAND | wxALL, 5);
+	sizer->Add(_angle_static,	0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_angle_text,		0, wxEXPAND | wxALL, 5);
 	sizer->ShowItems(true);
-	_frame->side_panel()->panel()->Layout();
+	_frame->frame()->Layout();
 }
 
 void p6::ForceBar::refresh() noexcept
