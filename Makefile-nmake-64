@@ -14,30 +14,22 @@ WX_LIB=$(WX_DIRECTORY)\lib\vc14x_x64_dll
 GOOGLE_INCLUDE=E:\Project\_lib\googletest\googletest\include
 GOOGLE_LIB=E:\Project\_lib\googletest\build64\lib\Release
 
-#Resource compiler
-RESOURCE_COMPILER_FLAGS = /I $(WX_DIRECTORY)\include
-
 #Release
 RELEASE_COMPILE_FLAGS = /GS /GL /W3 /Gy /Zc:wchar_t /I $(WX_DIRECTORY)\include /I $(EIGEN_DIRECTORY)\Eigen /I $(WX_DIRECTORY)\include\msvc /Zi /Gm- /O2 /sdl /Zc:inline /fp:precise /D "_CRT_SECURE_NO_WARNINGS" /D "__WXMSW__" /D "WXUSINGDLL" /D "wxMSVC_VERSION_AUTO" /D "wxMSVC_VERSION_ABI_COMPAT" /D "_UNICODE" /D "UNICODE" /errorReport:prompt /WX- /Zc:forScope /Gd /Oi /MD /FC /nologo /diagnostics:classic /c /EHsc
 
-RELEASE_LINK_FLAGS = /MANIFEST /LTCG:incremental /NXCOMPAT /DYNAMICBASE "kernel32.lib" "user32.lib" "gdi32.lib" "comdlg32.lib" "winspool.lib" "shell32.lib" "shlwapi.lib" "ole32.lib" "oleaut32.lib" "uuid.lib" "advapi32.lib" "version.lib" "comctl32.lib" "rpcrt4.lib" "wsock32.lib" "wininet.lib" "winmm.lib" "odbc32.lib" "odbccp32.lib" /DEBUG:FULL /MACHINE:X64 /OPT:REF /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /OPT:ICF /ERRORREPORT:PROMPT /NOLOGO /LIBPATH:$(WX_LIB) /TLBID:1
+RELEASE_LINK_FLAGS = /LTCG:incremental /NXCOMPAT /DYNAMICBASE "kernel32.lib" "user32.lib" "gdi32.lib" "comdlg32.lib" "winspool.lib" "shell32.lib" "shlwapi.lib" "ole32.lib" "oleaut32.lib" "uuid.lib" "advapi32.lib" "version.lib" "comctl32.lib" "rpcrt4.lib" "wsock32.lib" "wininet.lib" "winmm.lib" "odbc32.lib" "odbccp32.lib" /DEBUG:NONE /MACHINE:X64 /OPT:ICF /ERRORREPORT:PROMPT /NOLOGO /LIBPATH:$(WX_LIB) /TLBID:1
 
 {source}.cpp{tmp}.obj :
 	if not exist tmp mkdir tmp
 	$(COMPILER) $** $(RELEASE_COMPILE_FLAGS) /Fo:tmp\$(**B).obj
 
-{source}.rc{tmp}.res :
-	if not exist tmp mkdir tmp
-	$(RESOURCE_COMPILER) $(RESOURCE_COMPILER_FLAGS) $**
-	move source\$(**B).res tmp
-
-P6.exe : tmp\p6_resource.res tmp\p6_app.obj tmp\p6_common.obj tmp\p6_construction.obj tmp\p6_force_bar.obj tmp\p6_frame.obj tmp\p6_linear_material.obj tmp\p6_main_panel.obj tmp\p6_material.obj tmp\p6_material_bar.obj tmp\p6_menubar.obj tmp\p6_mouse.obj tmp\p6_move_bar.obj tmp\p6_node_bar.obj tmp\p6_nonlinear_material.obj tmp\p6_side_panel.obj tmp\p6_stick_bar.obj tmp\p6_toolbar.obj
+P6.exe : tmp\p6_app.obj tmp\p6_common.obj tmp\p6_construction.obj tmp\p6_force_bar.obj tmp\p6_frame.obj tmp\p6_linear_material.obj tmp\p6_main_panel.obj tmp\p6_material.obj tmp\p6_material_bar.obj tmp\p6_menubar.obj tmp\p6_mouse.obj tmp\p6_move_bar.obj tmp\p6_node_bar.obj tmp\p6_nonlinear_material.obj tmp\p6_side_panel.obj tmp\p6_stick_bar.obj tmp\p6_toolbar.obj
 	$(LINKER) $** $(RELEASE_LINK_FLAGS) /OUT:P6.exe
 
 #Testing
 TEST_COMPILE_FLAGS = /GS /GL /W3 /Gy /Zc:wchar_t /I $(EIGEN_DIRECTORY)\Eigen /I $(GOOGLE_INCLUDE) /I $(WX_DIRECTORY)\include\msvc /I $(WX_DIRECTORY)\include /Zi /Gm- /O2 /sdl /Zc:inline /fp:precise /D "_CRT_SECURE_NO_WARNINGS" /D "__WXMSW__" /D "WXUSINGDLL" /D "wxMSVC_VERSION_AUTO" /D "wxMSVC_VERSION_ABI_COMPAT" /D "_UNICODE" /D "UNICODE" /errorReport:prompt /WX- /Zc:forScope /Gd /Oi /MT /FC /nologo /diagnostics:classic /c /EHsc
 
-TEST_LINK_FLAGS = /MANIFEST /LTCG:incremental /NXCOMPAT /DYNAMICBASE "gtest.lib" "kernel32.lib" "user32.lib" "gdi32.lib" "comdlg32.lib" "winspool.lib" "shell32.lib" "shlwapi.lib" "ole32.lib" "oleaut32.lib" "uuid.lib" "advapi32.lib" "version.lib" "comctl32.lib" "rpcrt4.lib" "wsock32.lib" "wininet.lib" "winmm.lib" "odbc32.lib" "odbccp32.lib" /DEBUG:FULL /MACHINE:X64 /OPT:REF /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /OPT:ICF /ERRORREPORT:PROMPT /NOLOGO /LIBPATH:$(GOOGLE_LIB) /LIBPATH:$(WX_LIB) /TLBID:1
+TEST_LINK_FLAGS = /LTCG:incremental /NXCOMPAT /DYNAMICBASE "gtest.lib" "kernel32.lib" "user32.lib" "gdi32.lib" "comdlg32.lib" "winspool.lib" "shell32.lib" "shlwapi.lib" "ole32.lib" "oleaut32.lib" "uuid.lib" "advapi32.lib" "version.lib" "comctl32.lib" "rpcrt4.lib" "wsock32.lib" "wininet.lib" "winmm.lib" "odbc32.lib" "odbccp32.lib" /DEBUG:NONE /MACHINE:X64 /OPT:ICF /ERRORREPORT:PROMPT /NOLOGO /LIBPATH:$(GOOGLE_LIB) /LIBPATH:$(WX_LIB) /TLBID:1
 
 {source}.cpp{tmp\test}.obj :
 	if not exist tmp\test mkdir tmp\test

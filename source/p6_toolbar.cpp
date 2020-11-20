@@ -10,7 +10,7 @@
 
 #include "../header/p6_toolbar.hpp"
 #include "../header/p6_frame.hpp"
-#include <wx/file.h>
+#include <wx/rawbmp.h>
 
 void p6::ToolBar::_on_simulate(wxCommandEvent &e)
 {
@@ -188,9 +188,20 @@ void p6::ToolBar::_on_delete(wxCommandEvent &e)
 wxBitmap p6::ToolBar::_load_png(const String filepath) noexcept
 {
 	wxLogNull lognull;
-	wxBitmap bitmap = wxBitmap(filepath, wxBITMAP_TYPE_PNG);
-	if (bitmap.IsNull()) bitmap = wxBitmap(16, 16);
-	return bitmap;
+	wxImage image = wxImage(filepath, wxBITMAP_TYPE_PNG);
+	if (!image.IsOk()) return wxBitmap(16, 16);
+	
+	wxColour colour = _toolbar->GetBackgroundColour();
+	for (int x = 0; x < image.GetHeight(); x++)
+		for (int y = 0; y < image.GetWidth(); y++)
+		{
+			if (image.GetAlpha(x, y) == 0)
+			{
+				image.SetAlpha(x, y, 255);
+				image.SetRGB(x, y, colour.Red(), colour.Green(), colour.Blue());
+			}
+		}
+	return wxBitmap(image);
 }
 
 void p6::ToolBar::_refresh() noexcept
@@ -211,88 +222,88 @@ void p6::ToolBar::_refresh() noexcept
 
 p6::ToolBar::ToolBar(Frame *frame) noexcept : _frame(frame)
 {
-	wxToolBar *toolbar = frame->frame()->CreateToolBar(wxID_ANY, wxID_ANY, "Toolbar");
+	_toolbar = frame->frame()->CreateToolBar(wxID_ANY, wxID_ANY, "Toolbar");
 
 	//Simulate tool
-	_simulate = toolbar->AddCheckTool(
+	_simulate = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Simulate",
 		_load_png("icons/simulate.png"),
-		_load_png("icons/simulate_disabled.png"),
+		wxNullBitmap,
 		"Run simulation",
 		"Run simulation of the designed construction");
 	frame->frame()->Bind(wxEVT_TOOL, &ToolBar::_on_simulate, this, _simulate->GetId());
 
 	//Select tool
-	_select = toolbar->AddCheckTool(
+	_select = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Select",
 		_load_png("icons/select.png"),
-		_load_png("icons/select_disabled.png"),
+		wxNullBitmap,
 		"Select items",
 		"Select nodes, sticks or forces one by one");
 	frame->frame()->Bind(wxEVT_TOOL, &ToolBar::_on_select, this, _select->GetId());
 
 	//Area tool
-	_area = toolbar->AddCheckTool(
+	_area = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Area",
 		_load_png("icons/area.png"),
-		_load_png("icons/area_disabled.png"),
+		wxNullBitmap,
 		"Select area",
 		"Select all nodes, sticks or forces in area");
 	frame->frame()->Bind(wxEVT_TOOL, &ToolBar::_on_area, this, _area->GetId());
 
 	//Move tool
-	_move = toolbar->AddCheckTool(
+	_move = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Move",
 		_load_png("icons/move.png"),
-		_load_png("icons/move_disabled.png"),
+		wxNullBitmap,
 		"Move nodes",
 		"Complex move of selected nodes");
 	frame->frame()->Bind(wxEVT_TOOL, &ToolBar::_on_move, this, _move->GetId());
 
 	//Node tool
-	_node = toolbar->AddCheckTool(
+	_node = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Node",
 		_load_png("icons/node.png"),
-		_load_png("icons/node_disabled.png"),
+		wxNullBitmap,
 		"Create node",
 		"Create node or select nodes only");
 	frame->frame()->Bind(wxEVT_TOOL, &ToolBar::_on_node, this, _node->GetId());
 
 	//Stick tool
-	_stick = toolbar->AddCheckTool(
+	_stick = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Stick",
 		_load_png("icons/stick.png"),
-		_load_png("icons/stick_disabled.png"),
+		wxNullBitmap,
 		"Create stick",
 		"Create stick between selected nodes or select sticks only");
 	frame->frame()->Bind(wxEVT_TOOL, &ToolBar::_on_stick, this, _stick->GetId());
 
 	//Force tool
-	_force = toolbar->AddCheckTool(
+	_force = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Force",
 		_load_png("icons/force.png"),
-		_load_png("icons/force_disabled.png"),
+		wxNullBitmap,
 		"Create force",
 		"Create force on selected node or select nodes only");
 	frame->frame()->Bind(wxEVT_TOOL, &ToolBar::_on_force, this, _force->GetId());
 
 	//Delete tool
-	_delete = toolbar->AddCheckTool(
+	_delete = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Delete",
 		_load_png("icons/delete.png"),
-		_load_png("icons/delete_disabled.png"),
+		wxNullBitmap,
 		"Delete",
 		"Delete selected items");
 	frame->frame()->Bind(wxEVT_TOOL, &ToolBar::_on_delete, this, _delete->GetId());
-	toolbar->Realize();
+	_toolbar->Realize();
 }
 
 p6::ToolBar::Tool p6::ToolBar::tool() const noexcept

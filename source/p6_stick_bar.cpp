@@ -140,10 +140,15 @@ void p6::StickBar::refresh() noexcept
 		else _length_text->ChangeValue("");
 	}
 
-	_strain_static->Show(sim);
-	_strain_text->Show(sim);
-	_force_static->Show(sim);
-	_force_text->Show(sim);
+	if (sim != _strain_static->IsShown())
+	{
+		_strain_static->Show(sim);
+		_strain_text->Show(sim);
+		_force_static->Show(sim);
+		_force_text->Show(sim);
+		_frame->frame()->Layout();	//The only place where elements are shown or hidden within one bar
+	}
+
 	if (sim)
 	{
 		//Setting strain
