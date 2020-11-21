@@ -157,7 +157,7 @@ namespace p6
 		uint get_force_node(uint force)						const noexcept;	///<Returns node force is attached to
 
 		//Material
-		uint create_linear_material(const String name, real modulus)	noexcept;		///<Creates linear material, returns it's index
+		uint create_linear_material(const String name, real modulus);					///<Creates linear material, returns it's index
 		uint create_nonlinear_material(const String name, const String formula);		///<Creates non-linear material, returns it's index
 		void delete_material(uint material)								noexcept;		///<Deletes material
 		uint get_material_count()										const noexcept;	///<Returns material number

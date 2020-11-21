@@ -14,8 +14,8 @@
 wxPoint p6::MainPanel::_real_to_pixel(Coord coord, wxPoint offset) const noexcept
 {
 	return offset + wxPoint(
-		_panel->GetSize().x / 2 + (coord.x - _center.x) * pixels_in_meter,
-		_panel->GetSize().y / 2 - (coord.y - _center.y) * pixels_in_meter);
+		_panel->GetSize().x / 2 + (coord.x - center.x) * pixels_in_meter,
+		_panel->GetSize().y / 2 - (coord.y - center.y) * pixels_in_meter);
 }
 
 p6::MainPanel::MainPanel(Frame *frame) noexcept :
@@ -46,7 +46,7 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const noexcept
 	if (_grid_draw)
 	{
 		dc->SetPen(wxPen(wxColour(200, 200, 200), 1));
-		wxPoint start_pixel = _real_to_pixel(Coord(floor(_center.x), floor(_center.y)), wxPoint(0, 0));
+		wxPoint start_pixel = _real_to_pixel(Coord(floor(center.x), floor(center.y)), wxPoint(0, 0));
 		int meter = 0;
 		while (start_pixel.x + meter * pixels_in_meter < size().x)
 		{
@@ -260,8 +260,8 @@ p6::MainPanel::Item p6::MainPanel::get_item(wxPoint point) const noexcept
 p6::Coord p6::MainPanel::pixel_to_real(wxPoint point) const noexcept
 {
 	return Coord(
-		_center.x + (real)(point.x - _panel->GetSize().x / 2) / pixels_in_meter,
-		_center.y + (real)(_panel->GetSize().y / 2 - point.y) / pixels_in_meter);
+		center.x + (real)(point.x - _panel->GetSize().x / 2) / pixels_in_meter,
+		center.y + (real)(_panel->GetSize().y / 2 - point.y) / pixels_in_meter);
 }
 
 void p6::MainPanel::area_select_begin(wxPoint point) noexcept
@@ -320,14 +320,14 @@ void p6::MainPanel::area_select_end(wxPoint point) noexcept
 
 void p6::MainPanel::drag_begin(wxPoint point) noexcept
 {
-	_old_center = _center;
+	_old_center = center;
 	_drag_begin = point;
 }
 
 void p6::MainPanel::drag_continue(wxPoint point) noexcept
 {
-	_center.x = _old_center.x + (_drag_begin.x - point.x) / pixels_in_meter;
-	_center.y = _old_center.y + (point.y - _drag_begin.y) / pixels_in_meter;
+	center.x = _old_center.x + (_drag_begin.x - point.x) / pixels_in_meter;
+	center.y = _old_center.y + (point.y - _drag_begin.y) / pixels_in_meter;
 	need_refresh();
 }
 

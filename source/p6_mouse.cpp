@@ -13,6 +13,7 @@
 
 void p6::Mouse::_on_left_down(wxMouseEvent &e)
 {
+	_frame->main_panel()->panel()->SetFocus();
 	_pressed_item = _frame->main_panel()->get_item(e.GetPosition());
 	_pressed_point = e.GetPosition();
 	_pressed = true;
@@ -213,6 +214,10 @@ void p6::Mouse::_on_wheel(wxMouseEvent &e)
 {
 	if (_pressed) return;
 
+	wxPoint point = e.GetPosition();
+	if(point.x < 0 || point.x >= _frame->main_panel()->size().x
+	|| point.y < 0 || point.y >= _frame->main_panel()->size().y) return;
+	
 	if (_frame->toolbar()->tool() == ToolBar::Tool::force)
 	{
 		if (e.GetWheelRotation() > 0) _wheel_force++;
@@ -222,8 +227,12 @@ void p6::Mouse::_on_wheel(wxMouseEvent &e)
 	else
 	{
 		if (e.GetWheelRotation() > 0) _wheel++;
-		else if (e.GetWheelRotation() < 0) _wheel--;
-		_frame->main_panel()->pixels_in_meter = 30.0 * exp2(_wheel);
+		else if (e.GetWheelRotation() < 0 && _wheel > -2) _wheel--;
+		MainPanel *main_panel = _frame->main_panel();
+		Coord coord = main_panel->pixel_to_real(point);
+		main_panel->pixels_in_meter = 30.0 * exp2(_wheel);
+		main_panel->center.x = coord.x - (real)(point.x - main_panel->size().x / 2) / main_panel->pixels_in_meter;
+		main_panel->center.y = coord.y - (real)(main_panel->size().y / 2 - point.y) / main_panel->pixels_in_meter;
 	}
 	_frame->main_panel()->need_refresh();
 }
@@ -234,5 +243,5 @@ p6::Mouse::Mouse(Frame *frame) noexcept : _frame(frame)
 	parent->Bind(wxEVT_LEFT_DOWN, &Mouse::_on_left_down, this, parent->GetId());
 	parent->Bind(wxEVT_LEFT_UP, &Mouse::_on_left_up, this, parent->GetId());
 	parent->Bind(wxEVT_MOTION, &Mouse::_on_move, this, parent->GetId());
-	parent->Bind(wxEVT_MOUSEWHEEL, &Mouse::_on_wheel, this, wxID_ANY);
+	parent->Bind(wxEVT_MOUSEWHEEL, &Mouse::_on_wheel, this, parent->GetId());
 }

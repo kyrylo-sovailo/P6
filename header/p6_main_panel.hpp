@@ -29,7 +29,6 @@ namespace p6
 		wxPoint _area_select_current;	///<Current point of area selecting (needs to be saved because rendering happens in another function)
 		bool _area_select_draw;			///<Indicator if area selection needs to be drawn
 		bool _grid_draw;				///<Indicator if grid needs to be drawn
-		Coord _center;					///<Coordinates of view center
 		Coord _old_center;				///<Coordinates of old view center when being dragged
 		wxPoint _drag_begin;			///<Begin point of dragging
 
@@ -53,6 +52,7 @@ namespace p6
 			bool selected;	///Indicator if item is selected
 		};
 
+		Coord center;												///<Coordinates of view center
 		real pixels_in_meter = 30.0;								///<Pixels per meter rate
 		real meters_in_newton = 1.0;								///<Meters on newton rate (to display forces)
 		std::set<uint> selected_nodes;								///<Selected nodes

@@ -211,7 +211,7 @@ p6::uint p6::Construction::get_force_node(uint force) const noexcept
 	return _force[force].node;
 }
 
-p6::uint p6::Construction::create_linear_material(const String name, real modulus) noexcept
+p6::uint p6::Construction::create_linear_material(const String name, real modulus)
 {
 	assert(!_simulation);
 	for (uint i = 0; i < _material.size(); i++)

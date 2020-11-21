@@ -55,7 +55,7 @@ void p6::MaterialBar::_on_apply(wxCommandEvent &e)
 		_frame->side_panel()->refresh_materials();
 		_material_choice->SetSelection(material);
 	}
-	catch (std::exception &e)
+	catch (std::exception e)
 	{
 		wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame());
 	}
