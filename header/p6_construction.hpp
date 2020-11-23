@@ -65,7 +65,7 @@ namespace p6
 		std::vector<Stick> _stick;			///<List of all sticks
 		std::vector<Force> _force;			///<List of all forces
 		std::vector<Material*> _material;	///<List of all materials
-		bool _simulation;					///<Indicator if simulation is being run
+		bool _simulation = false;			///<Indicator if simulation is being run
 		uint _nfree;						///<Number of free nodes, set by _create_map
 
 		uint _node_equation_fx(uint free)					const noexcept;	///<Returns equation index of horizontal node force balance

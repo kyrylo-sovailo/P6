@@ -27,8 +27,8 @@ namespace p6
 	private:
 		wxFrame *_frame;							///<wxWidget's window
 		wxBoxSizer *_sizer;							///<Sizer of wxWidget's window
-		ToolBar _toolbar;							///<Tool bar
 		MenuBar _menubar;							///<Menu bar
+		ToolBar _toolbar;							///<Tool bar
 		MainPanel _main_panel;						///<Main panel
 		SidePanel _side_panel;						///<Side panel
 		Mouse _mouse;								///<Mouse events' handler

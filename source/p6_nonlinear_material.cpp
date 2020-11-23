@@ -13,6 +13,7 @@
 #include <cmath>
 #include <cstring>
 #include <cassert>
+#include <limits>
 
 p6::NonlinearMaterial::NonlinearMaterial(const String name, const String formula)
 {

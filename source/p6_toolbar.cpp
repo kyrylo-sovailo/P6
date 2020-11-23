@@ -187,21 +187,33 @@ void p6::ToolBar::_on_delete(wxCommandEvent &e)
 
 wxBitmap p6::ToolBar::_load_png(const String filepath) noexcept
 {
-	wxLogNull lognull;
-	wxImage image = wxImage(filepath, wxBITMAP_TYPE_PNG);
-	if (!image.IsOk()) return wxBitmap(16, 16);
-	
-	wxColour colour = _toolbar->GetBackgroundColour();
-	for (int x = 0; x < image.GetHeight(); x++)
-		for (int y = 0; y < image.GetWidth(); y++)
+	#ifdef ICONS_SET_BACKGROUND
+		wxImage image;
 		{
-			if (image.GetAlpha(x, y) == 0)
-			{
-				image.SetAlpha(x, y, 255);
-				image.SetRGB(x, y, colour.Red(), colour.Green(), colour.Blue());
-			}
+			wxLogNull lognull;
+			image = wxImage(filepath, wxBITMAP_TYPE_PNG);
 		}
-	return wxBitmap(image);
+		if (!image.IsOk()) return wxBitmap(16, 16);
+		wxColour colour = _toolbar->GetBackgroundColour();
+		for (int x = 0; x < image.GetHeight(); x++)
+			for (int y = 0; y < image.GetWidth(); y++)
+			{
+				if (image.HasAlpha() && image.GetAlpha(x, y) == 0)
+				{
+					image.SetAlpha(x, y, 255);
+					image.SetRGB(x, y, colour.Red(), colour.Green(), colour.Blue());
+				}
+			}
+		return wxBitmap(image);
+	#else
+		wxBitmap bitmap;
+		{
+			wxLogNull lognull;
+			bitmap = wxBitmap(filepath, wxBITMAP_TYPE_PNG);
+		}
+		if (!bitmap.IsOk()) return wxBitmap(16, 16);
+		else return bitmap;
+	#endif
 }
 
 void p6::ToolBar::_refresh() noexcept

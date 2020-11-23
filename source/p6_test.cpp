@@ -13,6 +13,7 @@
 #include "../header/p6_nonlinear_material.hpp"
 #include <gtest/gtest.h>
 #include <limits>
+#include <cmath>
 
 //Linear material test
 TEST(LinearMaterial, NegativeModule)

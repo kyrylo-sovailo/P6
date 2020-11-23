@@ -10,6 +10,7 @@
 
 #include "../header/p6_linear_material.hpp"
 #include <stdexcept>
+#include <limits>
 
 p6::LinearMaterial::LinearMaterial(const String name, real modulus)
 {

@@ -11,7 +11,7 @@
 #include "../header/p6_construction.hpp"
 #include "../header/p6_linear_material.hpp"
 #include "../header/p6_nonlinear_material.hpp"
-#include <wx/file.h>
+#include "../header/p6_file.hpp"
 #include <cassert>
 #include <Eigen>
 
@@ -287,31 +287,31 @@ p6::String p6::Construction::get_material_formula(uint material) const noexcept
 void p6::Construction::save(const String filepath) const
 {
 	//Open file
-	wxFile file(filepath, wxFile::OpenMode::write);
-	if (!file.IsOpened()) throw std::runtime_error("File cannot be opened for write");
+	OutputFile file(filepath);
+	if (!file.ok()) throw std::runtime_error("File cannot be opened for write");
 	Header header;
 	header.node = _node.size();
 	header.stick = _stick.size();
 	header.force = _force.size();
 	header.material = _material.size();
-	file.Write(&header, sizeof(Header));
+	file.write(&header, sizeof(Header));
 
 	//Nodes
 	for (uint i = 0; i < _node.size(); i++)
 	{
-		file.Write(&_node[i], sizeof(StaticNode));
+		file.write(&_node[i], sizeof(StaticNode));
 	}
 
 	//Sticks
 	for (uint i = 0; i < _stick.size(); i++)
 	{
-		file.Write(&_stick[i], sizeof(Stick));
+		file.write(&_stick[i], sizeof(Stick));
 	}
 
 	//Forces
 	for (uint i = 0; i < _force.size(); i++)
 	{
-		file.Write(&_force[i], sizeof(Force));
+		file.write(&_force[i], sizeof(Force));
 	}
 
 	//Materials
@@ -320,26 +320,26 @@ void p6::Construction::save(const String filepath) const
 		//Name
 		String name = _material[i]->name();
 		uint len = name.size();
-		file.Write(&len, sizeof(uint));
-		file.Write(name.data(), len);
+		file.write(&len, sizeof(uint));
+		file.write(name.data(), len);
 
 		//Type
 		Material::Type type = _material[i]->type();
-		file.Write(&type, sizeof(Material::Type));
+		file.write(&type, sizeof(Material::Type));
 
 		if (type == Material::Type::linear)
 		{
 			//Modulus
 			real modulus = ((LinearMaterial*)_material[i])->modulus();
-			file.Write(&modulus, sizeof(real));
+			file.write(&modulus, sizeof(real));
 		}
 		else
 		{
 			//Formula
 			String formula = ((NonlinearMaterial*)_material[i])->formula();
 			len = formula.size();
-			file.Write(&len, sizeof(uint));
-			file.Write(formula.data(), len);
+			file.write(&len, sizeof(uint));
+			file.write(formula.data(), len);
 		}
 	}
 }
@@ -347,31 +347,31 @@ void p6::Construction::save(const String filepath) const
 void p6::Construction::load(const String filepath)
 {
 	//Open file
-	wxFile file(filepath, wxFile::OpenMode::read);
-	if (!file.IsOpened()) throw std::runtime_error("File cannot be opened for read");
+	InputFile file(filepath);
+	if (!file.ok()) throw std::runtime_error("File cannot be opened for read");
 	Header header, sample;
-	file.Read(&header, sizeof(Header));
+	file.read(&header, sizeof(Header));
 	if (memcmp(header.signature, sample.signature, 8) != 0) throw ("Invalid file format");
 	
 	//Nodes
 	_node.resize(header.node);
 	for (uint i = 0; i < _node.size(); i++)
 	{
-		file.Read(&_node[i], sizeof(StaticNode));
+		file.read(&_node[i], sizeof(StaticNode));
 	}
 
 	//Sticks
 	_stick.resize(header.stick);
 	for (uint i = 0; i < _stick.size(); i++)
 	{
-		file.Read(&_stick[i], sizeof(Stick));
+		file.read(&_stick[i], sizeof(Stick));
 	}
 
 	//Forces
 	_force.resize(header.force);
 	for (uint i = 0; i < _force.size(); i++)
 	{
-		file.Read(&_force[i], sizeof(Force));
+		file.read(&_force[i], sizeof(Force));
 	}
 
 	//Materials
@@ -381,27 +381,27 @@ void p6::Construction::load(const String filepath)
 	{
 		//Name
 		uint len;
-		file.Read(&len, sizeof(uint));
+		file.read(&len, sizeof(uint));
 		String name(len, '\0');
-		file.Read(&name[0], len);
+		file.read(&name[0], len);
 
 		//Type
 		Material::Type type;
-		file.Read(&type, sizeof(Material::Type));
+		file.read(&type, sizeof(Material::Type));
 
 		if (type == Material::Type::linear)
 		{
 			//Modulus
 			real modulus;
-			file.Read(&modulus, sizeof(real));
+			file.read(&modulus, sizeof(real));
 			_material[i] = new LinearMaterial(name, modulus);
 		}
 		else
 		{
 			//Formula
-			file.Read(&len, sizeof(uint));
+			file.read(&len, sizeof(uint));
 			String formula(len, '\0');
-			file.Read(&formula[0], len);
+			file.read(&formula[0], len);
 			_material[i] = new NonlinearMaterial(name, formula);
 		}
 	}
@@ -410,10 +410,10 @@ void p6::Construction::load(const String filepath)
 void p6::Construction::import(const String filepath)
 {
 	//Open file
-	wxFile file(filepath, wxFile::OpenMode::read);
-	if (!file.IsOpened()) throw std::runtime_error("File cannot be opened for read");
+	InputFile file(filepath);
+	if (!file.ok()) throw std::runtime_error("File cannot be opened for read");
 	Header header, sample;
-	file.Read(&header, sizeof(Header));
+	file.read(&header, sizeof(Header));
 	if (memcmp(header.signature, sample.signature, 8) != 0) throw ("Invalid file format");
 
 	uint old_node_size = _node.size();
@@ -425,14 +425,14 @@ void p6::Construction::import(const String filepath)
 	_node.resize(old_node_size + header.node);
 	for (uint i = old_node_size; i < _node.size(); i++)
 	{
-		file.Read(&_node[i], sizeof(StaticNode));
+		file.read(&_node[i], sizeof(StaticNode));
 	}
 
 	//Sticks
 	_stick.resize(old_stick_size + header.stick);
 	for (uint i = old_stick_size; i < _stick.size(); i++)
 	{
-		file.Read(&_stick[i], sizeof(Stick));
+		file.read(&_stick[i], sizeof(Stick));
 		_stick[i].node[0] += old_node_size;
 		_stick[i].node[1] += old_node_size;
 		_stick[i].material += old_material_size;
@@ -442,7 +442,7 @@ void p6::Construction::import(const String filepath)
 	_force.resize(old_force_size + header.force);
 	for (uint i = old_force_size; i < _force.size(); i++)
 	{
-		file.Read(&_force[i], sizeof(Force));
+		file.read(&_force[i], sizeof(Force));
 		_force[i].node += old_node_size;
 	}
 
@@ -451,9 +451,9 @@ void p6::Construction::import(const String filepath)
 	{
 		//Name
 		uint len;
-		file.Read(&len, sizeof(uint));
+		file.read(&len, sizeof(uint));
 		String name(len, '\0');
-		file.Read(&name[0], len);
+		file.read(&name[0], len);
 
 		//Find existing material
 		uint existing_material = (uint)-1;
@@ -468,7 +468,7 @@ void p6::Construction::import(const String filepath)
 
 		//Type
 		Material::Type type;
-		file.Read(&type, sizeof(Material::Type));
+		file.read(&type, sizeof(Material::Type));
 
 		//Creating material
 		Material *new_material;
@@ -476,15 +476,15 @@ void p6::Construction::import(const String filepath)
 		{
 			//Modulus
 			real modulus;
-			file.Read(&modulus, sizeof(real));
+			file.read(&modulus, sizeof(real));
 			if (existing_material == (uint)-1) new_material = new LinearMaterial(name, modulus);
 		}
 		else
 		{
 			//Formula
-			file.Read(&len, sizeof(uint));
+			file.read(&len, sizeof(uint));
 			String formula(len, '\0');
-			file.Read(&formula[0], len);
+			file.read(&formula[0], len);
 			if (existing_material == (uint)-1) new_material = new NonlinearMaterial(name, formula);
 		}
 
