@@ -15,7 +15,12 @@
 #include <cassert>
 #include <Eigen>
 
-class p6::Construction::Vector : public Eigen::Vector<p6::real, Eigen::Dynamic> {};
+class p6::Construction::Vector : public Eigen::Vector<p6::real, Eigen::Dynamic>
+{
+public:
+	using Eigen::Vector<p6::real, Eigen::Dynamic>::Vector;
+};
+
 class p6::Construction::Matrix : public Eigen::Matrix<p6::real, Eigen::Dynamic, Eigen::Dynamic> {};
 
 p6::uint p6::Construction::create_node() noexcept
@@ -926,23 +931,26 @@ p6::real  p6::Construction::_get_flow_coefficient(
 	{
 		const uint *node = _stick[i].node;
 		Coord delta = _get_delta(i, node_to_free, s);
+		real length = delta.norm();
+		real initial_length = _node[node[0]].coord.distance(_node[node[1]].coord);
+		real strain = length / initial_length - 1.0;
+		real df_dl = _stick[i].area * _material[_stick[i].material]->derivative(strain) / initial_length;
+		if (1.0 / df_dl < coef) coef = 1.0 / df_dl;
+
 		for (uint j = 0; j < 2; j++)
 		{
 			if (_node[node[j]].freedom == 1)
 			{
 				uint free1d = node_to_free->at(node[j]);
-				real length = delta.norm();
 				real unbalanced_force = abs((*z)(_node_equation_fr(free1d)));
-				real newcoef = length / unbalanced_force;
-				if (newcoef < coef) coef = newcoef;
+				if (length / unbalanced_force < coef) coef = length / unbalanced_force;		
 			}
 			else if (_node[node[j]].freedom == 2)
 			{
 				uint free2d = node_to_free->at(node[j]);
-				real length = delta.norm();
 				real unbalanced_force = Coord((*z)(_node_equation_fx(free2d)), (*z)(_node_equation_fy(free2d))).norm();
 				real newcoef = length / unbalanced_force;
-				if (newcoef < coef) coef = newcoef;
+				if (length / unbalanced_force < coef) coef = length / unbalanced_force;
 			}
 		}
 	}
@@ -965,10 +973,10 @@ void p6::Construction::simulate(bool sim)
 	real tolerance = _get_tolerance();
 
 	//Creating vectors and matrixes
-	Vector s;					//State vector
-	Vector z;					//Should-be-zero value
-	Vector m;					//Modification of state vector
-	Matrix	d;	//Derivative of should-be-zero value
+	Vector s;	//State vector
+	Vector z;	//Should-be-zero value
+	Vector m;	//Modification of state vector
+	Matrix d;	//Derivative of should-be-zero value
 	_create_vectors(&node_to_free, &s, &z, &m, &d);
 
 	//Iterating
@@ -986,12 +994,11 @@ void p6::Construction::simulate(bool sim)
 		real error = _get_residuum(&z);
 		if (error < tolerance) break;
 		else if (error < last_error) not_converge_count = 0;
-		else if (++not_converge_count == 1000000) throw (std::runtime_error("Simulation does not converge"));
-		s += 0.001 * z;
-		/*Eigen::HouseholderQR<Matrix> qr(d);
+		else if (++not_converge_count == 1000) throw std::runtime_error("Simulation does not converge");
+		Eigen::HouseholderQR<Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic>> qr(d);
 		m = qr.solve(z);
 		if (_is_adequat(&m)) s -= m;
-		else s += 0.001 * _get_flow_coefficient(&node_to_free, &s, &z) * z;*/
+		else s += 0.001 * _get_flow_coefficient(&node_to_free, &s, &z) * z;
 	}
 	_apply_state_vector(&node_to_free, &s);
 
