@@ -42,7 +42,7 @@ void p6::Construction::delete_node(uint node) noexcept
 	{
 		if (_stick[i].node[0] == node || _stick[i].node[1] == node)
 		{
-			_stick.erase(_stick.cbegin() + i);
+			_stick.erase(_stick.begin() + i);
 		}
 		else
 		{
@@ -52,10 +52,10 @@ void p6::Construction::delete_node(uint node) noexcept
 	}
 	for (uint i = _force.size() - 1; i != (uint)-1; i--)
 	{
-		if (_force[i].node == node) _force.erase(_force.cbegin() + i);
+		if (_force[i].node == node) _force.erase(_force.begin() + i);
 		else if (_force[i].node > node) _force[i].node--;
 	}
-	_node.erase(_node.cbegin() + node);
+	_node.erase(_node.begin() + node);
 }
 
 void p6::Construction::set_node_coord(uint node, Coord coord) noexcept
@@ -130,7 +130,7 @@ p6::uint p6::Construction::create_stick(const uint node[2]) noexcept
 void p6::Construction::delete_stick(uint stick) noexcept
 {
 	assert(!_simulation);
-	_stick.erase(_stick.cbegin() + stick);
+	_stick.erase(_stick.begin() + stick);
 }
 
 void p6::Construction::set_stick_material(uint stick, uint material) noexcept
@@ -205,7 +205,7 @@ p6::uint p6::Construction::create_force(uint node) noexcept
 void p6::Construction::delete_force(uint force) noexcept
 {
 	assert(!_simulation);
-	_force.erase(_force.cbegin() + force);
+	_force.erase(_force.begin() + force);
 }
 
 void p6::Construction::set_force_direction(uint force, Coord direction) noexcept
@@ -274,7 +274,7 @@ void p6::Construction::delete_material(uint material) noexcept
 		if (_stick[i].material == material) _stick[i].material = (uint)-1;
 	}
 	delete _material[material];
-	_material.erase(_material.cbegin() + material);
+	_material.erase(_material.begin() + material);
 }
 
 p6::uint p6::Construction::get_material_count() const noexcept
@@ -949,7 +949,6 @@ p6::real  p6::Construction::_get_flow_coefficient(
 			{
 				uint free2d = node_to_free->at(node[j]);
 				real unbalanced_force = Coord((*z)(_node_equation_fx(free2d)), (*z)(_node_equation_fy(free2d))).norm();
-				real newcoef = length / unbalanced_force;
 				if (length / unbalanced_force < coef) coef = length / unbalanced_force;
 			}
 		}
