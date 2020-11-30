@@ -11,22 +11,46 @@
 #include "../header/p6_node_bar.hpp"
 #include "../header/p6_frame.hpp"
 
-void p6::NodeBar::_on_free(wxCommandEvent &e)
-{
-	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
-	_fixed_check->SetValue(!_free_check->GetValue());
-	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
-		_frame->construction()->set_node_free(*i, _free_check->GetValue());
-	_frame->main_panel()->need_refresh();
-}
-
 void p6::NodeBar::_on_fixed(wxCommandEvent &e)
 {
-	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
-	_free_check->SetValue(!_fixed_check->GetValue());
-	for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
-		_frame->construction()->set_node_free(*i, _free_check->GetValue());
-	_frame->main_panel()->need_refresh();
+	if (!e.IsChecked()) _fixed_check->SetValue(true);
+	else
+	{
+		_free1d_check->SetValue(false);
+		_free2d_check->SetValue(false);
+		std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
+		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
+			_frame->construction()->set_node_freedom(*i, 0);
+		_frame->main_panel()->need_refresh();
+	}
+}
+
+void p6::NodeBar::_on_free1d(wxCommandEvent &e)
+{
+	if (!e.IsChecked()) _free1d_check->SetValue(true);
+	else
+	{
+		_fixed_check->SetValue(false);
+		_free2d_check->SetValue(false);
+		std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
+		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
+			_frame->construction()->set_node_freedom(*i, 1);
+		_frame->main_panel()->need_refresh();
+	}
+}
+
+void p6::NodeBar::_on_free2d(wxCommandEvent &e)
+{
+	if (!e.IsChecked()) _free2d_check->SetValue(true);
+	else
+	{
+		_fixed_check->SetValue(false);
+		_free1d_check->SetValue(false);
+		std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
+		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
+			_frame->construction()->set_node_freedom(*i, 2);
+		_frame->main_panel()->need_refresh();
+	}
 }
 
 void p6::NodeBar::_on_x(wxCommandEvent &e)
@@ -61,18 +85,36 @@ void p6::NodeBar::_on_y(wxCommandEvent &e)
 	}
 }
 
+void p6::NodeBar::_on_angle(wxCommandEvent &e)
+{
+	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
+	real a = string_to_real(_angle_text->GetValue().ToStdString()) * pi() / 180.0;
+	if (a == a)
+	{
+		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
+		{
+			if (_frame->construction()->get_node_rail_angle(*i) == 1)
+				_frame->construction()->set_node_rail_angle(*i, a);
+		}
+	}
+}
+
 p6::NodeBar::NodeBar(Frame *frame) noexcept : _frame(frame)
 {
 	wxWindow *parent = _frame->side_panel()->panel();
 
-	//Free check
-	_free_check = new wxCheckBox(parent, wxID_ANY, "Free");
-	_free_check->Show(false);
-	parent->Bind(wxEVT_CHECKBOX, &NodeBar::_on_free, this, _free_check->GetId());
 	//Fixed check
 	_fixed_check = new wxCheckBox(parent, wxID_ANY, "Fixed");
 	_fixed_check->Show(false);
 	parent->Bind(wxEVT_CHECKBOX, &NodeBar::_on_fixed, this, _fixed_check->GetId());
+	//Fixed on rail check
+	_free1d_check = new wxCheckBox(parent, wxID_ANY, "Fixed on rail");
+	_free1d_check->Show(false);
+	parent->Bind(wxEVT_CHECKBOX, &NodeBar::_on_free1d, this, _free1d_check->GetId());
+	//Free check
+	_free2d_check = new wxCheckBox(parent, wxID_ANY, "Free");
+	_free2d_check->Show(false);
+	parent->Bind(wxEVT_CHECKBOX, &NodeBar::_on_free2d, this, _free2d_check->GetId());
 	//X static text
 	_x_static = new wxStaticText(parent, wxID_ANY, "X:");
 	_x_static->Show(false);
@@ -81,23 +123,33 @@ p6::NodeBar::NodeBar(Frame *frame) noexcept : _frame(frame)
 	_x_text->Show(false);
 	parent->Bind(wxEVT_TEXT, &NodeBar::_on_x, this, _x_text->GetId());
 	//Y static text
-	_y_static = new wxStaticText(parent, wxID_ANY, "X:");
+	_y_static = new wxStaticText(parent, wxID_ANY, "Y:");
 	_y_static->Show(false);
 	//Y edit
 	_y_text = new wxTextCtrl(parent, wxID_ANY);
 	_y_text->Show(false);
 	parent->Bind(wxEVT_TEXT, &NodeBar::_on_y, this, _y_text->GetId());
+	//Rail angle static text
+	_angle_static = new wxStaticText(parent, wxID_ANY, "Rail angle (fixed on rail only):");
+	_angle_static->Show(false);
+	//Rail angle edit
+	_angle_text = new wxTextCtrl(parent, wxID_ANY);
+	_angle_text->Show(false);
+	parent->Bind(wxEVT_TEXT, &NodeBar::_on_angle, this, _angle_text->GetId());
 }
 
 void p6::NodeBar::show() noexcept
 {
 	wxBoxSizer *sizer = _frame->side_panel()->sizer();
-	sizer->Add(_free_check,		0, wxEXPAND | wxALL, 5);
 	sizer->Add(_fixed_check,	0, wxEXPAND | wxALL, 5);
+	sizer->Add(_free1d_check,	0, wxEXPAND | wxALL, 5);
+	sizer->Add(_free2d_check,	0, wxEXPAND | wxALL, 5);
 	sizer->Add(_x_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
 	sizer->Add(_x_text,			0, wxEXPAND | wxALL, 5);
 	sizer->Add(_y_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
 	sizer->Add(_y_text,			0, wxEXPAND | wxALL, 5);
+	sizer->Add(_angle_static,	0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_angle_text,		0, wxEXPAND | wxALL, 5);
 	sizer->ShowItems(true);
 	_frame->frame()->Layout();
 }
@@ -108,18 +160,24 @@ void p6::NodeBar::refresh() noexcept
 	bool sim = _frame->toolbar()->simulation();
 	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
 
-	//Setting free
+	//Setting freedom degree
 	{
-		bool free_equal = true;
-		bool free_value = con->get_node_free(*selected_nodes->cbegin());
-		for (auto i = ++selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
+		bool has_fixed = false;
+		bool has_free1d = false;
+		bool has_free2d = false;
+		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		{
-			if (free_value != con->get_node_free(*i)) { free_equal = false; break; }
+			if (con->get_node_freedom(*i) == 0) has_fixed = true;
+			else if (con->get_node_freedom(*i) == 1) has_free1d = true;
+			else has_free2d = true;
+			if (has_fixed && has_free1d && has_free2d) break;
 		}
-		_free_check->SetValue(!free_equal || free_value);
-		_free_check->Enable(!sim);
-		_fixed_check->SetValue(!free_equal || !free_value);
 		_fixed_check->Enable(!sim);
+		_fixed_check->SetValue(has_fixed);
+		_free1d_check->Enable(!sim);
+		_free1d_check->SetValue(has_free1d);
+		_free2d_check->Enable(!sim);
+		_free2d_check->SetValue(has_free2d);
 	}
 
 	//Setting x
@@ -146,6 +204,23 @@ void p6::NodeBar::refresh() noexcept
 		if (y_equal) _y_text->ChangeValue(real_to_string(y_value));
 		else _y_text->ChangeValue("");
 		_y_text->Enable(!sim);
+	}
+
+	//Setting angle
+	{
+		bool angle_equal = true;
+		real angle_value = nan("");
+		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
+		{
+			if (con->get_node_freedom(*i) == 1)
+			{
+				if (angle_value != angle_value) angle_value = con->get_node_rail_angle(*i);
+				else if (angle_value != con->get_node_rail_angle(*i)) { angle_equal = false; break; }
+			}
+		}
+		if (angle_equal && angle_value == angle_value) _angle_text->ChangeValue(real_to_string(180.0*angle_value/pi()));
+		else _angle_text->ChangeValue("");
+		_angle_text->Enable(!sim);
 	}
 }
 

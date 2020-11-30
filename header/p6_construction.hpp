@@ -36,7 +36,8 @@ namespace p6
 		///Node data valid both during editing and simulation
 		struct StaticNode
 		{
-			bool free;
+			unsigned char freedom;
+			real angle;
 			Coord coord;
 		};
 
@@ -66,13 +67,16 @@ namespace p6
 		std::vector<Force> _force;			///<List of all forces
 		std::vector<Material*> _material;	///<List of all materials
 		bool _simulation = false;			///<Indicator if simulation is being run
-		uint _nfree;						///<Number of free nodes, set by _create_map
+		uint _nfree2d;						///<Number of fully free nodes, set by _create_map
+		uint _nfree1d;						///<Number of free along rail nodes, set by _create_map
 
-		uint _node_equation_fx(uint free)					const noexcept;	///<Returns equation index of horizontal node force balance
-		uint _node_equation_fy(uint free)					const noexcept;	///<Returns equation index of vertical node force balance
+		uint _node_equation_fx(uint free2d)					const noexcept;	///<Returns equation index of horizontal node force balance
+		uint _node_equation_fy(uint free2d)					const noexcept;	///<Returns equation index of vertical node force balance
+		uint _node_equation_fr(uint free1d)					const noexcept;	///<Returns equation index of node force balance along it's rail
 		uint _equation_number()								const noexcept;	///<Returns equation number
-		uint _node_variable_x(uint free)					const noexcept;	///<Returns variable index of node's X coordinate
-		uint _node_variable_y(uint free)					const noexcept;	///<Returns variable index of node's Y coordinate
+		uint _node_variable_x(uint free2d)					const noexcept;	///<Returns variable index of node's X coordinate
+		uint _node_variable_y(uint free2d)					const noexcept;	///<Returns variable index of node's Y coordinate
+		uint _node_variable_r(uint free1d)					const noexcept;	///<Returns variable index of node's coordinate along it's rail
 		uint _variable_number()								const noexcept;	///<Returns variable number
 		void _check_materials_specified()					const;			///<Checks if materials of all sticks are specified
 		void _create_map(std::vector<uint> *node_to_free)	noexcept;		///<Creates node-to-free map
@@ -127,29 +131,31 @@ namespace p6
 
 	public:
 		//Node
-		uint create_node(Coord coord, bool free)		noexcept;		///<Creates node, returns it's index
-		void delete_node(uint node)						noexcept;		///<Deletes node
-		void set_node_coord(uint node, Coord coord)		noexcept;		///<Sets node's coordinate
-		void set_node_free(uint node, bool free)		noexcept;		///<Sets if node is free
-		uint get_node_count()							const noexcept;	///<Returns node number
-		Coord get_node_coord(uint node)					const noexcept;	///<Returns node's coordinates
-		bool get_node_free(uint node)					const noexcept;	///<Returns if node if free
+		uint create_node()										noexcept;		///<Creates node, returns it's index
+		void delete_node(uint node)								noexcept;		///<Deletes node
+		void set_node_coord(uint node, Coord coord)				noexcept;		///<Sets node's coordinate
+		void set_node_freedom(uint node, unsigned char freedom)	noexcept;		///<Sets node's degree of freedom
+		void set_node_rail_angle(uint node, real angle)			noexcept;		///<Sets node's rail angle (for nodes fixed on rail)
+		uint get_node_count()									const noexcept;	///<Returns node number
+		Coord get_node_coord(uint node)							const noexcept;	///<Returns node's coordinates
+		unsigned char get_node_freedom(uint node)				const noexcept;	///<Returns if node's degree of freedom
+		real get_node_rail_angle(uint node)						const noexcept;	///<Returns node's rail angle (for nodes fixed on rail)
 		
 		//Stick
-		uint create_stick(const uint node[2], uint material, real area)	noexcept;		///<Creates stick or finds existing one, returns it's index
-		void delete_stick(uint stick)									noexcept;		///<Deletes stick
-		void set_stick_material(uint stick, uint material)				noexcept;		///<Sets stick's material
-		void set_stick_area(uint stick, real area)						noexcept;		///<Sets stick's cross-sectional area
-		uint get_stick_count()											const noexcept;	///<Returns stick number
-		uint get_stick_material(uint stick)								const noexcept;	///<Returns stick's material
-		real get_stick_area(uint stick)									const noexcept;	///<Returns stick's cross-sectional area
-		void get_stick_node(uint stick, uint node[2])					const noexcept;	///<Returns nodes stick is attached to
-		real get_stick_length(uint stick)								const noexcept;	///<Returns stick's length
-		real get_stick_strain(uint stick)								const noexcept;	///<Returns stick's strain
-		real get_stick_force(uint stick)								const noexcept;	///<Returns stick's force
+		uint create_stick(const uint node[2])					noexcept;		///<Creates stick or finds existing one, returns it's index
+		void delete_stick(uint stick)							noexcept;		///<Deletes stick
+		void set_stick_material(uint stick, uint material)		noexcept;		///<Sets stick's material
+		void set_stick_area(uint stick, real area)				noexcept;		///<Sets stick's cross-sectional area
+		uint get_stick_count()									const noexcept;	///<Returns stick number
+		uint get_stick_material(uint stick)						const noexcept;	///<Returns stick's material
+		real get_stick_area(uint stick)							const noexcept;	///<Returns stick's cross-sectional area
+		void get_stick_node(uint stick, uint node[2])			const noexcept;	///<Returns nodes stick is attached to
+		real get_stick_length(uint stick)						const noexcept;	///<Returns stick's length
+		real get_stick_strain(uint stick)						const noexcept;	///<Returns stick's strain
+		real get_stick_force(uint stick)						const noexcept;	///<Returns stick's force
 
 		//Force
-		uint create_force(uint node, Coord direction)		noexcept;		///<Creates force, returns it's index
+		uint create_force(uint node)						noexcept;		///<Creates force, returns it's index
 		void delete_force(uint force)						noexcept;		///<Deltes force
 		void set_force_direction(uint force, Coord coord)	noexcept;		///<Sets force's direction
 		uint get_force_count()								const noexcept;	///<Returns force number

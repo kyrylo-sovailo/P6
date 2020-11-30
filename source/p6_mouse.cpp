@@ -52,7 +52,7 @@ void p6::Mouse::_on_left_up(wxMouseEvent &e)
 				uint node[2];
 				node[0] = *selected_nodes->cbegin();
 				node[1] = *++selected_nodes->cbegin();
-				_frame->construction()->create_stick(node, (uint)-1, 0.0);
+				_frame->construction()->create_stick(node);
 				selected_nodes->clear();
 			}
 		}
@@ -85,7 +85,8 @@ void p6::Mouse::_on_left_up(wxMouseEvent &e)
 	&& toolbar->tool() == ToolBar::Tool::node
 	&& !toolbar->simulation())
 	{
-		_frame->construction()->create_node(_frame->main_panel()->pixel_to_real(e.GetPosition()), true);
+		uint node = _frame->construction()->create_node();
+		_frame->construction()->set_node_coord(node, _frame->main_panel()->pixel_to_real(e.GetPosition()));
 		_frame->main_panel()->need_refresh();
 	}
 	//Finish construction or view dragging (redirection to move bar)
@@ -177,7 +178,8 @@ void p6::Mouse::_on_move(wxMouseEvent &e)
 		Coord node_coord = con->get_node_coord(_pressed_item.index);
 		Coord direction = (point_coord - node_coord) / main_panel->meters_in_newton;
 		_pressed_item.type = MainPanel::Item::Type::force;
-		_pressed_item.index = con->create_force(_pressed_item.index, direction);
+		_pressed_item.index = con->create_force(_pressed_item.index);
+		con->set_force_direction(_pressed_item.index, direction);
 		_frame->main_panel()->need_refresh();
 	}
 	//Continue force creation

@@ -107,7 +107,7 @@ void p6::ToolBar::_on_stick(wxCommandEvent &e)
 		node[0] = *main->selected_nodes.cbegin();
 		node[1] = *++main->selected_nodes.cbegin();
 		main->selected_nodes.clear();
-		_frame->construction()->create_stick(node, (uint)-1, 0.0);
+		_frame->construction()->create_stick(node);
 		_frame->main_panel()->need_refresh();
 		_frame->side_panel()->refresh();
 	}

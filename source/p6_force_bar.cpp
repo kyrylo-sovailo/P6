@@ -56,7 +56,7 @@ void p6::ForceBar::_on_modulus(wxCommandEvent &e)
 		for (auto i = selected_forces->cbegin(); i != selected_forces->cend(); i++)
 		{
 			real angle = _frame->construction()->get_force_direction(*i).angle();
-			Coord direction = Coord(m * sin(angle), m * cos(angle));
+			Coord direction = Coord(cos(angle), sin(angle)) * m;
 			_x_text->ChangeValue(real_to_string(direction.x));
 			_y_text->ChangeValue(real_to_string(direction.y));
 			_frame->construction()->set_force_direction(*i, direction);
@@ -74,7 +74,7 @@ void p6::ForceBar::_on_angle(wxCommandEvent &e)
 		for (auto i = selected_forces->cbegin(); i != selected_forces->cend(); i++)
 		{
 			real modulus = _frame->construction()->get_force_direction(*i).norm();
-			Coord direction = Coord(modulus * sin(a), modulus * cos(a));
+			Coord direction = Coord(cos(a), sin(a)) * modulus;
 			_x_text->ChangeValue(real_to_string(direction.x));
 			_y_text->ChangeValue(real_to_string(direction.y));
 			_frame->construction()->set_force_direction(*i, direction);

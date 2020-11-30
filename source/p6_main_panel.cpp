@@ -163,8 +163,9 @@ void p6::MainPanel::render(wxDC *dc, wxPoint offset) const noexcept
 		wxPoint point = _real_to_pixel(con->get_node_coord(i), offset);
 		if (selected_nodes.count(i)) dc->SetPen(wxPen(wxColour(255, 255, 0), 1));
 		else dc->SetPen(wxPen(wxColour(0, 0, 0), 1));
-		if (con->get_node_free(i)) dc->SetBrush(wxBrush(wxColour(128, 128, 128)));
-		else dc->SetBrush(wxBrush(wxColour(64, 64, 64)));
+		if (con->get_node_freedom(i) == 0) dc->SetBrush(wxBrush(wxColour(64, 64, 64))); 
+		else if (con->get_node_freedom(i) == 1) dc->SetBrush(wxBrush(wxColour(128, 128, 128)));
+		else dc->SetBrush(wxBrush(wxColour(192, 192, 192)));
 		dc->DrawCircle(point, 5);
 	}
 

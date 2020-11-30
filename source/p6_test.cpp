@@ -4,7 +4,7 @@
 		- Please keep this notice and include the license file to your project
 		- I provide no warranty
 
-	d by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
+	Created by Kyrylo Sovailo (github.com/Meta-chan, k.sovailo@gmail.com)
 	Reinventing bicycles since 2020
 */
 
@@ -98,15 +98,32 @@ TEST(NonlinearMaterial, GoodFormula2)
 TEST(Construction, LinearCalculation)
 {
 	p6::Construction con;
-	con.create_node(p6::Coord(-1.0, 0.0), false);
-	con.create_node(p6::Coord(1.0, 0.0), false);
-	con.create_node(p6::Coord(0.0, 1.0), true);
+	//Creating first node
+	con.create_node();
+	con.set_node_coord(0, p6::Coord(-1.0, 0.0));
+	//Creating second node
+	con.create_node();
+	con.set_node_coord(1, p6::Coord(1.0, 0.0));
+	//Creating third node
+	con.create_node();
+	con.set_node_freedom(2, 2);
+	con.set_node_coord(2, p6::Coord(0.0, 1.0));
+	//Creating material
 	con.create_linear_material("steel", 100.0);
+	//Creating first stick
 	p6::uint stick[2]; stick[0] = 0; stick[1] = 2;
-	con.create_stick(stick, 0, 1.0);
+	con.create_stick(stick);
+	con.set_stick_material(0, 0);
+	con.set_stick_area(0, 1.0);
+	//Creating second stick
 	stick[0] = 1; stick[1] = 2;
-	con.create_stick(stick, 0, 1.0);
-	con.create_force(2, p6::Coord(1.0, 0.0));
+	con.create_stick(stick);
+	con.set_stick_material(1, 0);
+	con.set_stick_area(1, 1.0);
+	//Creating force
+	con.create_force(2);
+	con.set_force_direction(0, p6::Coord(1.0, 0.0));
+
 	con.simulate(true);
 	EXPECT_NEAR(con.get_node_coord(2).x, 0.0141302, 0.0001);
 	EXPECT_NEAR(con.get_node_coord(2).y, 1.00005, 0.0001);
@@ -115,15 +132,32 @@ TEST(Construction, LinearCalculation)
 TEST(Construction, NonlinearCalculation)
 {
 	p6::Construction con;
-	con.create_node(p6::Coord(-1.0, 0.0), false);
-	con.create_node(p6::Coord(1.0, 0.0), false);
-	con.create_node(p6::Coord(0.0, 1.0), true);
+	//Creating first node
+	con.create_node();
+	con.set_node_coord(0, p6::Coord(-1.0, 0.0));
+	//Creating second node
+	con.create_node();
+	con.set_node_coord(1, p6::Coord(1.0, 0.0));
+	//Creating third node
+	con.create_node();
+	con.set_node_freedom(2, 2);
+	con.set_node_coord(2, p6::Coord(0.0, 1.0));
+	//Creating material
 	con.create_nonlinear_material("goo", "s * s * s * 100");
+	//Creating first stick
 	p6::uint stick[2]; stick[0] = 0; stick[1] = 2;
-	con.create_stick(stick, 0, 1.0);
+	con.create_stick(stick);
+	con.set_stick_material(0, 0);
+	con.set_stick_area(0, 1.0);
+	//Creating second stick
 	stick[0] = 1; stick[1] = 2;
-	con.create_stick(stick, 0, 1.0);
-	con.create_force(2, p6::Coord(1.0, 0.0));
+	con.create_stick(stick);
+	con.set_stick_material(1, 0);
+	con.set_stick_area(1, 1.0);
+	//Creating force
+	con.create_force(2);
+	con.set_force_direction(0, p6::Coord(1.0, 0.0));
+
 	con.simulate(true);
 	EXPECT_NEAR(con.get_node_coord(2).x, 0.388449, 0.0001);
 	EXPECT_NEAR(con.get_node_coord(2).y, 0.985997, 0.0001);
