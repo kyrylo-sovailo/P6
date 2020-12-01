@@ -47,5 +47,5 @@ Application is developed to be simple, but there are some non-obvious moments:
 5. Rotating mouse wheel with "force" tool activated makes forces be displayed bigger or smaller.
 	
 
-Created by Meta-chan (Kyrylo Sovailo)
+Created by Meta-chan (Kyrylo Sovailo)\
 Feel free to contact me at [github](https://github.com/Meta-chan), [telegram](https://t.me/Meta_chan) and k.sovailo\@gmail.com
