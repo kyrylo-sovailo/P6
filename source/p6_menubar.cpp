@@ -147,7 +147,22 @@ void p6::MenuBar::_on_view_grid(wxCommandEvent &e)
 
 void p6::MenuBar::_on_help(wxCommandEvent &e)
 {
-	wxMessageBox("The developer highly recommends praying to Pinkie Pie to make it work", "Help", wxICON_INFORMATION, _frame->frame());
+	const char *help = R"(
+	2D solid construction editor and simulator
+	Non-obvious moments:
+	1) For non-linear materials you can type arbitrary strain(stress) in "Formula" window. There is special variable "s" for "stress" and also "sin", "cos", "ln", "exp" functions.
+	2) Red point in "move" mode is the anchor. Selected elements are scaled and rotated around the anchor.
+	3) Do not forget to specify material and cross-sectional area of sticks.
+	4) Clicking on "node", "stick" or "force" tool makes selection contain only nodes, sticks or forces respectively.
+	5) Rotating mouse wheel with "force" tool activated makes forces be displayed bigger or smaller.
+	
+	Created by Meta-chan (Kyrylo Sovailo)
+	Feel free to contact me at github.com/Meta-chan, t.me/Meta_chan and k.sovailo@gmail.com
+	)";
+	
+	wxMessageDialog dialog(_frame->frame(), "Welcome to P6", "Help");
+	dialog.SetExtendedMessage(help);
+	dialog.ShowModal();
 }
 
 p6::MenuBar::MenuBar(Frame *frame) noexcept : _frame(frame)

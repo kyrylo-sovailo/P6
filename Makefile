@@ -9,8 +9,8 @@ EIGEN_DIRECTORY = /mnt/E/Project/_lib/eigen/Eigen
 GOOGLE_LINK_FLAGS = -lgtest -lpthread
 
 #wxWidgets
-WX_COMPILE_FLAGS = -D P6_FILE_WXWIDGETS $(shell wx-config --cxxflags)
-WX_LINK_FLAGS = $(shell wx-config --libs)
+WX_COMPILE_FLAGS = -D P6_FILE_WXWIDGETS $(shell wx-config --version=3.0 --cxxflags)
+WX_LINK_FLAGS = $(shell wx-config --version=3.0 --libs)
 
 #Search path
 VPATH = tmp:source

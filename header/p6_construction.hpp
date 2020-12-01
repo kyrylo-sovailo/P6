@@ -113,21 +113,23 @@ namespace p6
 			uint stick,
 			const std::vector <uint> *node_to_free,
 			const Vector *s,
-			Matrix *d) const noexcept;
-			
-		real _get_residuum(const Vector *z) const noexcept;	///<Gets residuum
-		bool _is_adequat(const Vector *m) const noexcept;	///<Decides if Newton's modification is adequat
-		
-		///<Gets flow coefficient
+			Matrix *d) const noexcept;	
+		///Gets residuum
+		real _get_residuum(const Vector *z) const noexcept;
+		///Decides if Newton's modification is adequat
+		bool _is_adequat(
+			const Vector *m,
+			const std::vector <uint> *node_to_free,
+			const Vector *s) const noexcept;
+		///Gets flow coefficient
 		real _get_flow_coefficient(
 			const std::vector <uint> *node_to_free,
 			const Vector *s,
 			const Vector *z) const noexcept;
-		///<Sets items' data correspondent to state vector
+		///Sets items' data correspondent to state vector
 		void _apply_state_vector(
 			const std::vector<uint> *node_to_free,
 			const Vector *s) noexcept;
-		
 
 	public:
 		//Node

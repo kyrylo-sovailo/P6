@@ -55,7 +55,7 @@ void p6::MaterialBar::_on_apply(wxCommandEvent &e)
 		_frame->side_panel()->refresh_materials();
 		_material_choice->SetSelection(material);
 	}
-	catch (std::exception e)
+	catch (std::exception &e)
 	{
 		wxMessageBox(e.what(), "Error", wxICON_ERROR, _frame->frame());
 	}
@@ -69,7 +69,7 @@ void p6::MaterialBar::_on_delete(wxCommandEvent &e)
 		Construction *con = _frame->construction();
 		for (uint i = 0; i < con->get_stick_count(); i++)
 		{
-			if (con->get_stick_material(i) == c) con->set_stick_material(i, c);
+			if (con->get_stick_material(i) == (uint)c) con->set_stick_material(i, c);
 		}
 		con->delete_material(c);
 		_frame->side_panel()->refresh_materials();

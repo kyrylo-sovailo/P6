@@ -491,7 +491,7 @@ void p6::Construction::import(const String filepath)
 		file.read(&type, sizeof(Material::Type));
 
 		//Creating material
-		Material *new_material;
+		Material *new_material = nullptr;
 		if (type == Material::Type::linear)
 		{
 			//Modulus
@@ -632,8 +632,11 @@ void p6::Construction::_create_vectors(
 		}
 	}
 	z->resize(_equation_number());
+	z->setZero();
 	m->resize(_equation_number());
+	m->setZero();
 	d->resize(_equation_number(), _variable_number());
+	d->setZero();
 }
 
 void p6::Construction::_set_z_to_external_forces(
@@ -677,12 +680,12 @@ void p6::Construction::_set_d_to_zero(
 				//And own derivatives on coordinates of other point
 				if (_node[node[j ^ 1]].freedom == 1)
 				{
-					uint other_free1d = node_to_free->at(node[j]);
+					uint other_free1d = node_to_free->at(node[j ^ 1]);
 					(*d)(_node_equation_fr(free1d), _node_variable_r(other_free1d)) = 0.0;
 				}
 				else if (_node[node[j ^ 1]].freedom == 2)
 				{
-					uint other_free2d = node_to_free->at(node[j]);
+					uint other_free2d = node_to_free->at(node[j ^ 1]);
 					(*d)(_node_equation_fr(free1d), _node_variable_x(other_free2d)) = 0.0;
 					(*d)(_node_equation_fr(free1d), _node_variable_y(other_free2d)) = 0.0;
 				}
@@ -700,13 +703,13 @@ void p6::Construction::_set_d_to_zero(
 				//And own derivatives on coordinates of other point
 				if (_node[node[j ^ 1]].freedom == 1)
 				{
-					uint other_free1d = node_to_free->at(node[j]);
+					uint other_free1d = node_to_free->at(node[j ^ 1]);
 					(*d)(_node_equation_fx(free2d), _node_variable_r(other_free1d)) = 0.0;
 					(*d)(_node_equation_fy(free2d), _node_variable_r(other_free1d)) = 0.0;
 				}
 				else if (_node[node[j ^ 1]].freedom == 2)
 				{
-					uint other_free2d = node_to_free->at(node[j]);
+					uint other_free2d = node_to_free->at(node[j ^ 1]);
 					(*d)(_node_equation_fx(free2d), _node_variable_x(other_free2d)) = 0.0;
 					(*d)(_node_equation_fx(free2d), _node_variable_y(other_free2d)) = 0.0;
 					(*d)(_node_equation_fy(free2d), _node_variable_x(other_free2d)) = 0.0;
@@ -809,7 +812,7 @@ void p6::Construction::_modify_d_with_stick_force(
 			//And own derivatives on coordinates of other point
 			if (_node[node[i ^ 1]].freedom == 1)
 			{
-				uint other_free1d = node_to_free->at(node[i]);
+				uint other_free1d = node_to_free->at(node[i ^ 1]);
 				real angleo = _node[node[i ^ 1]].angle;
 				real dl_dro = (deltaoi.x * cos(angleo) + deltaoi.y * sin(angleo)) / length;
 				real df_dro = _stick[stick].area * material->derivative(strain) * dl_dro / initial_length;
@@ -820,7 +823,7 @@ void p6::Construction::_modify_d_with_stick_force(
 			}
 			else if (_node[node[i ^ 1]].freedom == 2)
 			{
-				uint other_free2d = node_to_free->at(node[i]);
+				uint other_free2d = node_to_free->at(node[i ^ 1]);
 				real dl_dxo = deltaoi.x / length;
 				real df_dxo = _stick[stick].area * material->derivative(strain) * dl_dxo / initial_length;
 				(*d)(_node_equation_fr(free1d), _node_variable_x(other_free2d)) += (
@@ -857,7 +860,7 @@ void p6::Construction::_modify_d_with_stick_force(
 			//And own derivatives on coordinates of other point
 			if (_node[node[i ^ 1]].freedom == 1)
 			{
-				uint other_free1d = node_to_free->at(node[i]);
+				uint other_free1d = node_to_free->at(node[i ^ 1]);
 				real angleo = _node[node[i ^ 1]].angle;
 				real dl_dro = (deltaoi.x * cos(angleo) + deltaoi.y * sin(angleo)) / length;
 				real df_dro = _stick[stick].area * material->derivative(strain) * dl_dro / initial_length;
@@ -868,7 +871,7 @@ void p6::Construction::_modify_d_with_stick_force(
 			}
 			else if (_node[node[i ^ 1]].freedom == 2)
 			{
-				uint other_free2d = node_to_free->at(node[i]);
+				uint other_free2d = node_to_free->at(node[i ^ 1]);
 				(*d)(_node_equation_fx(free2d), _node_variable_x(other_free2d)) -= dfxi_dxi;
 				(*d)(_node_equation_fx(free2d), _node_variable_y(other_free2d)) -= dfxi_dyi;
 				(*d)(_node_equation_fy(free2d), _node_variable_x(other_free2d)) -= dfyi_dxi;
@@ -910,13 +913,35 @@ void p6::Construction::_apply_state_vector(
 	}
 }
 
-bool p6::Construction::_is_adequat(const Vector *m) const noexcept
+bool p6::Construction::_is_adequat(
+	const Vector *m,
+	const std::vector <uint> *node_to_free,
+	const Vector *s) const noexcept
 {
-	bool adequat = true;
 	for (int i = 0; i < m->rows(); i++)
 	{
-		if ((*m)(i) != (*m)(i) || abs((*m)(i)) == std::numeric_limits<real>::infinity())
-			return false;
+		if ((*m)(i) != (*m)(i)) return false;
+		for (uint i = 0; i < _stick.size(); i++)
+		{
+			const uint *node = _stick[i].node;
+			Coord delta = _get_delta(i, node_to_free, s);
+			real length = delta.norm();
+			for (uint j = 0; j < 2; j++)
+			{
+				if (_node[node[j]].freedom == 1)
+				{
+					uint free1d = node_to_free->at(node[j]);
+					real modification = abs((*m)(_node_equation_fr(free1d)));
+					if (modification > length * 0.01) return false;
+				}
+				else if (_node[node[j]].freedom == 2)
+				{
+					uint free2d = node_to_free->at(node[j]);
+					real modification = Coord((*m)(_node_equation_fx(free2d)), (*m)(_node_equation_fy(free2d))).norm();
+					if (modification > length * 0.01) return false;
+				}
+			}
+		}
 	}
 	return true;
 }
@@ -993,11 +1018,11 @@ void p6::Construction::simulate(bool sim)
 		real error = _get_residuum(&z);
 		if (error < tolerance) break;
 		else if (error < last_error) not_converge_count = 0;
-		else if (++not_converge_count == 1000) throw std::runtime_error("Simulation does not converge");
+		else if (++not_converge_count == 10000) throw std::runtime_error("Simulation does not converge");
 		Eigen::HouseholderQR<Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic>> qr(d);
 		m = qr.solve(z);
-		if (_is_adequat(&m)) s -= m;
-		else s += 0.001 * _get_flow_coefficient(&node_to_free, &s, &z) * z;
+		if (_is_adequat(&m, &node_to_free, &s)) s -= m;
+		else s += 0.01 * _get_flow_coefficient(&node_to_free, &s, &z) * z;
 	}
 	_apply_state_vector(&node_to_free, &s);
 

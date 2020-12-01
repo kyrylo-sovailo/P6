@@ -24,6 +24,7 @@ p6::MainPanel::MainPanel(Frame *frame) noexcept :
 {
 	_panel->Show(false);
 	frame->sizer()->Add(_panel, 4, wxEXPAND | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
+	_panel->SetFocus();
 }
 
 wxPanel *p6::MainPanel::panel() noexcept

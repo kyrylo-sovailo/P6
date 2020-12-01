@@ -159,12 +159,12 @@ TEST(Construction, NonlinearCalculation)
 	con.set_force_direction(0, p6::Coord(1.0, 0.0));
 
 	con.simulate(true);
-	EXPECT_NEAR(con.get_node_coord(2).x, 0.388449, 0.0001);
-	EXPECT_NEAR(con.get_node_coord(2).y, 0.985997, 0.0001);
+	EXPECT_NEAR(con.get_node_coord(2).x, 0.388449, 0.001);
+	EXPECT_NEAR(con.get_node_coord(2).y, 0.985997, 0.001);
 }
 
 int main(int argc, char **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
-	RUN_ALL_TESTS();
+	return RUN_ALL_TESTS();
 }
