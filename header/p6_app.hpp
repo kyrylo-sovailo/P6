@@ -30,23 +30,23 @@
   ```
   make
   ```
-  - 6) Other available targets for Makefile are `run`, `test` (requires [Google Test](https://github.com/google/googletest)), `doc` (requires [Doxygen](https://www.doxygen.nl)) and `clean`.
 
  - Windows:
   - 1) Build [wxWidgets](https://www.wxwidgets.org) or download it's header files, 64-bit development files and release DLLs. Specify their location in Makefile-nmake-64.
   - 2) Download [Eigen](http://eigen.tuxfamily.org) and specify it's location in Makefile-nmake-64.
   - 3) (Optionally) Build [Google Test](https://github.com/google/googletest) and specify it's location in Makefile-nmake-64.
   - 4) (Optionally) Download and install [Doxygen](https://www.doxygen.nl).
-  - 5) Enter Visual Studio command prompt by calling `vsdevcmd.bat`. It is located in Visual Studio files, so you may need add it's folder to `PATH` or call it directly.
+  - 5) Enter Visual Studio command prompt by calling `VsDevCmd.bat -arch=amd64`. It is located in Visual Studio files, so you may need to add it's folder to `PATH` or call it directly.
   - 6) Build project by typing:
   ```
   nmake /F Makefile-nmake-64
   ```
-  - 7) Other available targets for Makefile are `run`, `test` (requires [Google Test](https://github.com/google/googletest)), `doc` (requires [Doxygen](https://www.doxygen.nl)) and `clean`.
 
  Hints:
- - 1) If you are having issue with black icons, try building project with Visual Studio (better) or uncommenting `#-DICONS_SET_BACKGROUND` in Makefile-nmake-64 (worse).
- - 2) If you want to test P6 without having wxWidgets, delete `-D P6_FILE_WXWIDGETS` from Makefile or Makefile-nmake-64 respectively.
+ - 1) Other available targets for Makefiles are `run`, `test` (requires [Google Test](https://github.com/google/googletest)), `doc` (requires [Doxygen](https://www.doxygen.nl)) and `clean`.
+ - 2) If you are having issue with black icons, try building project with Visual Studio (better) or uncommenting `/D ICONS_SET_BACKGROUND` in Makefile-nmake-64 (worse).
+ - 3) If you want to test P6 without having wxWidgets, delete `-D P6_FILE_WXWIDGETS` from Makefile or Makefile-nmake-64 respectively.
+ - 4) If you do not want to use `dot`, disable this option in Doxyfile by setting `HAVE_DOT = NO`.
 
 @section Help
  Application is developed to be simple, but there are some non-obvious moments:

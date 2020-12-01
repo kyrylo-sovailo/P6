@@ -913,7 +913,7 @@ void p6::Construction::_apply_state_vector(
 	}
 }
 
-bool p6::Construction::_is_adequat(
+bool p6::Construction::_is_adequate(
 	const Vector *m,
 	const std::vector <uint> *node_to_free,
 	const Vector *s) const noexcept
@@ -1021,7 +1021,7 @@ void p6::Construction::simulate(bool sim)
 		else if (++not_converge_count == 10000) throw std::runtime_error("Simulation does not converge");
 		Eigen::HouseholderQR<Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic>> qr(d);
 		m = qr.solve(z);
-		if (_is_adequat(&m, &node_to_free, &s)) s -= m;
+		if (_is_adequate(&m, &node_to_free, &s)) s -= m;
 		else s += 0.01 * _get_flow_coefficient(&node_to_free, &s, &z) * z;
 	}
 	_apply_state_vector(&node_to_free, &s);

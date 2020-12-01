@@ -116,8 +116,8 @@ namespace p6
 			Matrix *d) const noexcept;	
 		///Gets residuum
 		real _get_residuum(const Vector *z) const noexcept;
-		///Decides if Newton's modification is adequat
-		bool _is_adequat(
+		///Decides if Newton's modification is adequate
+		bool _is_adequate(
 			const Vector *m,
 			const std::vector <uint> *node_to_free,
 			const Vector *s) const noexcept;
