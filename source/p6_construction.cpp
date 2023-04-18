@@ -13,7 +13,7 @@
 #include "../header/p6_nonlinear_material.hpp"
 #include "../header/p6_file.hpp"
 #include <cassert>
-#include <Eigen>
+#include <Eigen/Dense>
 
 class p6::Construction::Vector : public Eigen::Vector<p6::real, Eigen::Dynamic>
 {
