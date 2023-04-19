@@ -99,6 +99,7 @@ void p6::StickBar::show() noexcept
 void p6::StickBar::refresh() noexcept
 {
 	std::set<uint> *selected_sticks = &_frame->main_panel()->selected_sticks;
+	if (selected_sticks->empty()) return;
 	bool sim = _frame->toolbar()->simulation();
 	Construction *con = _frame->construction();
 

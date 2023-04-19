@@ -37,8 +37,8 @@ namespace p6
 		struct StaticNode
 		{
 			unsigned char freedom;
-			real angle;
 			Coord coord;
+			Coord vector;
 		};
 
 		///Node data valid during simulation only
@@ -128,11 +128,11 @@ namespace p6
 		void delete_node(uint node)								noexcept;		///<Deletes node
 		void set_node_coord(uint node, Coord coord)				noexcept;		///<Sets node's coordinate
 		void set_node_freedom(uint node, unsigned char freedom)	noexcept;		///<Sets node's degree of freedom
-		void set_node_rail_angle(uint node, real angle)			noexcept;		///<Sets node's rail angle (for nodes fixed on rail)
+		void set_node_rail_vector(uint node, Coord vector)		noexcept;		///<Sets node's rail vector (for nodes fixed on rail)
 		uint get_node_count()									const noexcept;	///<Returns node number
 		Coord get_node_coord(uint node)							const noexcept;	///<Returns node's coordinates
 		unsigned char get_node_freedom(uint node)				const noexcept;	///<Returns if node's degree of freedom
-		real get_node_rail_angle(uint node)						const noexcept;	///<Returns node's rail angle (for nodes fixed on rail)
+		Coord get_node_rail_vector(uint node)					const noexcept;	///<Returns node's rail vector (for nodes fixed on rail)
 		
 		//Stick
 		uint create_stick(const uint node[2])					noexcept;		///<Creates stick or finds existing one, returns it's index

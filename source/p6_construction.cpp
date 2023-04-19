@@ -33,7 +33,7 @@ p6::uint p6::Construction::create_node() noexcept
 	Node node;
 	node.freedom = 0;
 	node.coord = Coord(0.0, 0.0);
-	node.angle = 0.0;
+	node.vector = Coord(1.0, 0.0);
 	node.coord_simulated = Coord(0.0, 0.0);
 	_node.push_back(node);
 	return _node.size() - 1;
@@ -79,13 +79,14 @@ void p6::Construction::set_node_freedom(uint node, unsigned char freedom) noexce
 	_node[node].freedom = freedom;
 }
 
-void p6::Construction::set_node_rail_angle(uint node, real angle) noexcept
+void p6::Construction::set_node_rail_vector(uint node, Coord vector) noexcept
 {
 	assert(!_simulation);
-	assert(_node[node].freedom == 1);
-	assert(angle == angle);
-	assert(abs(angle) != std::numeric_limits<real>::infinity());
-	_node[node].angle = angle;
+	assert(vector.x == vector.x);
+	assert(abs(vector.x) != std::numeric_limits<real>::infinity());
+	assert(vector.y == vector.y);
+	assert(abs(vector.y) != std::numeric_limits<real>::infinity());
+	_node[node].vector = vector;
 }
 
 p6::uint p6::Construction::get_node_count() const noexcept
@@ -103,10 +104,9 @@ unsigned char p6::Construction::get_node_freedom(uint node) const noexcept
 	return _node[node].freedom;
 }
 
-p6::real p6::Construction::get_node_rail_angle(uint node) const noexcept
+p6::Coord p6::Construction::get_node_rail_vector(uint node) const noexcept
 {
-	assert(_node[node].freedom == 1);
-	return _node[node].angle;
+	return _node[node].vector;
 }
 
 p6::uint p6::Construction::create_stick(const uint node[2]) noexcept
@@ -594,8 +594,8 @@ void p6::Construction::_set_z_to_external_forces(
 		uint node = _force[i].node;
 		if (_node[node].freedom == 1)
 		{
-			real angle = _node[node].angle;
-			(*z)(map->at(node)) = _force[i].direction.x * cos(angle) + _force[i].direction.y * sin(angle);
+			Coord vector = _node[node].vector;
+			(*z)(map->at(node)) = (_force[i].direction.x * vector.x + _force[i].direction.y * vector.y) / vector.norm();
 		}
 		else if (_node[node].freedom == 2)
 		{
@@ -669,8 +669,8 @@ p6::Coord p6::Construction::_get_delta(
 	{
 		if (_node[node[i]].freedom == 1)
 		{
-			real angle = _node[node[i]].angle;
-			coord[i] = _node[node[i]].coord + Coord(cos(angle), sin(angle)) * (*s)(map->at(node[i]));
+			Coord vector = _node[node[i]].vector;
+			coord[i] = _node[node[i]].coord + vector * (*s)(map->at(node[i])) / vector.norm();
 		}
 		else if (_node[node[i]].freedom == 2)
 		{
@@ -699,15 +699,14 @@ void p6::Construction::_modify_z_with_stick_force(
 		if (_node[node[i]].freedom == 1)
 		{
 			real sign = i == 0 ? 1.0 : -1.0;
-			(*z)(map->at(node[i])) +=
-				cos(_node[node[i]].angle) * sign * force * delta.x / length +
-				sin(_node[node[i]].angle) * sign * force * delta.y / length;
+			Coord vector = _node[node[i]].vector;
+			(*z)(map->at(node[i])) += (vector.x * delta.x + vector.y * delta.y) * sign * force / (length * vector.norm());
 		}
 		else if (_node[node[i]].freedom == 2)
 		{
 			real sign = i == 0 ? 1.0 : -1.0;
-			(*z)(map->at(node[i])    ) += sign * force * delta.x / length;
-			(*z)(map->at(node[i]) + 1) += sign * force * delta.y / length;
+			(*z)(map->at(node[i])    ) += delta.x * sign * force / length;
+			(*z)(map->at(node[i]) + 1) += delta.y * sign * force / length;
 		}
 	}
 }
@@ -734,39 +733,39 @@ void p6::Construction::_modify_d_with_stick_force(
 		if (_node[node[i]].freedom == 1)
 		{
 			//It sets own derivatives on own coordinates
-			real anglei = _node[node[i]].angle;
-			real dl_dri = (-deltaoi.x * cos(anglei) - deltaoi.y * sin(anglei)) / length;
+			Coord vectori = _node[node[i]].vector;
+			real dl_dri = (-deltaoi.x * vectori.x - deltaoi.y * vectori.y) / (length * vectori.norm());
 			real df_dri = _stick[stick].area * material->derivative(strain) * dl_dri / initial_length;
 			(*d)(map->at(node[i]), map->at(node[i])) += (
-				cos(anglei) * ((df_dri * deltaoi.x + force * (-cos(anglei))) * length - dl_dri * force * deltaoi.x) +
-				sin(anglei) * ((df_dri * deltaoi.y + force * (-sin(anglei))) * length - dl_dri * force * deltaoi.y)
-				) / sqr(length);
+				vectori.x * ((df_dri * deltaoi.x + force * (-vectori.x/vectori.norm())) * length - dl_dri * force * deltaoi.x) +
+				vectori.y * ((df_dri * deltaoi.y + force * (-vectori.y/vectori.norm())) * length - dl_dri * force * deltaoi.y)
+				) / (sqr(length) * vectori.norm());
 
 			//And own derivatives on coordinates of other point
 			if (_node[node[i ^ 1]].freedom == 1)
 			{
-				real angleo = _node[node[i ^ 1]].angle;
-				real dl_dro = (deltaoi.x * cos(angleo) + deltaoi.y * sin(angleo)) / length;
+				Coord vectoro = _node[node[i ^ 1]].vector;
+				real dl_dro = (deltaoi.x * vectoro.x + deltaoi.y * vectoro.y) / (length * vectoro.norm());
 				real df_dro = _stick[stick].area * material->derivative(strain) * dl_dro / initial_length;
 				(*d)(map->at(node[i ^ 1]), map->at(node[i ^ 1])) += (
-					cos(anglei) * ((df_dro * deltaoi.x + force * cos(angleo)) * length - dl_dro * force * deltaoi.x) +
-					sin(anglei) * ((df_dro * deltaoi.y + force * sin(angleo)) * length - dl_dro * force * deltaoi.y)
-					) / sqr(length);
+					vectori.x * ((df_dro * deltaoi.x + force * (vectoro.x/vectoro.norm())) * length - dl_dro * force * deltaoi.x) +
+					vectori.y * ((df_dro * deltaoi.y + force * (vectoro.y/vectoro.norm())) * length - dl_dro * force * deltaoi.y)
+					) / (sqr(length) * vectori.norm());
 			}
 			else if (_node[node[i ^ 1]].freedom == 2)
 			{
 				real dl_dxo = deltaoi.x / length;
 				real df_dxo = _stick[stick].area * material->derivative(strain) * dl_dxo / initial_length;
 				(*d)(map->at(node[i]), map->at(node[i ^ 1])) += (
-					cos(anglei) * ((df_dxo * deltaoi.x + force * 1.0) * length - dl_dxo * force * deltaoi.x) +
-					sin(anglei) * deltaoi.y * (df_dxo * length - dl_dxo * force)
-					) / sqr(length);
+					vectori.x * ((df_dxo * deltaoi.x + force * 1.0) * length - dl_dxo * force * deltaoi.x) +
+					vectori.y * deltaoi.y * (df_dxo * length - dl_dxo * force)
+					) / (sqr(length) * vectori.norm());
 				real dl_dyo = deltaoi.y / length;
 				real df_dyo = _stick[stick].area * material->derivative(strain) * dl_dyo / initial_length;
 				(*d)(map->at(node[i]), map->at(node[i ^ 1]) + 1) += (
-					cos(anglei) * deltaoi.x * (df_dyo * length - dl_dyo * force) +
-					sin(anglei) * ((df_dyo * deltaoi.y + force * 1.0) * length - dl_dyo * force * deltaoi.y)
-					) / sqr(length);
+					vectori.x * deltaoi.x * (df_dyo * length - dl_dyo * force) +
+					vectori.y * ((df_dyo * deltaoi.y + force * 1.0) * length - dl_dyo * force * deltaoi.y)
+					) / (sqr(length) * vectori.norm());
 			}
 		}
 		//If current point is free
@@ -789,13 +788,13 @@ void p6::Construction::_modify_d_with_stick_force(
 			//And own derivatives on coordinates of other point
 			if (_node[node[i ^ 1]].freedom == 1)
 			{
-				real angleo = _node[node[i ^ 1]].angle;
-				real dl_dro = (deltaoi.x * cos(angleo) + deltaoi.y * sin(angleo)) / length;
+				Coord vectoro = _node[node[i ^ 1]].vector;
+				real dl_dro = (deltaoi.x * vectoro.x + deltaoi.y * vectoro.y) / (length * vectoro.norm());
 				real df_dro = _stick[stick].area * material->derivative(strain) * dl_dro / initial_length;
 				(*d)(map->at(node[i])    , map->at(node[i ^ 1])) +=
-					((df_dro * deltaoi.x + force * cos(angleo)) * length - dl_dro * force * deltaoi.x) / sqr(length);
+					((df_dro * deltaoi.x + force * vectoro.x) * length - dl_dro * force * deltaoi.x) / (sqr(length) * vectoro.norm());
 				(*d)(map->at(node[i]) + 1, map->at(node[i ^ 1])) +=
-					((df_dro * deltaoi.y + force * sin(angleo)) * length - dl_dro * force * deltaoi.y) / sqr(length);
+					((df_dro * deltaoi.y + force * vectoro.y) * length - dl_dro * force * deltaoi.y) / (sqr(length) * vectoro.norm());
 			}
 			else if (_node[node[i ^ 1]].freedom == 2)
 			{
@@ -827,8 +826,8 @@ void p6::Construction::_apply_state_vector(
 	{
 		if (_node[i].freedom == 1)
 		{
-			real angle = _node[i].angle;
-			_node[i].coord_simulated = _node[i].coord + Coord(cos(angle), sin(angle)) * (*s)(map->at(i));
+			Coord vector = _node[i].vector;
+			_node[i].coord_simulated = _node[i].coord + vector * (*s)(map->at(i)) / vector.norm();
 		}
 		else if (_node[i].freedom == 2)
 		{

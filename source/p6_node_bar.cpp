@@ -85,17 +85,35 @@ void p6::NodeBar::_on_y(wxCommandEvent &e)
 	}
 }
 
-void p6::NodeBar::_on_angle(wxCommandEvent &e)
+void p6::NodeBar::_on_x_vector(wxCommandEvent &e)
 {
 	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
-	real a = string_to_real(_angle_text->GetValue().ToStdString()) * pi() / 180.0;
-	if (a == a)
+	real x = string_to_real(_x_vector_text->GetValue().ToStdString());
+	if (x == x)
 	{
 		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		{
-			if (_frame->construction()->get_node_rail_angle(*i) == 1)
-				_frame->construction()->set_node_rail_angle(*i, a);
+			Coord vector = _frame->construction()->get_node_rail_vector(*i);
+			vector.x = x;
+			_frame->construction()->set_node_rail_vector(*i, vector);
 		}
+		_frame->main_panel()->need_refresh();
+	}
+}
+
+void p6::NodeBar::_on_y_vector(wxCommandEvent &e)
+{
+	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
+	real y = string_to_real(_y_vector_text->GetValue().ToStdString());
+	if (y == y)
+	{
+		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
+		{
+			Coord vector = _frame->construction()->get_node_rail_vector(*i);
+			vector.y = y;
+			_frame->construction()->set_node_rail_vector(*i, vector);
+		}
+		_frame->main_panel()->need_refresh();
 	}
 }
 
@@ -129,13 +147,20 @@ p6::NodeBar::NodeBar(Frame *frame) noexcept : _frame(frame)
 	_y_text = new wxTextCtrl(parent, wxID_ANY);
 	_y_text->Show(false);
 	parent->Bind(wxEVT_TEXT, &NodeBar::_on_y, this, _y_text->GetId());
-	//Rail angle static text
-	_angle_static = new wxStaticText(parent, wxID_ANY, "Rail angle (fixed on rail only):");
-	_angle_static->Show(false);
-	//Rail angle edit
-	_angle_text = new wxTextCtrl(parent, wxID_ANY);
-	_angle_text->Show(false);
-	parent->Bind(wxEVT_TEXT, &NodeBar::_on_angle, this, _angle_text->GetId());
+	//Rail X static text
+	_x_vector_static = new wxStaticText(parent, wxID_ANY, "Rail vector X (fixed on rail only):");
+	_x_vector_static->Show(false);
+	//Rail X edit
+	_x_vector_text = new wxTextCtrl(parent, wxID_ANY);
+	_x_vector_text->Show(false);
+	parent->Bind(wxEVT_TEXT, &NodeBar::_on_x_vector, this, _x_vector_text->GetId());
+	//Rail Y static text
+	_y_vector_static = new wxStaticText(parent, wxID_ANY, "Rail vector Y (fixed on rail only):");
+	_y_vector_static->Show(false);
+	//Rail Y edit
+	_y_vector_text = new wxTextCtrl(parent, wxID_ANY);
+	_y_vector_text->Show(false);
+	parent->Bind(wxEVT_TEXT, &NodeBar::_on_y_vector, this, _y_vector_text->GetId());
 }
 
 void p6::NodeBar::show() noexcept
@@ -148,17 +173,20 @@ void p6::NodeBar::show() noexcept
 	sizer->Add(_x_text,			0, wxEXPAND | wxALL, 5);
 	sizer->Add(_y_static,		0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
 	sizer->Add(_y_text,			0, wxEXPAND | wxALL, 5);
-	sizer->Add(_angle_static,	0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
-	sizer->Add(_angle_text,		0, wxEXPAND | wxALL, 5);
+	sizer->Add(_x_vector_static,0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_x_vector_text,	0, wxEXPAND | wxALL, 5);
+	sizer->Add(_y_vector_static,0, wxEXPAND | wxRIGHT | wxLEFT | wxTOP, 5);
+	sizer->Add(_y_vector_text,	0, wxEXPAND | wxALL, 5);
 	sizer->ShowItems(true);
 	_frame->frame()->Layout();
 }
 
 void p6::NodeBar::refresh() noexcept
 {
+	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
+	if (selected_nodes->empty()) return;
 	Construction *con = _frame->construction();
 	bool sim = _frame->toolbar()->simulation();
-	std::set<uint> *selected_nodes = &_frame->main_panel()->selected_nodes;
 
 	//Setting freedom degree
 	{
@@ -206,21 +234,30 @@ void p6::NodeBar::refresh() noexcept
 		_y_text->Enable(!sim);
 	}
 
-	//Setting angle
+	//Setting X vector
 	{
-		bool angle_equal = true;
-		real angle_value = nan("");
-		for (auto i = selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
+		bool x_equal = true;
+		real x_value = con->get_node_rail_vector(*selected_nodes->cbegin()).x;
+		for (auto i = ++selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
 		{
-			if (con->get_node_freedom(*i) == 1)
-			{
-				if (angle_value != angle_value) angle_value = con->get_node_rail_angle(*i);
-				else if (angle_value != con->get_node_rail_angle(*i)) { angle_equal = false; break; }
-			}
+			if (x_value != con->get_node_rail_vector(*i).x) { x_equal = false; break; }
 		}
-		if (angle_equal && angle_value == angle_value) _angle_text->ChangeValue(real_to_string(180.0*angle_value/pi()));
-		else _angle_text->ChangeValue("");
-		_angle_text->Enable(!sim);
+		if (x_equal) _x_vector_text->ChangeValue(real_to_string(x_value));
+		else _x_vector_text->ChangeValue("");
+		_x_vector_text->Enable(!sim);
+	}
+
+	//Setting Y vector
+	{
+		bool y_equal = true;
+		real y_value = con->get_node_rail_vector(*selected_nodes->cbegin()).y;
+		for (auto i = ++selected_nodes->cbegin(); i != selected_nodes->cend(); i++)
+		{
+			if (y_value != con->get_node_rail_vector(*i).y) { y_equal = false; break; }
+		}
+		if (y_equal) _y_vector_text->ChangeValue(real_to_string(y_value));
+		else _y_vector_text->ChangeValue("");
+		_y_vector_text->Enable(!sim);
 	}
 }
 
