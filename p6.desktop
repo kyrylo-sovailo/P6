@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.1
+Name=P6
+Comment=Flash card based learning tool
+Exec=p6
+Icon=p6
+Terminal=false
+Categories=Science;

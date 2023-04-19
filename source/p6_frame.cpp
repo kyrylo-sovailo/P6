@@ -38,7 +38,7 @@ p6::Frame::Frame() noexcept :
 	wxIcon icon;
 	{
 		wxLogNull lognull;
-		icon = wxIcon("icon.png", wxBITMAP_TYPE_PNG);
+		icon = wxIcon("p6.png", wxBITMAP_TYPE_PNG);
 	}
 	if (!icon.IsNull()) _frame->SetIcon(icon);
 

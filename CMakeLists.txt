@@ -102,13 +102,21 @@ install(FILES
     "icons/area.png"
     "icons/delete.png"
     "icons/force.png"
-    "icons/icon.png"
     "icons/move.png"
     "icons/node.png"
+    "icons/p6.png"
     "icons/select.png"
     "icons/simulate.png"
     "icons/stick.png"
     DESTINATION "${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}")
+
+install(FILES
+    "icons/p6.svg"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps")
+
+install(FILES
+    "p6.desktop"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
 
 install(FILES "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake" "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}")
