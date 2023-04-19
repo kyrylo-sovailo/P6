@@ -67,51 +67,42 @@ namespace p6
 		std::vector<Force> _force;			///<List of all forces
 		std::vector<Material*> _material;	///<List of all materials
 		bool _simulation = false;			///<Indicator if simulation is being run
-		uint _nfree2d;						///<Number of fully free nodes, set by _create_map
-		uint _nfree1d;						///<Number of free along rail nodes, set by _create_map
 
-		uint _node_equation_fx(uint free2d)					const noexcept;	///<Returns equation index of horizontal node force balance
-		uint _node_equation_fy(uint free2d)					const noexcept;	///<Returns equation index of vertical node force balance
-		uint _node_equation_fr(uint free1d)					const noexcept;	///<Returns equation index of node force balance along it's rail
-		uint _equation_number()								const noexcept;	///<Returns equation number
-		uint _node_variable_x(uint free2d)					const noexcept;	///<Returns variable index of node's X coordinate
-		uint _node_variable_y(uint free2d)					const noexcept;	///<Returns variable index of node's Y coordinate
-		uint _node_variable_r(uint free1d)					const noexcept;	///<Returns variable index of node's coordinate along it's rail
-		uint _variable_number()								const noexcept;	///<Returns variable number
 		void _check_materials_specified()					const;			///<Checks if materials of all sticks are specified
-		void _create_map(std::vector<uint> *node_to_free)	noexcept;		///<Creates node-to-free map
+		unsigned int _create_map(std::vector<uint> *map)	noexcept;		///<Creates node -> equation/variable map, returns degree of freedom
 		real _get_tolerance()								const noexcept;	///<Returns force tolerance
 		
 		///Creates state, should-be-zero, modification vectors and derivative matrix
 		void _create_vectors(
-			const std::vector <uint> *node_to_free,
+			unsigned int freedom,
+			const std::vector <uint> *map,
 			Vector *s,
 			Vector *z,
 			Vector *m,
 			Matrix *d) const noexcept;
 		///Sets should-be-zero value to external forces
 		void _set_z_to_external_forces(
-			const std::vector <uint> *node_to_free,
+			const std::vector <uint> *map,
 			Vector *z) const noexcept;
-		///Sets derivative of shoud-be-zero to zero
+		///Sets derivative of should-be-zero to zero
 		void _set_d_to_zero(
-			const std::vector <uint> *node_to_free,
+			const std::vector <uint> *map,
 			Matrix *d) const noexcept;
 		///Gets coordinate difference between two nodes
 		Coord _get_delta(
 			uint stick,
-			const std::vector <uint> *node_to_free,
+			const std::vector <uint> *map,
 			const Vector *s) const noexcept;
 		///Modifies should-be-zero value with force of some stick
 		void _modify_z_with_stick_force(
 			uint stick,
-			const std::vector <uint> *node_to_free,
+			const std::vector <uint> *map,
 			const Vector *s,
 			Vector *z) const noexcept;
 		///Modifies derivative of should-be-zero with derivatives of force of some stick
 		void _modify_d_with_stick_force(
 			uint stick,
-			const std::vector <uint> *node_to_free,
+			const std::vector <uint> *map,
 			const Vector *s,
 			Matrix *d) const noexcept;	
 		///Gets residuum
@@ -119,16 +110,16 @@ namespace p6
 		///Decides if Newton's modification is adequate
 		bool _is_adequate(
 			const Vector *m,
-			const std::vector <uint> *node_to_free,
+			const std::vector <uint> *map,
 			const Vector *s) const noexcept;
 		///Gets flow coefficient
 		real _get_flow_coefficient(
-			const std::vector <uint> *node_to_free,
+			const std::vector <uint> *map,
 			const Vector *s,
 			const Vector *z) const noexcept;
 		///Sets items' data correspondent to state vector
 		void _apply_state_vector(
-			const std::vector<uint> *node_to_free,
+			const std::vector<uint> *map,
 			const Vector *s) noexcept;
 
 	public:

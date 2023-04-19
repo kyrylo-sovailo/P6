@@ -63,6 +63,7 @@ if(TARGET GTest::gtest)
         "source/p6_test.cpp"
     )
     target_link_libraries(${CMAKE_PROJECT_NAME}_test PUBLIC ${CMAKE_PROJECT_NAME} GTest::gtest)
+    add_custom_target(test COMMAND ${CMAKE_PROJECT_NAME}_test)
 endif()
 
 # Installation
