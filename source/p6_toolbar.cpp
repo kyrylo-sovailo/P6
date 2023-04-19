@@ -11,6 +11,8 @@
 #include "../header/p6_toolbar.hpp"
 #include "../header/p6_frame.hpp"
 #include <wx/rawbmp.h>
+#include <wx/stdpaths.h>
+#include <wx/filefn.h>
 
 void p6::ToolBar::_on_simulate(wxCommandEvent &e)
 {
@@ -185,6 +187,8 @@ void p6::ToolBar::_on_delete(wxCommandEvent &e)
 	_refresh();
 }
 
+#include <iostream>
+
 wxBitmap p6::ToolBar::_load_png(const String filepath) noexcept
 {
 	#ifdef ICONS_SET_BACKGROUND
@@ -209,10 +213,22 @@ wxBitmap p6::ToolBar::_load_png(const String filepath) noexcept
 		wxBitmap bitmap;
 		{
 			wxLogNull lognull;
-			bitmap = wxBitmap(filepath, wxBITMAP_TYPE_PNG);
+			wxString appdir = wxPathOnly(wxStandardPaths::Get().GetExecutablePath());
+			bitmap = wxBitmap(appdir + "/icons/" + filepath, wxBITMAP_TYPE_PNG);
+			if (!bitmap.IsOk())
+			{
+				bitmap = wxBitmap(wxPathOnly(appdir) + "/icons/" + filepath, wxBITMAP_TYPE_PNG);
+				if (!bitmap.IsOk())
+				{
+					bitmap = wxBitmap(wxPathOnly(appdir) + "/share/p6/" + filepath, wxBITMAP_TYPE_PNG);
+					if (!bitmap.IsOk())
+					{
+						bitmap = wxBitmap(16, 16);
+					}
+				}
+			}
 		}
-		if (!bitmap.IsOk()) return wxBitmap(16, 16);
-		else return bitmap;
+		return bitmap;
 	#endif
 }
 
@@ -240,7 +256,7 @@ p6::ToolBar::ToolBar(Frame *frame) noexcept : _frame(frame)
 	_simulate = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Simulate",
-		_load_png("icons/simulate.png"),
+		_load_png("simulate.png"),
 		wxNullBitmap,
 		"Run simulation",
 		"Run simulation of the designed construction");
@@ -250,7 +266,7 @@ p6::ToolBar::ToolBar(Frame *frame) noexcept : _frame(frame)
 	_select = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Select",
-		_load_png("icons/select.png"),
+		_load_png("select.png"),
 		wxNullBitmap,
 		"Select items",
 		"Select nodes, sticks or forces one by one");
@@ -260,7 +276,7 @@ p6::ToolBar::ToolBar(Frame *frame) noexcept : _frame(frame)
 	_area = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Area",
-		_load_png("icons/area.png"),
+		_load_png("area.png"),
 		wxNullBitmap,
 		"Select area",
 		"Select all nodes, sticks or forces in area");
@@ -270,7 +286,7 @@ p6::ToolBar::ToolBar(Frame *frame) noexcept : _frame(frame)
 	_move = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Move",
-		_load_png("icons/move.png"),
+		_load_png("move.png"),
 		wxNullBitmap,
 		"Move nodes",
 		"Complex move of selected nodes");
@@ -280,7 +296,7 @@ p6::ToolBar::ToolBar(Frame *frame) noexcept : _frame(frame)
 	_node = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Node",
-		_load_png("icons/node.png"),
+		_load_png("node.png"),
 		wxNullBitmap,
 		"Create node",
 		"Create node or select nodes only");
@@ -290,7 +306,7 @@ p6::ToolBar::ToolBar(Frame *frame) noexcept : _frame(frame)
 	_stick = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Stick",
-		_load_png("icons/stick.png"),
+		_load_png("stick.png"),
 		wxNullBitmap,
 		"Create stick",
 		"Create stick between selected nodes or select sticks only");
@@ -300,7 +316,7 @@ p6::ToolBar::ToolBar(Frame *frame) noexcept : _frame(frame)
 	_force = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Force",
-		_load_png("icons/force.png"),
+		_load_png("force.png"),
 		wxNullBitmap,
 		"Create force",
 		"Create force on selected node or select nodes only");
@@ -310,7 +326,7 @@ p6::ToolBar::ToolBar(Frame *frame) noexcept : _frame(frame)
 	_delete = _toolbar->AddCheckTool(
 		wxID_ANY,
 		"Delete",
-		_load_png("icons/delete.png"),
+		_load_png("delete.png"),
 		wxNullBitmap,
 		"Delete",
 		"Delete selected items");

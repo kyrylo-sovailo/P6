@@ -98,6 +98,18 @@ install(FILES
     "header/p6_nonlinear_material.hpp"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
+install(FILES
+    "icons/area.png"
+    "icons/delete.png"
+    "icons/force.png"
+    "icons/icon.png"
+    "icons/move.png"
+    "icons/node.png"
+    "icons/select.png"
+    "icons/simulate.png"
+    "icons/stick.png"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}")
+
 install(FILES "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake" "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}")
 
