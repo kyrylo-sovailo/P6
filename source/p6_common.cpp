@@ -69,6 +69,11 @@ p6::Coord p6::Coord::operator/(real coef) const noexcept
 	return Coord(x / coef, y / coef);
 }
 
+p6::real p6::Coord::dot(Coord coord) const noexcept
+{
+	return x * coord.x + y * coord.y;
+}
+
 p6::real p6::Coord::distance(Coord coord) const noexcept
 {
 	return sqrt(sqr(x - coord.x) + sqr(y - coord.y));

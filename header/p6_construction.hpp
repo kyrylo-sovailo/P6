@@ -16,13 +16,14 @@
 
 namespace p6
 {
+	class DenseVector;	///<Dense vector
+	class DenseMatrix;	///<Dense matrix
+	class SparseMatrix;	///<Sparse matrix
+	class TripletVector;///<Vector of triplets
+
 	///Truss construction
 	class Construction
 	{
-	private:
-		class Vector;	///<Mathematical vector
-		class Matrix;	///<Mathematical matrix
-
 		///File header
 		struct Header
 		{
@@ -68,59 +69,22 @@ namespace p6
 		std::vector<Material*> _material;	///<List of all materials
 		bool _simulation = false;			///<Indicator if simulation is being run
 
-		void _check_materials_specified()					const;			///<Checks if materials of all sticks are specified
-		unsigned int _create_map(std::vector<uint> *map)	noexcept;		///<Creates node -> equation/variable map, returns degree of freedom
-		real _get_tolerance()								const noexcept;	///<Returns force tolerance
-		
-		///Creates state, should-be-zero, modification vectors and derivative matrix
-		void _create_vectors(
-			unsigned int freedom,
-			const std::vector <uint> *map,
-			Vector *s,
-			Vector *z,
-			Vector *m,
-			Matrix *d) const noexcept;
-		///Sets should-be-zero value to external forces
-		void _set_z_to_external_forces(
-			const std::vector <uint> *map,
-			Vector *z) const noexcept;
-		///Sets derivative of should-be-zero to zero
-		void _set_d_to_zero(
-			const std::vector <uint> *map,
-			Matrix *d) const noexcept;
-		///Gets coordinate difference between two nodes
-		Coord _get_delta(
-			uint stick,
-			const std::vector <uint> *map,
-			const Vector *s) const noexcept;
-		///Modifies should-be-zero value with force of some stick
-		void _modify_z_with_stick_force(
-			uint stick,
-			const std::vector <uint> *map,
-			const Vector *s,
-			Vector *z) const noexcept;
-		///Modifies derivative of should-be-zero with derivatives of force of some stick
-		void _modify_d_with_stick_force(
-			uint stick,
-			const std::vector <uint> *map,
-			const Vector *s,
-			Matrix *d) const noexcept;	
-		///Gets residuum
-		real _get_residuum(const Vector *z) const noexcept;
-		///Decides if Newton's modification is adequate
-		bool _is_adequate(
-			const Vector *m,
-			const std::vector <uint> *map,
-			const Vector *s) const noexcept;
-		///Gets flow coefficient
-		real _get_flow_coefficient(
-			const std::vector <uint> *map,
-			const Vector *s,
-			const Vector *z) const noexcept;
-		///Sets items' data correspondent to state vector
-		void _apply_state_vector(
-			const std::vector<uint> *map,
-			const Vector *s) noexcept;
+		///Checks if materials of all sticks are specified
+		void _check_materials_specified() const;
+		///Creates node -> equation/variable map, returns degree of freedom
+		unsigned int _create_map(std::vector<uint> *map) noexcept;
+		///Finds smallest external force
+		real _find_smallest_force() const noexcept;
+		///Copies coordinates from coord to simulated_coord
+		void _copy_state() noexcept;
+		///Creates state and fills with initial values
+		void _create_state(const std::vector<uint> *map, DenseVector *state) noexcept;
+		///Read state and write simulated coordinates
+		void _apply_state(const std::vector<uint> *map, const DenseVector *state) noexcept;
+		///Fills derivative and residual with values
+		void _fill_derivative_and_residual(const std::vector<uint> *map, const DenseVector *state, TripletVector *buffer, DenseVector *residual, SparseMatrix *derivative) noexcept;
+		///Limit corrections with fraction of stick's length
+		void _fix_infinite_correction(const std::vector<uint> *map, const DenseVector *state, DenseVector *correction) noexcept;
 
 	public:
 		//Node

@@ -39,6 +39,7 @@ namespace p6
 		Coord operator-(Coord coord)		const noexcept;	///<Returns difference between two coordinates
 		Coord operator*(real coef)			const noexcept;	///<Returns coordinates multiplied with scalar value
 		Coord operator/(real coef)			const noexcept;	///<Returns coordinates divided with scalar value
+		real dot(Coord coord)				const noexcept;	///<Returns distance to coordinates
 		real distance(Coord coord)			const noexcept;	///<Returns distance to coordinates
 		real distance(const Coord coord[2])	const noexcept;	///<Returns distance to line or NaN
 		real norm()							const noexcept;	///<Returns norm of coordinates (considered as vector)
