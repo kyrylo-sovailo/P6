@@ -571,7 +571,7 @@ p6::real p6::Construction::_find_smallest_force() const noexcept
 	real force = std::numeric_limits<real>::infinity();
 	for (uint i = 0; i < _force.size(); i++)
 	{
-		if (force == 0.0 || force < _force[i].direction.norm()) force = _force[i].direction.norm();
+		if (force > _force[i].direction.norm()) force = _force[i].direction.norm();
 	}
 	return force;
 }
@@ -656,7 +656,7 @@ void p6::Construction::_fill_derivative_and_residual(
 			for (uint j = 0; j < 2; j++)
 			{
 				if (_node[node[j]].freedom == 1) coord[j] = _node[node[j]].coord + _node[node[j]].vector * (*state)(map->at(node[j])) / _node[node[j]].vector.norm();
-				else if (_node[node[j]].freedom == 1) coord[j] = Coord((*state)(map->at(node[j])), (*state)(map->at(node[j]) + 1));
+				else if (_node[node[j]].freedom == 2) coord[j] = Coord((*state)(map->at(node[j])), (*state)(map->at(node[j]) + 1));
 				else coord[j] = _node[node[j]].coord;
 			}
 			delta = coord[1] - coord[0];
@@ -683,8 +683,10 @@ void p6::Construction::_fill_derivative_and_residual(
 		}
 
 		//Summing/setting derivative
-		if (derivative != nullptr) continue;
+		if (derivative == nullptr) continue;
 		real dtension = _stick[i].area * material->derivative((length - initial_length) / initial_length);
+		if (dtension == 0.0) dtension = 1.0;
+		dtension *= _stick[i].area;
 		real dl_dx0 = -delta.x / length;
 		real dl_dy0 = -delta.y / length;
 		real dt_dx0 = dtension * dl_dx0 / initial_length;
@@ -714,28 +716,28 @@ void p6::Construction::_fill_derivative_and_residual(
 				}
 				else if (_node[node[j ^ 1]].freedom == 2) //Other point is free
 				{
-					buffer->push_back(Eigen::Triplet<real>(map->at(node[j ^ 1]    ), map->at(node[j]), -(rail_vector.x * dfx0_dx0 + rail_vector.y * dfy0_dx0)));
-					buffer->push_back(Eigen::Triplet<real>(map->at(node[j ^ 1] + 1), map->at(node[j]), -(rail_vector.x * dfx0_dy0 + rail_vector.y * dfy0_dy0)));
+					buffer->push_back(Eigen::Triplet<real>(map->at(node[j ^ 1])    , map->at(node[j]), -(rail_vector.x * dfx0_dx0 + rail_vector.y * dfy0_dx0)));
+					buffer->push_back(Eigen::Triplet<real>(map->at(node[j ^ 1]) + 1, map->at(node[j]), -(rail_vector.x * dfx0_dy0 + rail_vector.y * dfy0_dy0)));
 				}
 			}
 			else if (_node[node[j]].freedom == 2) //Current point is free
 			{
-				buffer->push_back(Eigen::Triplet<real>(map->at(node[j]    ), map->at(node[j]    ), dfx0_dx0));
-				buffer->push_back(Eigen::Triplet<real>(map->at(node[j]    ), map->at(node[j] + 1), dfx0_dy0));
-				buffer->push_back(Eigen::Triplet<real>(map->at(node[j] + 1), map->at(node[j]    ), dfy0_dx0));
-				buffer->push_back(Eigen::Triplet<real>(map->at(node[j] + 1), map->at(node[j] + 1), dfy0_dy0));
+				buffer->push_back(Eigen::Triplet<real>(map->at(node[j])    , map->at(node[j])    , dfx0_dx0));
+				buffer->push_back(Eigen::Triplet<real>(map->at(node[j])    , map->at(node[j]) + 1, dfx0_dy0));
+				buffer->push_back(Eigen::Triplet<real>(map->at(node[j]) + 1, map->at(node[j])    , dfy0_dx0));
+				buffer->push_back(Eigen::Triplet<real>(map->at(node[j]) + 1, map->at(node[j]) + 1, dfy0_dy0));
 				if (_node[node[j ^ 1]].freedom == 1) //Other point is fixed on rail
 				{
 					Coord other_rail_vector = _node[node[j ^ 1]].vector / _node[node[j ^ 1]].vector.norm();
-					buffer->push_back(Eigen::Triplet<real>(map->at(node[j]    ), map->at(node[j ^ 1]), -(other_rail_vector.x * dfx0_dx0 + other_rail_vector.y * dfx0_dy0)));
-					buffer->push_back(Eigen::Triplet<real>(map->at(node[j] + 1), map->at(node[j ^ 1]), -(other_rail_vector.x * dfy0_dx0 + other_rail_vector.y * dfy0_dy0)));
+					buffer->push_back(Eigen::Triplet<real>(map->at(node[j])    , map->at(node[j ^ 1]), -(other_rail_vector.x * dfx0_dx0 + other_rail_vector.y * dfx0_dy0)));
+					buffer->push_back(Eigen::Triplet<real>(map->at(node[j]) + 1, map->at(node[j ^ 1]), -(other_rail_vector.x * dfy0_dx0 + other_rail_vector.y * dfy0_dy0)));
 				}
 				else if (_node[node[j ^ 1]].freedom == 2) //Other point is free
 				{
-					buffer->push_back(Eigen::Triplet<real>(map->at(node[j]    ), map->at(node[j ^ 1]    ), -dfx0_dx0));
-					buffer->push_back(Eigen::Triplet<real>(map->at(node[j]    ), map->at(node[j ^ 1] + 1), -dfx0_dy0));
-					buffer->push_back(Eigen::Triplet<real>(map->at(node[j] + 1), map->at(node[j ^ 1]    ), -dfy0_dx0));
-					buffer->push_back(Eigen::Triplet<real>(map->at(node[j] + 1), map->at(node[j ^ 1] + 1), -dfy0_dy0));
+					buffer->push_back(Eigen::Triplet<real>(map->at(node[j])    , map->at(node[j ^ 1])    , -dfx0_dx0));
+					buffer->push_back(Eigen::Triplet<real>(map->at(node[j])    , map->at(node[j ^ 1]) + 1, -dfx0_dy0));
+					buffer->push_back(Eigen::Triplet<real>(map->at(node[j]) + 1, map->at(node[j ^ 1])    , -dfy0_dx0));
+					buffer->push_back(Eigen::Triplet<real>(map->at(node[j]) + 1, map->at(node[j ^ 1]) + 1, -dfy0_dy0));
 				}
 			}
 		}	
@@ -756,7 +758,7 @@ void p6::Construction::_fix_infinite_correction(
 		for (uint j = 0; j < 2; j++)
 		{
 			if (_node[node[j]].freedom == 1) coord[j] = _node[node[j]].coord + _node[node[j]].vector * (*state)(map->at(node[j])) / _node[node[j]].vector.norm();
-			else if (_node[node[j]].freedom == 1) coord[j] = Coord((*state)(map->at(node[j])), (*state)(map->at(node[j]) + 1));
+			else if (_node[node[j]].freedom == 2) coord[j] = Coord((*state)(map->at(node[j])), (*state)(map->at(node[j]) + 1));
 			else coord[j] = _node[node[j]].coord;
 		}
 		real length = (coord[1] - coord[0]).norm();
@@ -797,10 +799,11 @@ void p6::Construction::simulate(bool sim)
 	//Declare variables
 	TripletVector buffer;
 	DenseVector state(freedom), forward_state(freedom), correction(freedom), residual(freedom);
-	SparseMatrix derivative;
+	SparseMatrix derivative(freedom, freedom);
 	Eigen::SparseLU<SparseMatrix, Eigen::COLAMDOrdering<int>> solver;
 	_create_state(&map, &state);
-	real max_residual = std::numeric_limits<real>::infinity();
+	_fill_derivative_and_residual(&map, &state, &buffer, &residual, nullptr);
+	real max_residual = residual.array().abs().maxCoeff();
 	unsigned int step_divider = 0;
 	bool finished = false;
 	while (!finished)
@@ -815,13 +818,13 @@ void p6::Construction::simulate(bool sim)
 		{
 			forward_state = state - pow(0.5, step_divider) * correction;
 			if (forward_state == state) { finished = true; break; }
-			_fill_derivative_and_residual(&map, &state, &buffer, &residual, nullptr);
+			_fill_derivative_and_residual(&map, &forward_state, &buffer, &residual, nullptr);
 			real new_residual = residual.array().abs().maxCoeff();
 			if (new_residual < max_residual) { max_residual = new_residual; state = forward_state; break; }
 			else step_divider++;
 		}
 	}
-	if (max_residual < _find_smallest_force() / 1000.0)
+	if (max_residual < 0.001 * smallest_force)
 	{
 		_apply_state(&map, &state);
 		_simulation = true;
